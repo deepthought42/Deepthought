@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Random;
 
 import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 
@@ -15,6 +15,9 @@ import com.qanairy.models.Path;
 import com.qanairy.models.PathObject;
 import com.qanairy.rl.memory.ObjectDefinition;
 import com.qanairy.rl.memory.Vocabulary;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 import com.qanairy.rl.memory.OrientDbPersistor;
 
 /**
@@ -66,6 +69,86 @@ public class Brain {
 		// 6. return predicted action vector
 		
 		return new double[0];
+	}
+	
+	/**
+	 * Predicts best action based on disparate action information
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	public static int predict(ObjectDefinition obj) throws IllegalArgumentException, IllegalAccessException {
+		double[] action_weight = new double[actions.length];
+		Random rand = new Random();
+
+		//COMPUTE ALL EDGE PROBABILITIES
+		for(int index = 0; index < actions.length; index++){
+			OrientDbPersistor orientPersistor = new OrientDbPersistor();
+			Iterator<Vertex> vertices = orientPersistor.findVertices(obj).iterator();
+			if(!vertices.hasNext()){
+				return rand.nextInt(actions.length);
+			}
+			Vertex vertex = vertices.next();
+
+			Iterable<Edge> edges = vertex.getEdges(Direction.OUT, actions[index]);
+			if(edges.iterator().hasNext()){
+				for(Edge edge : edges){
+					if(edge.getLabel().isEmpty()){
+						//guess the label
+					}
+					else{
+						String label = edge.getLabel();
+						int action_count = edge.getProperty("count");
+						int probability = edge.getProperty("probability");
+						log.info("Label :: "+label+" ; count :: "+ action_count + " ; P() :: " + probability + "%");	
+					}
+				}
+			}
+			else{
+				log.info("+++   No edges found. Setting weight randomly ++");
+				action_weight[index] = rand.nextDouble();
+			}
+		}
+		
+		//Call predict method and get anticipated reward for given action against all datums
+		//	-- method needed for prediction 
+		//START PREDICT METHOD
+			
+		//Flip a coin to determine whether we should exploit/optimize or explore
+		double coin = rand.nextDouble();
+		if(coin > .5){
+			//Get Best action_weight prediction
+			double max = -1.0;
+			int maxIdx = 0;
+		    for(int j = 0; j < action_weight.length; j++){
+		    	if(action_weight[j] > max){
+		    		log.info("MAX WEIGHT FOR NOW :: "+max);
+		    		max=action_weight[j];
+		    		maxIdx = j;
+		    	}
+		    }
+		    
+		    log.info("-----------    max computed action is ....." + actions[maxIdx]);
+		    return maxIdx;
+		}
+		else{
+			log.info("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
+			return 1;
+		}
+		//END PREDICT METHOD
+	}
+	
+	/**
+	 * Retrieves all {@linkplain Vocabulary vocabularies} that are required by the agent 
+	 * 
+	 * @param vocabLabels
+	 * @return
+	 */
+	public ArrayList<Vocabulary> loadVocabularies(String[] vocabLabels){
+		ArrayList<Vocabulary> vocabularies = new ArrayList<Vocabulary>();
+		for(String label : vocabLabels){			
+			vocabularies.add(Vocabulary.load(label));
+		}
+		return vocabularies;		
 	}
 	
 	/**
