@@ -1,9 +1,9 @@
-package com.qanairy.db;
+package com.qanairy.models;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
+import com.qanairy.db.OrientDbPersistor;
 import com.tinkerpop.blueprints.Vertex;
 
 /**

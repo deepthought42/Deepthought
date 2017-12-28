@@ -10,8 +10,6 @@ import com.tinkerpop.blueprints.Vertex;
  * A list of unique objects of a designated type that are stored and loaded in a specific order as
  *  a way of maintaining the ability to grow a vertex of features that are always in the exact same
  *  order from run to run.
- * 
- * @author Brandon Kindred
  *
  */
 public class VocabularyWeights{
