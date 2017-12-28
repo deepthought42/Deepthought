@@ -7,43 +7,45 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.slf4j.Logger;import org.slf4j.LoggerFactory;
-
-import com.minion.browsing.ActionFactory;
-import com.qanairy.models.Path;
-import com.qanairy.models.PathObject;
-import com.qanairy.rl.memory.ObjectDefinition;
-import com.qanairy.rl.memory.Vocabulary;
+import com.qanairy.db.DataDecomposer;
+import com.qanairy.db.OrientConnectionFactory;
+import com.qanairy.db.OrientDbPersistor;
+import com.qanairy.models.ObjectDefinition;
+import com.qanairy.models.Vocabulary;
+import com.qanairy.models.repositories.ObjectDefinitionRepository;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
-import com.qanairy.rl.memory.OrientDbPersistor;
 
 /**
- *
+ * Provides ability to predict and learn from data
+ * 
  */
 public class Brain {
 	private static Logger log = LoggerFactory.getLogger(Brain.class);
-
-	private static OrientDbPersistor persistor = null;
 	
-	public static double[] predict(List<ObjectDefinition> object_definitions, String[] actions){
+	public static HashMap<String, Double> predict(List<ObjectDefinition> object_definitions, String[] actions){
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
 		// 2. create record based on vocabulary
 		for(ObjectDefinition objDef : object_definitions){
+			log.info("saving object definition");
 			vocabulary.appendToVocabulary(objDef.getValue());
+			OrientConnectionFactory orientPersistor = new OrientConnectionFactory();
+			ObjectDefinitionRepository obj_def_record = new ObjectDefinitionRepository();
+			obj_def_record.save(orientPersistor, objDef);
 			//load policy for object definition
 		}
 		
 		// 3. adjust action policies if more actions exist than the known actions
-		String[] known_actions = ActionFactory.getActions();
 		
 		// 4. load known vocabulary action policies into matrix
 		// 5. generate vocabulary policy matrix from list of object_definitions
 
-		double[][] vocab_actions = new double[vocabulary.getValueList().size()][known_actions.length];
+		double[][] vocab_actions = new double[vocabulary.getValueList().size()][actions.length];
 		
 		int idx = 0;
 		for(String vocab_word : vocabulary.getValueList()){
@@ -52,13 +54,13 @@ public class Brain {
 				state[idx] = true;
 				//load vocabulary object definition and make sure action list of probabilities is in the proper order
 
-				for(int action_idx=0; action_idx<known_actions.length; action_idx++){
+				for(int action_idx=0; action_idx<actions.length; action_idx++){
 					//vocab_actions[idx][action_idx] = 0.1;  whats the dynamic value though??
 				}
 			}
 			else{
 				state[idx] = false;
-				for(int action_idx=0; action_idx<known_actions.length; action_idx++){
+				for(int action_idx=0; action_idx<actions.length; action_idx++){
 					vocab_actions[idx][action_idx] = 0.0;
 				}
 			}
@@ -68,7 +70,7 @@ public class Brain {
 		// 5. run predictions with the vocabulary vector as a record and multiply it by the action policies st. vocabulary_state*(policies)^Transpose = Y
 		// 6. return predicted action vector
 		
-		return new double[0];
+		return new HashMap<String, Double>();
 	}
 	
 	/**
@@ -76,7 +78,20 @@ public class Brain {
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-	public static int predict(ObjectDefinition obj) throws IllegalArgumentException, IllegalAccessException {
+	public static HashMap<String, Double> predict(HashMap<?,?> obj) throws IllegalArgumentException, IllegalAccessException {
+		List<ObjectDefinition> object_definitions = DataDecomposer.decompose(obj);
+		
+		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
+		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
+		// 2. create record based on vocabulary
+		for(ObjectDefinition objDef : object_definitions){
+			vocabulary.appendToVocabulary(objDef.getValue());
+			//load policy for object definition
+		}
+				
+		//get List of all possible actions
+		String[] actions = ActionFactory.getActions();
+		
 		double[] action_weight = new double[actions.length];
 		Random rand = new Random();
 
@@ -85,8 +100,10 @@ public class Brain {
 			OrientDbPersistor orientPersistor = new OrientDbPersistor();
 			Iterator<Vertex> vertices = orientPersistor.findVertices(obj).iterator();
 			if(!vertices.hasNext()){
-				return rand.nextInt(actions.length);
+				/*return rand.nextInt(actions.length);*/
+				return new HashMap<String, Double>();
 			}
+
 			Vertex vertex = vertices.next();
 
 			Iterable<Edge> edges = vertex.getEdges(Direction.OUT, actions[index]);
@@ -128,27 +145,13 @@ public class Brain {
 		    }
 		    
 		    log.info("-----------    max computed action is ....." + actions[maxIdx]);
-		    return maxIdx;
+		    return new HashMap<String, Double>();
 		}
 		else{
 			log.info("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
-			return 1;
+			return new HashMap<String, Double>();
 		}
 		//END PREDICT METHOD
-	}
-	
-	/**
-	 * Retrieves all {@linkplain Vocabulary vocabularies} that are required by the agent 
-	 * 
-	 * @param vocabLabels
-	 * @return
-	 */
-	public ArrayList<Vocabulary> loadVocabularies(String[] vocabLabels){
-		ArrayList<Vocabulary> vocabularies = new ArrayList<Vocabulary>();
-		for(String label : vocabLabels){			
-			vocabularies.add(Vocabulary.load(label));
-		}
-		return vocabularies;		
 	}
 	
 	/**
@@ -300,89 +303,10 @@ public class Brain {
 		//}catch(IllegalArgumentException e){}
 
 		//get all objects for the chosen page_element	
-	}
-	
-	/**
-	 * Reads path and performs learning tasks
-	 * 
-	 * @param path an {@link ArrayList} of graph vertex indices. Order matters
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws NullPointerException
-	 * @throws IOException 
-	 */
-	public static void learn(Path path,
-					  boolean isProductive)
-						  throws IllegalArgumentException, IllegalAccessException, 
-							  NullPointerException, IOException{
-		//REINFORCEMENT LEARNING
-		log.info( " Initiating learning");
-
-		//DUE TO CHANGES IN ARCHITECTURE THE WAY THAT LEARNING WILL OCCUR WILL BE DIFFERENT THAN THE ORIGINAL LOGIC
-		
-		//Iterate over path objects
-		//if previous pathObject is not an action and the current pathObject is also not an action
-		//	then create a component edge between both pathObjects
-		//else if current pathObject is an action, 
-		//	then 
-		//		extract action
-		//		get next pathObject and previous pathObject 
-		//		create action edge between the current and previous pathObject
-		//		set edge property for action to the action that was extracted from path
-		
-		PathObject prev_obj = null;
-		for(PathObject obj : path.getPath()){
-			//List<ObjectDefinition> decomposer = DataDecomposer.decompose(obj.data());
-
-			//for(ObjectDefinition objDef : object_definition_list){
-				//if object definition value doesn't exist in vocabulary 
-				// then add value to vocabulary
-				//vocabulary.appendToVocabulary(objDef.getValue());
-			//}
-			
-			//Save states
-			/** Handled already in memory Registry I think...LEAVE THIS UNTIL VERIFIED ITS NOT NEEDED
-
-			if(prev_obj != null && !(prev_obj.getData() instanceof Action)){
-				Vertex prev_vertex = persistor.find(prev_obj);
-				Vertex current_vertex = persistor.find(obj);
-				ArrayList<Integer> path_ids = new ArrayList<Integer>();
-				path_ids.add(path.hashCode());
-				log.info("Adding GOES_TO transition");
-				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Component", "GOES_TO");
-				e.setProperty("path_ids", path_ids);
-			}
-			else if(prev_obj != null && prev_obj.getData() instanceof Action){
-				Vertex prev_vertex = persistor.find(prev_obj);
-				Vertex current_vertex = persistor.find(obj);
-				ArrayList<Integer> path_ids = new ArrayList<Integer>();
-				path_ids.add(path.hashCode());
-				log.info("Adding GOES_TO transition");
-				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Transition", "GOES_TO");
-				e.setProperty("path_ids", path_ids);
-			}
-			
-			
-			
-			log.info("SAVING NOW...");
-			persistor.save();
-			*/
-			
-			prev_obj = obj;
-		}
 		
 		
 		
-		
-		/*
-		
-		MemoryState memState = new MemoryState(last_page.hashCode());
-		com.tinkerpop.blueprints.Vertex state_vertex = null;
-		try{
-			state_vertex = memState.createAndLoadState(last_page, null, persistor);
-		}catch(IllegalArgumentException e){}
-		
-
+		/* ORIGINAL CODE FROM ORIGINAL LEARN METHOD		
 		double actual_reward = 0.0;
 	
 		if(!last_page.equals(current_page)){
@@ -447,30 +371,66 @@ public class Brain {
 		*/
 	}
 	
+	/**
+	 * 
+	 * @param object_list
+	 * @return
+	 */
 	private Vocabulary predictVocabulary(List<ObjectDefinition> object_list){
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @param object_list
+	 * @param vocabulary
+	 * @return
+	 */
 	private List<ObjectDefinition> generateVocabRecord(List<ObjectDefinition> object_list, Vocabulary vocabulary){
 		return object_list;
-		
 	}
 	
+	/**
+	 * Retrieves all {@linkplain Vocabulary vocabularies} that are required by the agent 
+	 * 
+	 * @param vocabLabels
+	 * @return
+	 */
+	public ArrayList<Vocabulary> loadVocabularies(String[] vocabLabels){
+		ArrayList<Vocabulary> vocabularies = new ArrayList<Vocabulary>();
+		for(String label : vocabLabels){			
+			vocabularies.add(Vocabulary.load(label));
+		}
+		return vocabularies;		
+	}
+	
+	/**
+	 * 
+	 * @param object_list
+	 * @param vocabulary
+	 * @return
+	 */
 	private List<List<ObjectDefinition>> loadActionPolicies(List<ObjectDefinition> object_list, Vocabulary vocabulary){
 		return null;
 		
 	}
 	
+	/**
+	 * 
+	 */
 	private void backPropogate(){
 		
 	}
 	
+	/**
+	 * 
+	 */
 	private void saveActionPolicies(){
 		
 	}
 	
 	@Deprecated
-	public static synchronized void registerPath(Path path){
+	public static synchronized void registerPath(Object path){
 		
 		
 		/**

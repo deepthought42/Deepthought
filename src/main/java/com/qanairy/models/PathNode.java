@@ -1,4 +1,4 @@
-package com.qanairy.db;
+package com.qanairy.models;
 
 /**
  * 

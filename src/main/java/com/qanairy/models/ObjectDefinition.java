@@ -1,6 +1,7 @@
-package com.qanairy.db;
+package com.qanairy.models;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -10,8 +11,8 @@ public class ObjectDefinition {
 
 	public final String value;
 	public final String type;
-	public final int hash_code;
-	public final HashMap<String, Double> actions;
+	public final String key;
+	public final List<Action> actions;
 	
 	/**
 	 * Instantiates a new object definition
@@ -28,7 +29,26 @@ public class ObjectDefinition {
 		
 		this.value = value;
 		this.type = type;
-		this.hash_code = value.hashCode();
+		this.key = null;
+		this.actions = actions;
+	}
+	
+	/**
+	 * Instantiates a new object definition
+	 * 
+	 * @param uid
+	 * @param value
+	 * @param type
+	 * @param actions
+	 * 
+	 * @pre actions != null
+	 */
+	public ObjectDefinition(String key, String value, String type, List<Action> actions) {
+		assert actions != null;
+		
+		this.value = value;
+		this.type = type;
+		this.key = key;
 		this.actions = actions;
 	}
 	
@@ -42,7 +62,7 @@ public class ObjectDefinition {
 	public ObjectDefinition(String value, String type) {
 		this.value = value;
 		this.type = type;
-		this.hash_code = value.hashCode();
+		this.key = null;
 		this.actions = new HashMap<String, Double>();
 	}
 

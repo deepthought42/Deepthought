@@ -26,7 +26,7 @@ public class OrientDbPersistor{
 	 * Creates a new connection to the orientDB graph
 	 */
 	public OrientDbPersistor() {
-		this.graph = new OrientGraph("remote:localhost/Thoth", "brandon", "password");
+		this.graph = new OrientGraph("remote:159.203.177.116/deepthought", "root", "BP6*g^Cw_Kb=28_y");
         try {
 			//RexsterClient client = RexsterClientFactory.open("localhost", 8984);
 //			client.execute(RexProMessage.EMPTY_REQUEST);
