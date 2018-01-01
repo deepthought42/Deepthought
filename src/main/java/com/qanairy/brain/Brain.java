@@ -10,12 +10,14 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.deepthought.models.Action;
+import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.Vocabulary;
+import com.deepthought.models.repositories.ObjectDefinitionRepository;
 import com.qanairy.db.DataDecomposer;
 import com.qanairy.db.OrientConnectionFactory;
 import com.qanairy.db.OrientDbPersistor;
-import com.qanairy.models.ObjectDefinition;
-import com.qanairy.models.Vocabulary;
-import com.qanairy.models.repositories.ObjectDefinitionRepository;
+import com.qanairy.models.PageElement;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -221,7 +223,7 @@ public class Brain {
 		
 		//Reinforce probabilities for the component objects of this element
 		for(ObjectDefinition objDef : object_definition_list){
-			HashMap<String, Double> action_map = objDef.getActions();
+			List<Action> action_map = objDef.getActions();
 			
 			//NEED TO LOOK UP OBJECT DEFINITION IN MEMORY, IF IT EXISTS, THEN IT SHOULD BE LOADED AND USED, 
 			//IF NOT THEN IT SHOULD BE CREATED, POPULATED, AND SAVED
@@ -573,5 +575,103 @@ public class Brain {
 		
 	}
 
+	/**
+	 * Calculates the rewards
+	 * 
+	 * @param action_rewards
+	 * @param pageElement
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	public HashMap<String, Double> calculateActionProbabilities(PageElement pageElement) throws IllegalArgumentException, IllegalAccessException{
+		/*List<ObjectDefinition> definitions = DataDecomposer.decompose(pageElement);
+
+		log.info(getSelf().hashCode() + " -> GETTING BEST ACTION PROBABILITY...");
+		HashMap<String, Double> cumulative_action_map = new HashMap<String, Double>();
+		
+		for(Object obj : definitions){
+			Iterable<com.tinkerpop.blueprints.Vertex> memory_vertex_iter = persistor.findVertices(obj);
+			Iterator<com.tinkerpop.blueprints.Vertex> memory_iterator = memory_vertex_iter.iterator();
+			
+			while(memory_iterator.hasNext()){
+				com.tinkerpop.blueprints.Vertex mem_vertex = memory_iterator.next();
+				HashMap<String, Double> action_map = mem_vertex.getProperty("actions");
+				double probability = 0.0;
+				if(action_map != null){
+					for(String action: action_map.keySet()){
+						if(cumulative_action_map.containsKey(action)){
+							probability += cumulative_action_map.get(action);
+						}
+						
+						cumulative_action_map.put(action, probability);
+					}
+				}
+				else{
+					for(String action: ActionFactory.getActions()){						
+						cumulative_action_map.put(action, probability);
+					}
+				}
+			}
+		}
+		return cumulative_action_map;
+		*/
+		return null;
+	}
+	
+	
+	/**
+	 * Calculate all estimated element probabilities
+	 * 
+	 * @param page
+	 * @param element_probabilities
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<PageElement> pageElements) 
+			throws IllegalArgumentException, IllegalAccessException
+	{
+		/*
+		ArrayList<HashMap<String, Double>> element_action_map_list = new ArrayList<HashMap<String, Double>>(0);
+				
+		for(PageElement elem : pageElements){
+			HashMap<String, Double> full_action_map = new HashMap<String, Double>(0);
+			//find vertex for given element
+			List<Object> raw_object_definitions = DataDecomposer.decompose(elem);
+			List<com.tinkerpop.blueprints.Vertex> object_definition_list
+				= persistor.findAll(raw_object_definitions);
+					
+			//iterate over set to get all actions for object definition list
+			for(com.tinkerpop.blueprints.Vertex v : object_definition_list){
+				HashMap<String, Double> action_map = v.getProperty("actions");
+				if(action_map != null && !action_map.isEmpty()){
+					for(String action : action_map.keySet()){
+						if(!full_action_map.containsKey(action)){
+							//If it doesn't yet exist, then seed it with a random variable
+							full_action_map.put(action, rand.nextDouble());
+						}
+						else{
+							
+							double action_sum = full_action_map.get(action) + action_map.get(action);
+							full_action_map.put(action, action_sum);
+						}
+					}
+				}
+			}
+			
+			for(String action : full_action_map.keySet()){
+				double probability = 0.0;
+				probability = full_action_map.get(action)/(double)object_definition_list.size();
+
+				//cumulative_probability[action_idx] += probability;
+				full_action_map.put(action, probability);
+			}
+			element_action_map_list.add(full_action_map);
+		}
+		
+		return element_action_map_list;
+		*/
+		
+		return null;
+	}
 
 }

@@ -1,4 +1,4 @@
-package com.qanairy.models.dto;
+package com.deepthought.models.dto;
 
 import com.tinkerpop.frames.Property;
 
