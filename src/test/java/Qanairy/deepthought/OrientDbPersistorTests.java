@@ -3,9 +3,10 @@ package Qanairy.deepthought;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import org.testng.annotations.Test;
+
+import com.deepthought.models.ObjectDefinition;
 import com.qanairy.brain.ActionFactory;
 import com.qanairy.db.OrientDbPersistor;
-import com.qanairy.models.ObjectDefinition;
 
 public class OrientDbPersistorTests {
   @Test

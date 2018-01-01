@@ -1,10 +1,10 @@
-package com.qanairy.models.dto;
+package com.deepthought.models.dto;
 
-import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
 
 /**
- * 
  *
  */
 public interface IObjectDefinition {
@@ -26,12 +26,15 @@ public interface IObjectDefinition {
 	@Property("value")
 	public String setValue(String value);
 	
-	@Adjacency(label="action")
+	@Incidence(direction=Direction.OUT, label="action")
 	public Iterable<IAction> getActions();
-	
-	@Adjacency(label="action")
-	public void addAction(IAction value);
 
-	@Adjacency(label="action")
+	@Incidence(direction=Direction.OUT, label="action")
 	public void removeAction(IAction value);
+	
+	@Incidence(direction=Direction.OUT, label="action")
+	public Iterable<IPolicyEdge> getPolicyEdges();
+	
+	@Incidence(direction=Direction.OUT, label="action")
+	public IPolicyEdge addAction(IAction action);
 }

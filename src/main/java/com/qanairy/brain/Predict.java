@@ -1,7 +1,8 @@
 package com.qanairy.brain;
 
 import java.util.List;
-import com.qanairy.models.ObjectDefinition;
+
+import com.deepthought.models.ObjectDefinition;
 import com.tinkerpop.blueprints.Vertex;
 
 /**

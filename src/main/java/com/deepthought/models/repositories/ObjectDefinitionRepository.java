@@ -1,4 +1,4 @@
-package com.qanairy.models.repositories;
+package com.deepthought.models.repositories;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,21 +7,12 @@ import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.deepthought.models.Action;
+import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.dto.IAction;
+import com.deepthought.models.dto.IObjectDefinition;
 import com.qanairy.db.IPersistable;
 import com.qanairy.db.OrientConnectionFactory;
-import com.qanairy.models.Group;
-import com.qanairy.models.ObjectDefinition;
-import com.qanairy.models.TestRecord;
-import com.qanairy.models.dto.DomainRepository;
-import com.qanairy.models.dto.GroupRepository;
-import com.qanairy.models.dto.IObjectDefinition;
-import com.qanairy.models.dto.PageRepository;
-import com.qanairy.models.dto.PathRepository;
-import com.qanairy.models.dto.TestRecordRepository;
-import com.qanairy.persistence.DataAccessObject;
-import com.qanairy.persistence.IDomain;
-import com.qanairy.persistence.IGroup;
-import com.qanairy.persistence.ITest;
 
 public class ObjectDefinitionRepository implements IPersistable<ObjectDefinition, IObjectDefinition> {
 
@@ -48,7 +39,14 @@ public class ObjectDefinitionRepository implements IPersistable<ObjectDefinition
 	}
 
 	public ObjectDefinition convertFromRecord(IObjectDefinition obj) {
-		return new ObjectDefinition(obj.getKey(), obj.getValue(), obj.getType());
+		
+		ActionRepository action_repo = new ActionRepository();
+		List<Action> actions = new ArrayList<Action>();
+		for(IAction action : obj.getActions()){
+			actions.add(action_repo.convertFromRecord(action));
+		}
+		
+		return new ObjectDefinition(obj.getKey(), obj.getValue(), obj.getType(), actions);
 	}
 
 	public ObjectDefinition save(OrientConnectionFactory connection, ObjectDefinition obj) {

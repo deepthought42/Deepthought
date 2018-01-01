@@ -1,4 +1,4 @@
-package com.qanairy.models;
+package com.deepthought.models;
 
 import java.util.ArrayList;
 import java.util.Iterator;

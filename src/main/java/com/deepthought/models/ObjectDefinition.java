@@ -1,6 +1,6 @@
-package com.qanairy.models;
+package com.deepthought.models;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,7 +24,7 @@ public class ObjectDefinition {
 	 * 
 	 * @pre actions != null
 	 */
-	public ObjectDefinition(String value, String type, HashMap<String, Double> actions) {
+	public ObjectDefinition(String value, String type, List<Action> actions) {
 		assert actions != null;
 		
 		this.value = value;
@@ -63,7 +63,7 @@ public class ObjectDefinition {
 		this.value = value;
 		this.type = type;
 		this.key = null;
-		this.actions = new HashMap<String, Double>();
+		this.actions = new ArrayList<Action>();
 	}
 
 
@@ -87,7 +87,7 @@ public class ObjectDefinition {
 	 * Gets list of probabilities associated with actions for this object definition
 	 * @return
 	 */
-	public HashMap<String, Double> getActions(){
+	public List<Action> getActions(){
 		return this.actions;
 	}
 }

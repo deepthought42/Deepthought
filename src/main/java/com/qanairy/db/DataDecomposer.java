@@ -8,7 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.qanairy.models.ObjectDefinition;
+import com.deepthought.models.ObjectDefinition;
 
 /**
  * Defines static methods to handle the decomposition of it's data into their constituent pieces.

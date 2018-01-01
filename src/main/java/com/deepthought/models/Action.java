@@ -1,4 +1,4 @@
-package com.qanairy.models;
+package com.deepthought.models;
 
 /**
  * Defines an action in name only
@@ -77,5 +77,15 @@ public class Action {
 	@Override
 	public Action clone() {
 		return new Action(this.getName(), this.getValue());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean equals(Object o) {
+		if (this == o) return true;
+        if (!(o instanceof Action)) return false;
+        Action that = (Action)o;
+        return (this.getName().equals(that.getName()) && this.getValue().equals(that.getValue()));
 	}
 }
