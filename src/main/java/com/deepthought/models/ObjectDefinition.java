@@ -3,16 +3,33 @@ package com.deepthought.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+
+import com.deepthought.models.edges.ActionWeight;
+
 
 /**
  * Defines objects that are available to the system for learning against
  */
+@NodeEntity
 public class ObjectDefinition {
 
-	public final String value;
-	public final String type;
-	public final String key;
-	public final List<Action> actions;
+	@Id 
+	@GeneratedValue 
+	private Long id;
+    
+	private String value;
+	private String type;
+	private String key;
+	
+	@Relationship(type = "HAS_ACTION")
+	private List<ActionWeight> action_weights = new ArrayList<ActionWeight>();
+	
+	public ObjectDefinition(){}
 	
 	/**
 	 * Instantiates a new object definition
@@ -24,32 +41,13 @@ public class ObjectDefinition {
 	 * 
 	 * @pre actions != null
 	 */
-	public ObjectDefinition(String value, String type, List<Action> actions) {
+	public ObjectDefinition(String value, String type, List<ActionWeight> actions) {
 		assert actions != null;
 		
 		this.value = value;
 		this.type = type;
-		this.key = null;
-		this.actions = actions;
-	}
-	
-	/**
-	 * Instantiates a new object definition
-	 * 
-	 * @param uid
-	 * @param value
-	 * @param type
-	 * @param actions
-	 * 
-	 * @pre actions != null
-	 */
-	public ObjectDefinition(String key, String value, String type, List<Action> actions) {
-		assert actions != null;
-		
-		this.value = value;
-		this.type = type;
-		this.key = key;
-		this.actions = actions;
+		this.key = generateKey();
+		this.action_weights = actions;
 	}
 	
 	/**
@@ -62,13 +60,24 @@ public class ObjectDefinition {
 	public ObjectDefinition(String value, String type) {
 		this.value = value;
 		this.type = type;
-		this.key = null;
-		this.actions = new ArrayList<Action>();
+		this.key = generateKey();
+		this.action_weights = new ArrayList<ActionWeight>();
 	}
 
+	public String generateKey() {
+		return DigestUtils.sha256Hex(getValue());
+	}
 
 	public String getType() {
 		return type;
+	}
+	
+	public String getKey(){
+		return this.key;
+	}
+	
+	public void setKey(String key){
+		this.key = key;
 	}
 	
 	public String getValue(){
@@ -87,7 +96,7 @@ public class ObjectDefinition {
 	 * Gets list of probabilities associated with actions for this object definition
 	 * @return
 	 */
-	public List<Action> getActions(){
-		return this.actions;
+	public List<ActionWeight> getActionWeights(){
+		return this.action_weights;
 	}
 }

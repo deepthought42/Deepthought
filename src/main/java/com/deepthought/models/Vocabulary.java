@@ -1,23 +1,30 @@
 package com.deepthought.models;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
-import com.qanairy.db.OrientDbPersistor;
-import com.tinkerpop.blueprints.Vertex;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * A list of unique objects of a designated type that are stored and loaded in a specific order as
  *  a way of maintaining the ability to grow a vertex of features that are always in the exact same
  *  order from run to run.
  */
+@NodeEntity
 public class Vocabulary{
 
+	@Id 
+	@GeneratedValue 
+	private Long id;
+	
 	private ArrayList<String> valueList = null;
 	//private ArrayList<Float> weights = null;
 	//private ArrayList<ArrayList<Float>> actions = null; 
+	private String key;
 
 	private String label = null;
+	
+	public Vocabulary(){}
 	
 	/**
 	 * Generates an empty list with the given label as the list name.
@@ -27,6 +34,7 @@ public class Vocabulary{
 	public Vocabulary(String listLabel) {
 		this.valueList = new ArrayList<String>();
 		this.label = listLabel;
+		this.key = "";
 		//this.weights = new ArrayList<Float>();
 	}
 	
@@ -39,6 +47,8 @@ public class Vocabulary{
 		this.valueList = valueList;
 		this.label = label;
 		//this.weights = new ArrayList<Float>(valueList.size());
+		this.key = "";
+
 	}
 	
 	/**
@@ -53,32 +63,6 @@ public class Vocabulary{
 			return false;
 		}
 		return valueList.add(obj);
-	}
-	
-	/**
-	 * Saves vocabulary to a vertex in a graph Database;
-	 */
-	public void save(){
-		OrientDbPersistor persistor = new OrientDbPersistor();
-		Vertex v = persistor.addVertexType(Vocabulary.class);
-		v.setProperty("vocabulary", this.valueList);
-		v.setProperty("label", this.label);		
-		persistor.save();
-	}
-	
-	/**
-	 * Loades vocabulary from a vertex in a graph Database, into a 1 dimensional array;
-	 */
-	public static Vocabulary load(String label){
-		OrientDbPersistor persistor = new OrientDbPersistor();
-
-		Iterator<Vertex> vIter = persistor.findVertices("label", label).iterator();
-		if(!vIter.hasNext()){
-			return new Vocabulary(new ArrayList<String>(), label);
-		}
-		ArrayList<String> vocabulary = vIter.next().getProperty("vocabulary");
-		
-		return new Vocabulary(vocabulary, label);
 	}
 
 	public ArrayList<String> getValueList() {
