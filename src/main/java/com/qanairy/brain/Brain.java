@@ -3,42 +3,51 @@ package com.qanairy.brain;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.deepthought.models.Action;
 import com.deepthought.models.ObjectDefinition;
 import com.deepthought.models.Vocabulary;
-import com.deepthought.models.repositories.ObjectDefinitionRepository;
+import com.deepthought.models.edges.ActionWeight;
+import com.deepthought.models.repository.ActionRepository;
+import com.deepthought.models.repository.ObjectDefinitionRepository;
 import com.qanairy.db.DataDecomposer;
-import com.qanairy.db.OrientConnectionFactory;
-import com.qanairy.db.OrientDbPersistor;
-import com.qanairy.models.PageElement;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
+
 
 /**
  * Provides ability to predict and learn from data
  * 
  */
+@Component
 public class Brain {
 	private static Logger log = LoggerFactory.getLogger(Brain.class);
+
+	@Autowired
+	private ActionRepository action_repo;
+
+	@Autowired
+	private ObjectDefinitionRepository object_definition_repo;
+
+	//@Autowired
+	//private static ActionWeightRepository action_weight_repo;
 	
-	public static HashMap<String, Double> predict(List<ObjectDefinition> object_definitions, String[] actions){
+	public Brain(){}
+	
+	public HashMap<String, Double> predict(List<ObjectDefinition> object_definitions, String[] actions){
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
 		// 2. create record based on vocabulary
 		for(ObjectDefinition objDef : object_definitions){
-			log.info("saving object definition");
+			System.err.println("saving object definition");
 			vocabulary.appendToVocabulary(objDef.getValue());
-			OrientConnectionFactory orientPersistor = new OrientConnectionFactory();
-			ObjectDefinitionRepository obj_def_record = new ObjectDefinitionRepository();
-			obj_def_record.save(orientPersistor, objDef);
+
+			object_definition_repo.save(objDef);
 			//load policy for object definition
 		}
 		
@@ -98,11 +107,11 @@ public class Brain {
 		Random rand = new Random();
 
 		//COMPUTE ALL EDGE PROBABILITIES
+		/*
 		for(int index = 0; index < actions.length; index++){
-			OrientDbPersistor orientPersistor = new OrientDbPersistor();
 			Iterator<Vertex> vertices = orientPersistor.findVertices(obj).iterator();
 			if(!vertices.hasNext()){
-				/*return rand.nextInt(actions.length);*/
+				return rand.nextInt(actions.length);
 				return new HashMap<String, Double>();
 			}
 
@@ -118,12 +127,12 @@ public class Brain {
 						String label = edge.getLabel();
 						int action_count = edge.getProperty("count");
 						int probability = edge.getProperty("probability");
-						log.info("Label :: "+label+" ; count :: "+ action_count + " ; P() :: " + probability + "%");	
+						System.err.println("Label :: "+label+" ; count :: "+ action_count + " ; P() :: " + probability + "%");	
 					}
 				}
 			}
 			else{
-				log.info("+++   No edges found. Setting weight randomly ++");
+				System.err.println("+++   No edges found. Setting weight randomly ++");
 				action_weight[index] = rand.nextDouble();
 			}
 		}
@@ -140,19 +149,21 @@ public class Brain {
 			int maxIdx = 0;
 		    for(int j = 0; j < action_weight.length; j++){
 		    	if(action_weight[j] > max){
-		    		log.info("MAX WEIGHT FOR NOW :: "+max);
+		    		System.err.println("MAX WEIGHT FOR NOW :: "+max);
 		    		max=action_weight[j];
 		    		maxIdx = j;
 		    	}
 		    }
 		    
-		    log.info("-----------    max computed action is ....." + actions[maxIdx]);
+		    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
 		    return new HashMap<String, Double>();
 		}
 		else{
-			log.info("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
+			System.err.println("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
 			return new HashMap<String, Double>();
 		}
+		*/
+		return new HashMap<String, Double>();
 		//END PREDICT METHOD
 	}
 	
@@ -165,25 +176,28 @@ public class Brain {
 	 * @throws NullPointerException
 	 * @throws IOException 
 	 */
-	public static void learn(List<ObjectDefinition> object_definition_list,
+	public void learn(List<ObjectDefinition> object_definition_list,
 					  Map<String,Double> predicted_action_vector,
-					  String actual_action,
-					  boolean isProductive)
+					  Action actual_action,
+					  boolean isRewarded)
 						  throws IllegalArgumentException, IllegalAccessException, 
 							  NullPointerException, IOException{
 		//REINFORCEMENT LEARNING
-		log.info( " Initiating learning");
+		System.err.println( " Initiating learning");
 		
 		//learning model
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
 
+		System.err.println("object definition list size :: "+object_definition_list.size());
 		// 2. create record based on vocabulary
 		for(ObjectDefinition objDef : object_definition_list){
 			vocabulary.appendToVocabulary(objDef.getValue());
 		}
 		
-		// 2. create state vertex from vocabulary and
+		System.err.println("vocabulary :: "+vocabulary);
+		System.err.println("vocab value list size   :: "+vocabulary.getValueList().size());
+		// 2. create state vertex from vocabulary 
 		int idx = 0;
 		for(String vocab_word : vocabulary.getValueList()){
 			boolean[] state = new boolean[vocabulary.getValueList().size()];
@@ -196,12 +210,12 @@ public class Brain {
 			idx++;
 		}
 		
-		// 2a. load known action policies/probabilities for each object definition in the definition
+		// 2a. load known action policies/probabilities for each object definition in the definition list
 
 		// 3. determine reward/regret score based on productivity status
 		double actual_reward = 0.0;
 		
-		if(isProductive){
+		if(isRewarded){
 			actual_reward = 10.0;
 		}
 		else{
@@ -210,8 +224,12 @@ public class Brain {
 			actual_reward = -1.0;
 		}
 		
+		System.err.println("Set award :: "+actual_reward);
+		
 		// 4. apply reward/regret to predicted_action_vector
 		// 5. perform backpropagation through network supporting result
+		
+		System.err.println("Setting up for q-learning");
 		//Q-LEARNING VARIABLES
 		final double learning_rate = .08;
 		final double discount_factor = .08;
@@ -221,39 +239,60 @@ public class Brain {
 		
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
 		
+		System.err.println("doing stuff with object definition list "+object_definition_list.size());
 		//Reinforce probabilities for the component objects of this element
 		for(ObjectDefinition objDef : object_definition_list){
-			List<Action> action_map = objDef.getActions();
-			
+			System.err.println("Object defintion to be updated ..."+objDef.getValue());
 			//NEED TO LOOK UP OBJECT DEFINITION IN MEMORY, IF IT EXISTS, THEN IT SHOULD BE LOADED AND USED, 
 			//IF NOT THEN IT SHOULD BE CREATED, POPULATED, AND SAVED
-			Iterator<com.tinkerpop.blueprints.Vertex> v_mem_iter = null; //persistor.findAll(objDef).iterator();
-			com.tinkerpop.blueprints.Vertex memory_vertex = null;
-			if(v_mem_iter.hasNext()){
-				memory_vertex = v_mem_iter.next();
-				action_map = memory_vertex.getProperty("actions");
-				if(action_map == null){
-					action_map = objDef.getActions();
+			String key = objDef.generateKey();
+			System.err.println("Object definition key :: "+key);
+			System.err.println("REPO :: "+object_definition_repo);
+			ObjectDefinition obj_def = object_definition_repo.findByKey(key);
+			
+			System.err.println("object def retrieved :: "+obj_def);
+			if(obj_def != null){
+				objDef = obj_def;
+			}
+			List<ActionWeight> action_weight_list = objDef.getActionWeights();
+			System.err.println("action weight list size :: "+action_weight_list.size());
+			double last_value = 0.0;
+			System.err.println("Checkinf if known action...");
+			ActionWeight known_action_weight = null;
+			boolean is_known_action = false;
+			for(ActionWeight action_weight : action_weight_list){
+				if(action_weight.getAction().getKey().equals(actual_action.getKey())){
+					System.err.println("Last action : "+actual_action.getKey() + " exists in action_map for object");
+					last_value = action_weight.getWeight();
+					known_action_weight = action_weight;
+					is_known_action = true;
 				}
 			}
-			double last_reward = 0.0;
-
-			/*
-			if(action_map.containsKey(last_action)){
-				log.info("Last action : "+last_action + " exists in action_map for object");
-				last_reward = action_map.get(last_action);
-			}
-			*/
-			log.info("last reward : "+last_reward);
-			log.info("actual_reward : "+actual_reward);
-			log.info("estimated_reward : "+estimated_reward);
 			
-			double q_learn_val = q_learn.calculate(last_reward, actual_reward, estimated_reward );
-			//action_map.put(last_action, q_learn_val);
-			//log.info(" -> ADDED LAST ACTION TO ACTION MAP :: "+last_action+"...Q LEARN VAL : "+q_learn_val);
+			System.err.println("last reward : "+last_value);
+			System.err.println("actual_reward : "+actual_reward);
+			System.err.println("estimated_reward : "+estimated_reward);
+			
+			if(!is_known_action){
+				Random rand = new Random();
+				last_value = rand.nextFloat();
+			}
+			double q_learn_val = q_learn.calculate(last_value, actual_reward, estimated_reward );
+			
+			if(known_action_weight == null){
+				known_action_weight = new ActionWeight();
+				known_action_weight.setAction(actual_action);
+				known_action_weight.setObjectDefinition(objDef);
+				objDef.getActionWeights().add(known_action_weight);
+			}
+			known_action_weight.setWeight(q_learn_val);
 
-			//objDef.setActions(action_map);
-			//com.tinkerpop.blueprints.Vertex v = objDef.findAndUpdateOrCreate(persistor);
+			System.err.println(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_action+"...Q LEARN VAL : "+q_learn_val);
+
+			System.err.println("Object definition :: "+objDef);
+			System.err.println("Object definition key :: "+objDef.getKey());
+			System.err.println("Object definition value :: "+objDef.getValue());
+			object_definition_repo.save(objDef);
 		}
 		
 		
@@ -273,7 +312,7 @@ public class Brain {
 				Vertex current_vertex = persistor.find(obj);
 				ArrayList<Integer> path_ids = new ArrayList<Integer>();
 				path_ids.add(path.hashCode());
-				log.info("Adding GOES_TO transition");
+				System.err.println("Adding GOES_TO transition");
 				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Component", "GOES_TO");
 				e.setProperty("path_ids", path_ids);
 			}
@@ -282,95 +321,16 @@ public class Brain {
 				Vertex current_vertex = persistor.find(obj);
 				ArrayList<Integer> path_ids = new ArrayList<Integer>();
 				path_ids.add(path.hashCode());
-				log.info("Adding GOES_TO transition");
+				System.err.println("Adding GOES_TO transition");
 				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Transition", "GOES_TO");
 				e.setProperty("path_ids", path_ids);
 			}
 			
 			
 			
-			log.info("SAVING NOW...");
+			System.err.println("SAVING NOW...");
 			persistor.save();
 			*/
-							
-		
-		
-		
-		
-		
-		//MemoryState memState = new MemoryState(last_page.hashCode());
-		//com.tinkerpop.blueprints.Vertex state_vertex = null;
-		//try{
-		//	state_vertex = memState.createAndLoadState(last_page, null, persistor);
-		//}catch(IllegalArgumentException e){}
-
-		//get all objects for the chosen page_element	
-		
-		
-		
-		/* ORIGINAL CODE FROM ORIGINAL LEARN METHOD		
-		double actual_reward = 0.0;
-	
-		if(!last_page.equals(current_page)){
-			actual_reward = 10.0;
-			
-			com.tinkerpop.blueprints.Vertex new_state_vertex = null;
-			MemoryState new_memory_state = new MemoryState(current_page.hashCode());
-			
-			new_state_vertex = new_memory_state.createAndLoadState(current_page, state_vertex, persistor);
-
-			//w edge to memory
-			
-		}
-		else{
-			//nothing changed so there was no reward for that combination. We want to remember this in the future
-			// so we set it to a negative value to simulate regret
-			actual_reward = -1.0;
-		}
-		
-		//get all objects for the chosen page_element
-		//Q-LEARNING VARIABLES
-		final double learning_rate = .08;
-		final double discount_factor = .08;
-		
-		//machine learning algorithm should produce this value
-		double estimated_reward = 1.0;
-		
-		QLearn q_learn = new QLearn(learning_rate, discount_factor);
-		//Reinforce probabilities for the component objects of this element
-		for(ObjectDefinition objDef : best_definitions){
-			HashMap<String, Double> action_map = objDef.getActions();
-			
-			//NEED TO LOOK UP OBJECT DEFINITION IN MEMORY, IF IT EXISTS, THEN IT SHOULD BE LOADED AND USED, 
-			//IF NOT THEN IT SHOULD BE CREATED POPULATED AND SAVED
-			Iterator<com.tinkerpop.blueprints.Vertex> v_mem_iter = persistor.find(objDef).iterator();
-			com.tinkerpop.blueprints.Vertex memory_vertex = null;
-			if(v_mem_iter.hasNext()){
-				memory_vertex = v_mem_iter.next();
-				action_map = memory_vertex.getProperty("actions");
-				if(action_map == null){
-					action_map = objDef.getActions();
-				}
-			}
-			double last_reward = 0.0;
-
-			if(action_map.containsKey(last_action)){
-				log.info("Last action : "+last_action + " exists in action_map for object");
-				last_reward = action_map.get(last_action);
-			}
-			
-			log.info("last reward : "+last_reward);
-			log.info("actual_reward : "+actual_reward);
-			log.info("estimated_reward : "+estimated_reward);
-			
-			double q_learn_val = q_learn.calculate(last_reward, actual_reward, estimated_reward );
-			action_map.put(last_action, q_learn_val);
-			log.info(" -> ADDED LAST ACTION TO ACTION MAP :: "+last_action+"...Q LEARN VAL : "+q_learn_val);
-
-			objDef.setActions(action_map);
-			com.tinkerpop.blueprints.Vertex v = objDef.findAndUpdateOrCreate(persistor);
-		}
-		*/
 	}
 	
 	/**
@@ -401,7 +361,7 @@ public class Brain {
 	public ArrayList<Vocabulary> loadVocabularies(String[] vocabLabels){
 		ArrayList<Vocabulary> vocabularies = new ArrayList<Vocabulary>();
 		for(String label : vocabLabels){			
-			vocabularies.add(Vocabulary.load(label));
+			//vocabularies.add(Vocabulary.load(label));
 		}
 		return vocabularies;		
 	}
@@ -497,7 +457,7 @@ public class Brain {
 					
 					
 					//for(int weight_idx = 0 ; weight_idx < action_weights.size(); weight_idx++){
-						//log.info("SETTING ACTION WIGHT : "+rand.nextFloat());
+						//System.err.println("SETTING ACTION WIGHT : "+rand.nextFloat());
 					//	action_weights.set(weight_idx, rand.nextFloat());
 					//}
 =======
@@ -544,15 +504,10 @@ public class Brain {
 			
 			//unroll vocabulary weights
 			
-			
-			
 			//run vocabularyExperienceRecord with loaded weights through NN
 			Sigmoid sigmoid = new Sigmoid();
-
-			
 			
 			//perform reinforcement learning based on last action taken and result against predictions
-
 			
 			// apply reinforcement learning
 			// based on result of crawl and predicted values, updated predicted values
@@ -568,7 +523,6 @@ public class Brain {
 			}
 		
 			// Backpropagate updated results back through layers
-	
 		}
 		
 		 */
@@ -583,10 +537,10 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public HashMap<String, Double> calculateActionProbabilities(PageElement pageElement) throws IllegalArgumentException, IllegalAccessException{
+	public HashMap<String, Double> calculateActionProbabilities(ObjectDefinition pageElement) throws IllegalArgumentException, IllegalAccessException{
 		/*List<ObjectDefinition> definitions = DataDecomposer.decompose(pageElement);
 
-		log.info(getSelf().hashCode() + " -> GETTING BEST ACTION PROBABILITY...");
+		System.err.println(getSelf().hashCode() + " -> GETTING BEST ACTION PROBABILITY...");
 		HashMap<String, Double> cumulative_action_map = new HashMap<String, Double>();
 		
 		for(Object obj : definitions){
@@ -627,7 +581,7 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<PageElement> pageElements) 
+	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<ObjectDefinition> pageElements) 
 			throws IllegalArgumentException, IllegalAccessException
 	{
 		/*
@@ -648,9 +602,8 @@ public class Brain {
 						if(!full_action_map.containsKey(action)){
 							//If it doesn't yet exist, then seed it with a random variable
 							full_action_map.put(action, rand.nextDouble());
-						}
+						}	
 						else{
-							
 							double action_sum = full_action_map.get(action) + action_map.get(action);
 							full_action_map.put(action, action_sum);
 						}

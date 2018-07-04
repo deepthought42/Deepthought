@@ -2,9 +2,7 @@ package com.qanairy.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
-import com.tinkerpop.blueprints.Vertex;
 
 /**
  * A list of unique objects of a designated type that are stored and loaded in a specific order as
@@ -57,39 +55,6 @@ public class VocabularyWeights{
 		}
 		vocabulary_weights.put(obj, new HashMap<String, Float>());
 	}
-	
-	/**
-	 * Saves vocabulary to a vertex in a graph Database;
-	 */
-	public void save(){
-		OrientDbPersistor persistor = new OrientDbPersistor();
-		Vertex v = persistor.addVertexType(VocabularyWeights.class);
-		v.setProperty("vocabulary", this.vocabulary_weights);
-		v.setProperty("label", this.label);		
-		persistor.save();
-	}
-	
-	/**
-	 * Loades vocabulary from a vertex in a graph Database, into a 1 dimensional array;
-	 */
-	public static VocabularyWeights load(String label){
-		OrientDbPersistor persistor = new OrientDbPersistor();
-		ArrayList<String> vocabList = new ArrayList<String>();
-
-		Iterator<Vertex> vIter = persistor.findVertices("label", label).iterator();
-		if(!vIter.hasNext()){
-			return new VocabularyWeights(vocabList, label);
-		}
-		String vocabulary = vIter.next().getProperty("vocabulary");
-		
-		String[] vocabArray = vocabulary.split(",");
-		for(String word : vocabArray){
-			vocabList.add(word);
-		}
-		
-		return new VocabularyWeights(vocabList, label);
-	}
-
 	
 	public String getLabel(){
 		return this.label;

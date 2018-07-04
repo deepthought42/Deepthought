@@ -28,7 +28,7 @@ public class QLearn {
 	 * @return
 	 */
 	public double calculate(double old_value, double actual_reward, double estimated_future_reward){
-		return (old_value + learning_rate * (actual_reward + (discount_factor * estimated_future_reward) - old_value ));
+		return (old_value + learning_rate * (actual_reward + (discount_factor * estimated_future_reward)));
 	}
 
 }
