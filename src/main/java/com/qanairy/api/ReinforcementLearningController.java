@@ -88,7 +88,7 @@ public class ReinforcementLearningController {
 		double[][] vocab_policy = FeatureVector.loadPolicy(def_list, object_definitions, vocabulary_record, action_vocab);
     	*/
     	System.err.println("Predicting...");
-    	HashMap<String, Double> prediction_vector = brain.predict(object_definitions, ActionFactory.getActions());
+    	HashMap<String, Double> prediction_vector = brain.predict(object_definitions, actions);
 		System.err.println("prediction found. produced vector :: "+prediction_vector.size());
 		
     	return prediction_vector;
