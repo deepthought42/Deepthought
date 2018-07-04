@@ -1,5 +1,9 @@
 package com.deepthought.models.edges;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -24,6 +28,9 @@ public class ActionWeight {
     
 	@EndNode   
 	private Action action;
+
+	@Property
+	private List<String> labels = new ArrayList<String>();
     
     public Action getAction(){
     	return this.action;
@@ -43,5 +50,10 @@ public class ActionWeight {
 
 	public void setObjectDefinition(ObjectDefinition objDef) {
 		this.object_definition = objDef;
+	}
+
+	public List<String> getLabels() {
+		// TODO Auto-generated method stub
+		return this.labels;
 	}
 }

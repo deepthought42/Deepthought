@@ -39,24 +39,30 @@ public class Brain {
 	
 	public Brain(){}
 	
-	public HashMap<String, Double> predict(List<ObjectDefinition> object_definitions, String[] actions){
+	public HashMap<String, Double> predict(List<ObjectDefinition> object_definitions, List<Action> actions){
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
 		// 2. create record based on vocabulary
 		for(ObjectDefinition objDef : object_definitions){
 			System.err.println("saving object definition");
+			ObjectDefinition obj_def = object_definition_repo.findByKey(objDef.getKey());
+			if(obj_def != null){
+				objDef = obj_def;
+			}
+			else{
+				objDef = object_definition_repo.save(objDef);
+			}
 			vocabulary.appendToVocabulary(objDef.getValue());
-
-			object_definition_repo.save(objDef);
+			
 			//load policy for object definition
-		}
+		
 		
 		// 3. adjust action policies if more actions exist than the known actions
 		
 		// 4. load known vocabulary action policies into matrix
 		// 5. generate vocabulary policy matrix from list of object_definitions
 
-		double[][] vocab_actions = new double[vocabulary.getValueList().size()][actions.length];
+		double[][] vocab_actions = new double[vocabulary.getValueList().size()][actions.size()];
 		
 		int idx = 0;
 		for(String vocab_word : vocabulary.getValueList()){
@@ -65,22 +71,81 @@ public class Brain {
 				state[idx] = true;
 				//load vocabulary object definition and make sure action list of probabilities is in the proper order
 
-				for(int action_idx=0; action_idx<actions.length; action_idx++){
+				for(int action_idx=0; action_idx<actions.size(); action_idx++){
 					//vocab_actions[idx][action_idx] = 0.1;  whats the dynamic value though??
 				}
 			}
 			else{
 				state[idx] = false;
-				for(int action_idx=0; action_idx<actions.length; action_idx++){
+				for(int action_idx=0; action_idx<actions.size(); action_idx++){
 					vocab_actions[idx][action_idx] = 0.0;
 				}
 			}
 			idx++;
 		}
 		
+		Random rand = new Random();
+
 		// 5. run predictions with the vocabulary vector as a record and multiply it by the action policies st. vocabulary_state*(policies)^Transpose = Y
 		// 6. return predicted action vector
+		//COMPUTE ALL EDGE PROBABILITIES
+			
+		System.err.println("Actions size : "+actions.size());
+		for(int index = 0; index < actions.size(); index++){
+
+			List<ActionWeight> action_weights = obj_def.getActionWeights();
+			if(action_weights.size() > 0){
+				for(ActionWeight weight : action_weights){
+					if(weight.getLabels().isEmpty()){
+						//guess the label
+					}
+					else{
+						List<String> labels = weight.getLabels();
+						double probability = weight.getWeight();
+						System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");	
+					}
+				}
+			}
+			else{
+				System.err.println("+++   No edges found. Setting weight randomly ++");
+
+				ActionWeight action_weight = new ActionWeight();
+				action_weight.setAction(actions.get(index));
+				action_weight.setObjectDefinition(obj_def);
+				action_weight.setWeight(rand.nextDouble());
+				obj_def.getActionWeights().add(action_weight);
+				object_definition_repo.save(obj_def);
+			}
+			
+		}
 		
+		//Call predict method and get anticipated reward for given action against all datums
+		//	-- method needed for prediction 
+		//START PREDICT METHOD
+			
+		//Flip a coin to determine whether we should exploit/optimize or explore
+		/*double coin = rand.nextDouble();
+		if(coin > .5){
+			//Get Best action_weight prediction
+			double max = -1.0;
+			int maxIdx = 0;
+		    for(int j = 0; j < action_weights.size(); j++){
+		    	if(action_weights.get(j) > max){
+		    		System.err.println("MAX WEIGHT FOR NOW :: "+max);
+		    		max=action_weights.get(j);
+		    		maxIdx = j;
+		    	}
+		    }
+		    
+		    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
+		    return new HashMap<String, Double>();
+		}
+		else{
+			System.err.println("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
+			return new HashMap<String, Double>();
+		}*/
+		}
+
 		return new HashMap<String, Double>();
 	}
 	
@@ -216,7 +281,7 @@ public class Brain {
 		double actual_reward = 0.0;
 		
 		if(isRewarded){
-			actual_reward = 10.0;
+			actual_reward = 5.0;
 		}
 		else{
 			//nothing changed so there was no reward for that combination. We want to remember this in the future
