@@ -1,8 +1,5 @@
 package com.deepthought.models.edges;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -11,28 +8,25 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import com.deepthought.models.Action;
-import com.deepthought.models.Feature;
+import com.deepthought.models.MemoryRecord;
 
 /**
- * 
+ * A rich edge that contains the reward attributed to a given action for a memory record
  */
-@RelationshipEntity(type = "HAS_ACTION")
-public class ActionWeight {
+@RelationshipEntity(type = "REWARDED")
+public class ActionReward {
 	@Id 
 	@GeneratedValue   
 	private Long relationshipId;
     
 	@Property  
-    private double weight;
+    private double reward;
     
 	@StartNode 
-	private Feature feature;
+	private MemoryRecord memory;
     
 	@EndNode   
 	private Action action;
-
-	@Property
-	private List<String> labels = new ArrayList<String>();
     
     public Action getAction(){
     	return this.action;
@@ -42,19 +36,15 @@ public class ActionWeight {
     	this.action = action;
     }
     
-    public double getWeight(){
-    	return this.weight;
+    public double getReward(){
+    	return this.reward;
     }
     
-    public void setWeight(double weight){
-    	this.weight = weight;
+    public void setReward(double reward){
+    	this.reward = reward;
     }
 
-	public void setFeature(Feature feature) {
-		this.feature = feature;
-	}
-
-	public List<String> getLabels() {
-		return this.labels;
+	public void setMemoryRecord(MemoryRecord memory) {
+		this.memory = memory;
 	}
 }

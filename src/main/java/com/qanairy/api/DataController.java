@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.Feature;
 import com.qanairy.db.DataDecomposer;
 
 
@@ -24,7 +24,7 @@ public class DataController {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	@RequestMapping(method = RequestMethod.POST)
-    public @ResponseBody List<ObjectDefinition> decompose(JSONObject obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
+    public @ResponseBody List<Feature> decompose(JSONObject obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
 		return DataDecomposer.decompose(obj);
 	}
 }

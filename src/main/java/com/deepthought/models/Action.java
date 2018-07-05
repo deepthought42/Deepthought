@@ -21,7 +21,7 @@ public class Action {
 	private String val;
 	
 	@Relationship(type = "HAS_ACTION", direction = Relationship.INCOMING)
-	private List<ObjectDefinition> object_definitions;
+	private List<Feature> features;
 	
 	/**
 	 * Construct empty action object
@@ -51,7 +51,7 @@ public class Action {
 	 * {@inheritDoc}
 	 */
 	public String generateKey() {
-		return getName() + ":"+ getValue().hashCode();
+		return getName() + ";"+ getValue().hashCode();
 	}
 
 	/**
@@ -69,6 +69,7 @@ public class Action {
 		if (this == o) return true;
         if (!(o instanceof Action)) return false;
         Action that = (Action)o;
+        
         return (this.getName().equals(that.getName()) && this.getValue().equals(that.getValue()));
 	}
 	

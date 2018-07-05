@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.Feature;
 
 /**
  * Defines static methods to handle the decomposition of it's data into their constituent pieces.
@@ -28,9 +28,9 @@ public class DataDecomposer {
 	 * @throws IllegalAccessException
      * @throws JSONException 
 	 */
-	public static List<ObjectDefinition> decompose(JSONObject jsonObject) 
+	public static List<Feature> decompose(JSONObject jsonObject) 
 			throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
-		List<ObjectDefinition> objDefList = new ArrayList<ObjectDefinition>();
+		List<Feature> objDefList = new ArrayList<Feature>();
 		Iterator<String> iter = jsonObject.keys();
 		
 		while(iter.hasNext()){
@@ -38,20 +38,20 @@ public class DataDecomposer {
 			System.err.println("Object Field Name :: "+key);
 			Object value = jsonObject.get(key);
 			if(value!=null){
-	        	ObjectDefinition objDef = null;
+	        	Feature objDef = null;
 	        	System.err.println("System class :: "+value.getClass());
 	        	if(value.toString().substring(0, 2).equals("[{")){
 	        		System.err.println("converting to json string");
 	        		String json_string = value.toString().substring(1, value.toString().length()-1);
 		        	JSONObject obj = new JSONObject(json_string);
-		        	List<ObjectDefinition> definition_list = decompose(obj);
+		        	List<Feature> definition_list = decompose(obj);
 		        	objDefList.addAll(definition_list);
 	        	}
 	        	else if(value.getClass().equals(ArrayList.class)){
 		        	System.err.println("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<ObjectDefinition> decomposedList = decomposeArrayList(list);
+		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(JSONObject.class)){
@@ -63,7 +63,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new ObjectDefinition(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+		        		objDef = new Feature(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -71,7 +71,7 @@ public class DataDecomposer {
 		        	System.err.println("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
-		        	List<ObjectDefinition> decomposedList = decomposeObjectArray(array);
+		        	List<Feature> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(JSONArray.class)){
@@ -85,7 +85,7 @@ public class DataDecomposer {
 		        	String[] words = value.toString().split("\\s+");
 		        	System.err.println("parsing string .....");
 		        	for(String word : words){
-		        		objDef = new ObjectDefinition(word, key);
+		        		objDef = new Feature(word, key);
 		        		objDefList.add(objDef);
 		        	}		        	
 		        }
@@ -106,8 +106,8 @@ public class DataDecomposer {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static List<ObjectDefinition> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
-		List<ObjectDefinition> objDefList = new ArrayList<ObjectDefinition>();
+	public static List<Feature> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Feature> objDefList = new ArrayList<Feature>();
 		JSONObject jsonObject = new JSONObject();
     	System.err.println("Creating object definition for String");
     	String[] words = value.toString().split("\\s+");
@@ -115,7 +115,7 @@ public class DataDecomposer {
     	System.err.println("words :: "+words.length);
     	for(String word : words){
     		System.err.println("word :: "+word);
-    		ObjectDefinition objDef = new ObjectDefinition(word, "");
+    		Feature objDef = new Feature(word, "");
     		objDefList.add(objDef);
     	}
 	        	
@@ -129,8 +129,8 @@ public class DataDecomposer {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static List<ObjectDefinition> decompose(Object obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
-		List<ObjectDefinition> objDefList = new ArrayList<ObjectDefinition>();
+	public static List<Feature> decompose(Object obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Feature> objDefList = new ArrayList<Feature>();
 		JSONObject jsonObject = new JSONObject();
 		Iterator<String> iter = jsonObject.keys();
 		
@@ -144,20 +144,20 @@ public class DataDecomposer {
 	    for(Field field : fields) {
 	        Object value = field.get(obj);
 	        if(value!=null){
-	        	ObjectDefinition objDef = null;
+	        	Feature objDef = null;
 	        		
 	        	if(value.getClass().equals(ArrayList.class)){
 		        	System.err.println("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<ObjectDefinition> decomposedList = decomposeArrayList(list);
+		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(ArrayList.class)){
 		        	System.err.println("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<ObjectDefinition> decomposedList = decomposeArrayList(list);
+		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(String[].class)){
@@ -165,7 +165,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new ObjectDefinition(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+		        		objDef = new Feature(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -173,7 +173,7 @@ public class DataDecomposer {
 		        	System.err.println("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
-		        	List<ObjectDefinition> decomposedList = decomposeObjectArray(array);
+		        	List<Feature> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else{
@@ -183,11 +183,11 @@ public class DataDecomposer {
 		        	System.err.println("words :: "+words.length);
 		        	for(String word : words){
 		        		System.err.println("word :: "+word);
-		        		objDef = new ObjectDefinition(word, "");
+		        		objDef = new Feature(word, "");
 		        		objDefList.add(objDef);
 		        	}
 		        	
-	        		//objDef = new ObjectDefinition(value.toString(), field.getType().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+	        		//objDef = new Feature(value.toString(), field.getType().getSimpleName().replace(".", "").replace("[","").replace("]",""));
 		        	//objDefList.add(objDef);
 		        }
 	        }
@@ -202,8 +202,8 @@ public class DataDecomposer {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static List<ObjectDefinition> decompose(HashMap<?,?> map) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
-		List<ObjectDefinition> objDefList = new ArrayList<ObjectDefinition>();
+	public static List<Feature> decompose(HashMap<?,?> map) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Feature> objDefList = new ArrayList<Feature>();
 		
 		Class<?> objClass = map.getClass();
         System.err.println("LIST CLASS:: "+ objClass);
@@ -211,20 +211,20 @@ public class DataDecomposer {
 		for(Object key : map.keySet()){
 			Object value = map.get(key);
 			if(value!=null){
-	        	ObjectDefinition objDef = null;
+	        	Feature objDef = null;
 	        		
 	        	if(value.getClass().equals(ArrayList.class)){
 		        	System.err.println("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<ObjectDefinition> decomposedList = decomposeArrayList(list);
+		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(ArrayList.class)){
 		        	System.err.println("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<ObjectDefinition> decomposedList = decomposeArrayList(list);
+		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(String[].class)){
@@ -232,7 +232,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new ObjectDefinition(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+		        		objDef = new Feature(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -240,7 +240,7 @@ public class DataDecomposer {
 		        	System.err.println("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
-		        	List<ObjectDefinition> decomposedList = decomposeObjectArray(array);
+		        	List<Feature> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else{
@@ -248,7 +248,7 @@ public class DataDecomposer {
 		        	String[] words = value.toString().split("\\s+");
 
 		        	for(String word : words){
-		        		objDef = new ObjectDefinition(word, "");
+		        		objDef = new Feature(word, "");
 		        		objDefList.add(objDef);
 		        	}
 		        }
@@ -264,8 +264,8 @@ public class DataDecomposer {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static List<ObjectDefinition> decomposeObjectArray(Object[] array) throws IllegalArgumentException, IllegalAccessException{
-    	List<ObjectDefinition> objDefList = new ArrayList<ObjectDefinition>();
+	private static List<Feature> decomposeObjectArray(Object[] array) throws IllegalArgumentException, IllegalAccessException{
+    	List<Feature> objDefList = new ArrayList<Feature>();
 		if(array == null || array.length == 0){
 			return objDefList;
 		}
@@ -284,8 +284,8 @@ public class DataDecomposer {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static List<ObjectDefinition> decomposeArrayList(ArrayList<?> list) throws IllegalArgumentException, IllegalAccessException, NullPointerException {
-    	List<ObjectDefinition> objDefList = new ArrayList<ObjectDefinition>();
+	private static List<Feature> decomposeArrayList(ArrayList<?> list) throws IllegalArgumentException, IllegalAccessException, NullPointerException {
+    	List<Feature> objDefList = new ArrayList<Feature>();
 		if(list == null || list.isEmpty()){
 			return objDefList;
 		}

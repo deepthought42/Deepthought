@@ -1,9 +1,12 @@
 package com.deepthought.models;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
 /**
  * A list of unique objects of a designated type that are stored and loaded in a specific order as
@@ -17,9 +20,8 @@ public class Vocabulary{
 	@GeneratedValue 
 	private Long id;
 	
-	private ArrayList<String> valueList = null;
-	//private ArrayList<Float> weights = null;
-	//private ArrayList<ArrayList<Float>> actions = null; 
+	@Relationship(type = "HAS_FEATURE")
+	private List<Feature> features = new ArrayList<Feature>();
 	private String key;
 
 	private String label = null;
@@ -32,10 +34,8 @@ public class Vocabulary{
 	 * @param valueList
 	 */
 	public Vocabulary(String listLabel) {
-		this.valueList = new ArrayList<String>();
-		this.label = listLabel;
-		this.key = "";
-		//this.weights = new ArrayList<Float>();
+		setLabel(listLabel);
+		this.setKey(label);
 	}
 	
 	/**
@@ -43,14 +43,13 @@ public class Vocabulary{
 	 * 
 	 * @param valueList
 	 */
-	public Vocabulary(ArrayList<String> valueList, String label) {
-		this.valueList = valueList;
-		this.label = label;
-		//this.weights = new ArrayList<Float>(valueList.size());
-		this.key = "";
+	public Vocabulary(List<Feature> features, String label) {
+		setLabel(label);
+		setFeatures(features);
+		this.setKey(label);
 
 	}
-	
+
 	/**
 	 * Appends an object of the vocabulary type to the end of the current vocabulary list if it 
 	 *  doesn't yet exist in the valueList
@@ -58,18 +57,34 @@ public class Vocabulary{
 	 * @param obj
 	 * @return boolean value indicating if vocabulary object was successfully added to list
 	 */
-	public boolean appendToVocabulary(String obj){
-		if(this.valueList.contains(obj)){
+	public boolean appendToVocabulary(Feature feature){
+		if(this.features.contains(feature)){
 			return false;
 		}
-		return valueList.add(obj);
+		return features.add(feature);
 	}
-
-	public ArrayList<String> getValueList() {
-		return this.valueList;
+	
+	public void setLabel(String label){
+		this.label = label;
 	}
 	
 	public String getLabel(){
 		return this.label;
+	}
+	
+	public void setFeatures(List<Feature> features) {
+		this.features = features;		
+	}
+	
+	public List<Feature> getFeatures() {
+		return this.features;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
 	}
 }
