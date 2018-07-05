@@ -6,18 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.deepthought.models.Action;
-import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.Feature;
+import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
 import com.deepthought.models.edges.ActionWeight;
-import com.deepthought.models.repository.ActionRepository;
-import com.deepthought.models.repository.ObjectDefinitionRepository;
-import com.qanairy.db.DataDecomposer;
+import com.deepthought.models.edges.FeaturePolicy;
+import com.deepthought.models.edges.Prediction;
+import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.models.repository.MemoryRecordRepository;
+import com.deepthought.models.repository.VocabularyRepository;
 
 
 /**
@@ -29,209 +34,172 @@ public class Brain {
 	private static Logger log = LoggerFactory.getLogger(Brain.class);
 
 	@Autowired
-	private ActionRepository action_repo;
-
+	private FeatureRepository feature_repo;
+	
 	@Autowired
-	private ObjectDefinitionRepository object_definition_repo;
-
-	//@Autowired
-	//private static ActionWeightRepository action_weight_repo;
+	private MemoryRecordRepository memory_repo;
+	
+	@Autowired
+	private VocabularyRepository vocabulary_repo;
 	
 	public Brain(){}
 	
-	public HashMap<String, Double> predict(List<ObjectDefinition> object_definitions, List<Action> actions){
-		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
-		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
-		// 2. create record based on vocabulary
-		for(ObjectDefinition objDef : object_definitions){
-			System.err.println("saving object definition");
-			ObjectDefinition obj_def = object_definition_repo.findByKey(objDef.getKey());
-			if(obj_def != null){
-				objDef = obj_def;
-			}
-			else{
-				objDef = object_definition_repo.save(objDef);
-			}
-			vocabulary.appendToVocabulary(objDef.getValue());
+	public Map<Action, Double> predict(List<Feature> features, List<Action> actions, Vocabulary vocabulary){
 			
-			//load policy for object definition
-		
-		
-		// 3. adjust action policies if more actions exist than the known actions
-		
-		// 4. load known vocabulary action policies into matrix
-		// 5. generate vocabulary policy matrix from list of object_definitions
-
-		double[][] vocab_actions = new double[vocabulary.getValueList().size()][actions.size()];
-		
-		int idx = 0;
-		for(String vocab_word : vocabulary.getValueList()){
-			boolean[] state = new boolean[vocabulary.getValueList().size()];
-			if(object_definitions.contains(vocab_word)){
-				state[idx] = true;
-				//load vocabulary object definition and make sure action list of probabilities is in the proper order
-
-				for(int action_idx=0; action_idx<actions.size(); action_idx++){
-					//vocab_actions[idx][action_idx] = 0.1;  whats the dynamic value though??
-				}
-			}
-			else{
-				state[idx] = false;
-				for(int action_idx=0; action_idx<actions.size(); action_idx++){
-					vocab_actions[idx][action_idx] = 0.0;
-				}
-			}
-			idx++;
-		}
-		
-		Random rand = new Random();
-
-		// 5. run predictions with the vocabulary vector as a record and multiply it by the action policies st. vocabulary_state*(policies)^Transpose = Y
-		// 6. return predicted action vector
-		//COMPUTE ALL EDGE PROBABILITIES
-			
-		System.err.println("Actions size : "+actions.size());
-		for(int index = 0; index < actions.size(); index++){
-
-			List<ActionWeight> action_weights = obj_def.getActionWeights();
-			if(action_weights.size() > 0){
-				for(ActionWeight weight : action_weights){
-					if(weight.getLabels().isEmpty()){
-						//guess the label
-					}
-					else{
-						List<String> labels = weight.getLabels();
-						double probability = weight.getWeight();
-						System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");	
-					}
-				}
-			}
-			else{
-				System.err.println("+++   No edges found. Setting weight randomly ++");
-
-				ActionWeight action_weight = new ActionWeight();
-				action_weight.setAction(actions.get(index));
-				action_weight.setObjectDefinition(obj_def);
-				action_weight.setWeight(rand.nextDouble());
-				obj_def.getActionWeights().add(action_weight);
-				object_definition_repo.save(obj_def);
-			}
-			
-		}
-		
-		//Call predict method and get anticipated reward for given action against all datums
-		//	-- method needed for prediction 
-		//START PREDICT METHOD
-			
-		//Flip a coin to determine whether we should exploit/optimize or explore
-		/*double coin = rand.nextDouble();
-		if(coin > .5){
-			//Get Best action_weight prediction
-			double max = -1.0;
-			int maxIdx = 0;
-		    for(int j = 0; j < action_weights.size(); j++){
-		    	if(action_weights.get(j) > max){
-		    		System.err.println("MAX WEIGHT FOR NOW :: "+max);
-		    		max=action_weights.get(j);
-		    		maxIdx = j;
-		    	}
-		    }
-		    
-		    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
-		    return new HashMap<String, Double>();
-		}
-		else{
-			System.err.println("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
-			return new HashMap<String, Double>();
-		}*/
-		}
-
-		return new HashMap<String, Double>();
-	}
-	
-	/**
-	 * Predicts best action based on disparate action information
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 */
-	public static HashMap<String, Double> predict(HashMap<?,?> obj) throws IllegalArgumentException, IllegalAccessException {
-		List<ObjectDefinition> object_definitions = DataDecomposer.decompose(obj);
-		
-		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
-		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
-		// 2. create record based on vocabulary
-		for(ObjectDefinition objDef : object_definitions){
-			vocabulary.appendToVocabulary(objDef.getValue());
-			//load policy for object definition
-		}
+			//Call predict method and get anticipated reward for given action against all datums
+			//	-- method needed for prediction 
+			//START PREDICT METHOD
 				
-		//get List of all possible actions
-		String[] actions = ActionFactory.getActions();
-		
-		double[] action_weight = new double[actions.length];
-		Random rand = new Random();
-
-		//COMPUTE ALL EDGE PROBABILITIES
-		/*
-		for(int index = 0; index < actions.length; index++){
-			Iterator<Vertex> vertices = orientPersistor.findVertices(obj).iterator();
-			if(!vertices.hasNext()){
-				return rand.nextInt(actions.length);
-				return new HashMap<String, Double>();
-			}
-
-			Vertex vertex = vertices.next();
-
-			Iterable<Edge> edges = vertex.getEdges(Direction.OUT, actions[index]);
-			if(edges.iterator().hasNext()){
-				for(Edge edge : edges){
-					if(edge.getLabel().isEmpty()){
-						//guess the label
-					}
-					else{
-						String label = edge.getLabel();
-						int action_count = edge.getProperty("count");
-						int probability = edge.getProperty("probability");
-						System.err.println("Label :: "+label+" ; count :: "+ action_count + " ; P() :: " + probability + "%");	
-					}
-				}
+			//Flip a coin to determine whether we should exploit/optimize or explore
+			/*double coin = rand.nextDouble();
+			if(coin > .5){
+				//Get Best action_weight prediction
+				double max = -1.0;
+				int maxIdx = 0;
+			    for(int j = 0; j < action_weights.size(); j++){
+			    	if(action_weights.get(j) > max){
+			    		System.err.println("MAX WEIGHT FOR NOW :: "+max);
+			    		max=action_weights.get(j);
+			    		maxIdx = j;
+			    	}
+			    }
+			    
+			    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
+			    return new HashMap<String, Double>();
 			}
 			else{
-				System.err.println("+++   No edges found. Setting weight randomly ++");
-				action_weight[index] = rand.nextDouble();
+				System.err.println("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
+				return new HashMap<String, Double>();
+			}*/
+		
+
+		
+		
+		
+		// 1. Create a memory record for prediction
+		MemoryRecord memory = new MemoryRecord();
+		
+		// 2. add vocabulary to memory record
+		
+		// 3. if any features are not in vocabulary add them to the vocabulary
+		for(Feature feature : features){
+			boolean feature_already_exists = false;
+			for(Feature vocab_feature : vocabulary.getFeatures()){
+				if(vocab_feature.equals(feature)){
+					feature_already_exists = true;
+					break;
+				}
+			}
+			
+			if(!feature_already_exists){
+				feature = feature_repo.findByKey(feature.getKey());
+				vocabulary.getFeatures().add(feature);
 			}
 		}
+		vocabulary = vocabulary_repo.save(vocabulary);
 		
-		//Call predict method and get anticipated reward for given action against all datums
-		//	-- method needed for prediction 
-		//START PREDICT METHOD
+		memory.setVocabulary(vocabulary);
+		memory = memory_repo.save(memory);
+		
+		List<Action> known_actions = new ArrayList<Action>();
+		Map<Feature, Map<String, Double>> unordered_feature_policy = new HashMap<Feature, Map<String, Double>>();
+		// 4. for each feature
+		for(Feature feature : features){
+			System.err.println("Feature iteration :: "+feature);
+			feature = feature_repo.findByKey(feature.getKey());
 			
-		//Flip a coin to determine whether we should exploit/optimize or explore
-		double coin = rand.nextDouble();
-		if(coin > .5){
-			//Get Best action_weight prediction
-			double max = -1.0;
-			int maxIdx = 0;
-		    for(int j = 0; j < action_weight.length; j++){
-		    	if(action_weight[j] > max){
-		    		System.err.println("MAX WEIGHT FOR NOW :: "+max);
-		    		max=action_weight[j];
-		    		maxIdx = j;
-		    	}
-		    }
-		    
-		    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
-		    return new HashMap<String, Double>();
+			Map<String, Double> action_policy = new HashMap<String, Double>();
+			List<String> policy_actions = new ArrayList<String>();
+			List<Double> policy_weights = new ArrayList<Double>();
+			
+			// 4.1) load action weights for policy
+			List<ActionWeight> action_weights = feature.getActionWeights();
+			for(ActionWeight weight : action_weights){
+				List<String> labels = weight.getLabels();
+				double probability = weight.getWeight();
+				policy_actions.add(weight.getAction().getKey());
+				policy_weights.add(probability);
+				action_policy.put(weight.getAction().getKey(), probability);
+				if(!known_actions.contains(weight.getAction())){
+					known_actions.add(weight.getAction());
+				}
+				System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");	
+			}
+			
+			if(policy_actions.size() > 0 && policy_weights.size() > 0){
+				// 4.2) Add feature action policy to memory record
+				FeaturePolicy feature_policy = new FeaturePolicy();
+				feature_policy.setMemoryRecord(memory);
+				feature_policy.setFeature(feature);
+				feature_policy.setPolicyActions(policy_actions);
+				feature_policy.setPolicyWeights(policy_weights);
+				memory.getFeaturePolicies().add(feature_policy);
+			}
+			// 4.3) append policy to policy matrix
+			
+			unordered_feature_policy.put(feature, action_policy);
 		}
-		else{
-			System.err.println("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
-			return new HashMap<String, Double>();
+		memory = memory_repo.save(memory);
+
+
+		System.err.println("Total known actions :: "+known_actions.size());
+
+		// 5. Generate feature vector
+		Set<Feature> feature_vector = unordered_feature_policy.keySet();
+		
+		// 5.1 build ordered feature matrix
+		
+		double[][] weight_matrix = new double[feature_vector.size()][known_actions.size()];
+		
+		int feature_idx = 0;
+		for(Feature feature : feature_vector){
+			Map<String, Double> action_policy = unordered_feature_policy.get(feature);
+			System.err.println("loading action policy for : "+feature.getValue());
+			int action_idx = 0;
+			
+			for(Action action : known_actions){
+				System.err.println("Action key :: "+action.getKey());
+				System.err.println("action_policy :: "+action_policy);
+				Double action_weight = action_policy.get(action.getKey());
+				if(action_weight == null){
+					System.err.println("Action weight is null");
+					weight_matrix[feature_idx][action_idx] = 0.0;
+				}else{
+					System.err.println("Action weight is "+action_weight);
+
+					weight_matrix[feature_idx][action_idx] = action_weight;
+				}
+				action_idx++;
+			}
+			feature_idx++;
 		}
-		*/
-		return new HashMap<String, Double>();
-		//END PREDICT METHOD
+			
+		// 6. generate prediction using feature vector and policy matrix (1*(policies)^Transpose = Y)
+		Map<Action, Double> prediction_map = new HashMap<Action, Double>();
+		
+		for(int i=0; i<weight_matrix[0].length; i++){
+			double action_weight = 0.0;
+			for(int j=0; j<weight_matrix.length; j++){
+				System.err.println("Adding to action weight :: "+ weight_matrix[j][i]);
+				action_weight += weight_matrix[j][i];
+			}
+			Prediction prediction = new Prediction();
+			prediction.setAction(known_actions.get(i));
+			prediction.setMemoryRecord(memory);
+			prediction.setWeight(action_weight);
+			memory.getActionPrediction().add(prediction);
+			memory = memory_repo.save(memory);
+			prediction_map.put(known_actions.get(i), action_weight);
+		}
+		
+		//	6.1) Store predictions in memory record
+		
+		// 7. return prediction map
+		
+		
+		return prediction_map;
 	}
-	
+		
 	/**
 	 * Reads path and performs learning tasks
 	 * 
@@ -241,7 +209,7 @@ public class Brain {
 	 * @throws NullPointerException
 	 * @throws IOException 
 	 */
-	public void learn(List<ObjectDefinition> object_definition_list,
+	public void learn(List<Feature> object_definition_list,
 					  Map<String,Double> predicted_action_vector,
 					  Action actual_action,
 					  boolean isRewarded)
@@ -252,21 +220,21 @@ public class Brain {
 		
 		//learning model
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
-		Vocabulary vocabulary = new Vocabulary(new ArrayList<String>(), "internet");
+		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
 
 		System.err.println("object definition list size :: "+object_definition_list.size());
 		// 2. create record based on vocabulary
-		for(ObjectDefinition objDef : object_definition_list){
-			vocabulary.appendToVocabulary(objDef.getValue());
+		for(Feature feature : object_definition_list){
+			vocabulary.appendToVocabulary(feature);
 		}
 		
 		System.err.println("vocabulary :: "+vocabulary);
-		System.err.println("vocab value list size   :: "+vocabulary.getValueList().size());
+		System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
 		// 2. create state vertex from vocabulary 
 		int idx = 0;
-		for(String vocab_word : vocabulary.getValueList()){
-			boolean[] state = new boolean[vocabulary.getValueList().size()];
-			if(object_definition_list.contains(vocab_word)){
+		for(Feature vocab_feature : vocabulary.getFeatures()){
+			boolean[] state = new boolean[vocabulary.getFeatures().size()];
+			if(object_definition_list.contains(vocab_feature)){
 				state[idx] = true;
 			}
 			else{
@@ -306,20 +274,20 @@ public class Brain {
 		
 		System.err.println("doing stuff with object definition list "+object_definition_list.size());
 		//Reinforce probabilities for the component objects of this element
-		for(ObjectDefinition objDef : object_definition_list){
-			System.err.println("Object defintion to be updated ..."+objDef.getValue());
+		for(Feature feature : object_definition_list){
+			System.err.println("Object defintion to be updated ..."+feature.getValue());
 			//NEED TO LOOK UP OBJECT DEFINITION IN MEMORY, IF IT EXISTS, THEN IT SHOULD BE LOADED AND USED, 
 			//IF NOT THEN IT SHOULD BE CREATED, POPULATED, AND SAVED
-			String key = objDef.generateKey();
+			String key = feature.generateKey();
 			System.err.println("Object definition key :: "+key);
-			System.err.println("REPO :: "+object_definition_repo);
-			ObjectDefinition obj_def = object_definition_repo.findByKey(key);
+			System.err.println("REPO :: "+feature_repo);
+			Feature feature_record = feature_repo.findByKey(key);
 			
-			System.err.println("object def retrieved :: "+obj_def);
-			if(obj_def != null){
-				objDef = obj_def;
+			System.err.println("object def retrieved :: "+feature_record);
+			if(feature_record != null){
+				feature = feature_record;
 			}
-			List<ActionWeight> action_weight_list = objDef.getActionWeights();
+			List<ActionWeight> action_weight_list = feature.getActionWeights();
 			System.err.println("action weight list size :: "+action_weight_list.size());
 			double last_value = 0.0;
 			System.err.println("Checkinf if known action...");
@@ -347,17 +315,17 @@ public class Brain {
 			if(known_action_weight == null){
 				known_action_weight = new ActionWeight();
 				known_action_weight.setAction(actual_action);
-				known_action_weight.setObjectDefinition(objDef);
-				objDef.getActionWeights().add(known_action_weight);
+				known_action_weight.setFeature(feature);
+				feature.getActionWeights().add(known_action_weight);
 			}
 			known_action_weight.setWeight(q_learn_val);
 
 			System.err.println(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_action+"...Q LEARN VAL : "+q_learn_val);
 
-			System.err.println("Object definition :: "+objDef);
-			System.err.println("Object definition key :: "+objDef.getKey());
-			System.err.println("Object definition value :: "+objDef.getValue());
-			object_definition_repo.save(objDef);
+			System.err.println("Object definition :: "+feature);
+			System.err.println("Object definition key :: "+feature.getKey());
+			System.err.println("Object definition value :: "+feature.getValue());
+			feature_repo.save(feature);
 		}
 		
 		
@@ -403,7 +371,7 @@ public class Brain {
 	 * @param object_list
 	 * @return
 	 */
-	private Vocabulary predictVocabulary(List<ObjectDefinition> object_list){
+	private Vocabulary predictVocabulary(List<Feature> object_list){
 		return null;
 	}
 	
@@ -413,7 +381,7 @@ public class Brain {
 	 * @param vocabulary
 	 * @return
 	 */
-	private List<ObjectDefinition> generateVocabRecord(List<ObjectDefinition> object_list, Vocabulary vocabulary){
+	private List<Feature> generateVocabRecord(List<Feature> object_list, Vocabulary vocabulary){
 		return object_list;
 	}
 	
@@ -437,7 +405,7 @@ public class Brain {
 	 * @param vocabulary
 	 * @return
 	 */
-	private List<List<ObjectDefinition>> loadActionPolicies(List<ObjectDefinition> object_list, Vocabulary vocabulary){
+	private List<List<Feature>> loadActionPolicies(List<Feature> object_list, Vocabulary vocabulary){
 		return null;
 		
 	}
@@ -474,9 +442,9 @@ public class Brain {
 			//decompose path obj
 			DataDecomposer decomposer = new DataDecomposer();
 			
-			List<ObjectDefinition> objDefinitionList = null;
+			List<Feature> featureinitionList = null;
 			try {
-				objDefinitionList = decomposer.decompose(pathObj.getData());
+				featureinitionList = decomposer.decompose(pathObj.getData());
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -508,14 +476,14 @@ public class Brain {
 			
 			//Run through object definitions and make sure that they are all included in the vocabulary
 			Random rand = new Random();
-			for(ObjectDefinition objDef : objDefinitionList){
-				if( !this.vocab.getValueList().contains(objDef.getValue())){
+			for(Feature feature : featureinitionList){
+				if( !this.vocab.getValueList().contains(feature.getValue())){
 					//then add object value to end of vocabulary
-					this.vocab.appendToVocabulary(objDef.getValue());
+					this.vocab.appendToVocabulary(feature.getValue());
 					
 					//add a new 0.0 value weight to end of weights
 <<<<<<< HEAD
-					//this.vocab.appendToWeights(objDef.getValue(), rand.nextFloat());
+					//this.vocab.appendToWeights(feature.getValue(), rand.nextFloat());
 					
 					//add new actions entry to match vocab
 					ArrayList<Float> action_weights = new ArrayList<Float>(Arrays.asList(new Float[ActionFactory.getActions().length]));
@@ -526,12 +494,12 @@ public class Brain {
 					//	action_weights.set(weight_idx, rand.nextFloat());
 					//}
 =======
-					vocab_weights.appendToVocabulary(objDef.getValue());
+					vocab_weights.appendToVocabulary(feature.getValue());
 
 >>>>>>> f8550e37a7b03a9e5d435acb6d8ce040379bea09
 					//add weights to vocabulary weights;
 					for(String action : ActionFactory.getActions()){
-						vocab_weights.appendToWeights(objDef.getValue(), action, rand.nextFloat()); 
+						vocab_weights.appendToWeights(feature.getValue(), action, rand.nextFloat()); 
 					}
 					
 					//action_weights_list.add(action_weights);
@@ -549,8 +517,8 @@ public class Brain {
 			Boolean[][] experience_record = new Boolean[this.vocab.getValueList().size()][ActionFactory.getActions().length];
 			double[][] weight_record = new double[this.vocab.getValueList().size()][ActionFactory.getActions().length];
 			
-			for(ObjectDefinition objDef : objDefinitionList){
-				int value_idx = this.vocab.getValueList().indexOf(objDef.getValue() );
+			for(Feature feature : featureinitionList){
+				int value_idx = this.vocab.getValueList().indexOf(feature.getValue() );
 				for(int i=0; i < ActionFactory.getActions().length; i++){
 					if(ActionFactory.getActions()[i].equals(last_action)){
 						vocabularyExperienceRecord.set(value_idx, Boolean.TRUE);
@@ -561,7 +529,7 @@ public class Brain {
 					}
 					
 					//place weights into 2 dimensional array for NN computations later
-					weight_record[value_idx][i] = vocab_weights.getVocabulary_weights().get(objDef.getValue()).get(ActionFactory.getActions()[i]);
+					weight_record[value_idx][i] = vocab_weights.getVocabulary_weights().get(feature.getValue()).get(ActionFactory.getActions()[i]);
 				}
 			}
 			
@@ -602,8 +570,8 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public HashMap<String, Double> calculateActionProbabilities(ObjectDefinition pageElement) throws IllegalArgumentException, IllegalAccessException{
-		/*List<ObjectDefinition> definitions = DataDecomposer.decompose(pageElement);
+	public HashMap<String, Double> calculateActionProbabilities(Feature pageElement) throws IllegalArgumentException, IllegalAccessException{
+		/*List<Feature> definitions = DataDecomposer.decompose(pageElement);
 
 		System.err.println(getSelf().hashCode() + " -> GETTING BEST ACTION PROBABILITY...");
 		HashMap<String, Double> cumulative_action_map = new HashMap<String, Double>();
@@ -646,7 +614,7 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<ObjectDefinition> pageElements) 
+	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<Feature> pageElements) 
 			throws IllegalArgumentException, IllegalAccessException
 	{
 		/*
@@ -655,9 +623,9 @@ public class Brain {
 		for(PageElement elem : pageElements){
 			HashMap<String, Double> full_action_map = new HashMap<String, Double>(0);
 			//find vertex for given element
-			List<Object> raw_object_definitions = DataDecomposer.decompose(elem);
+			List<Object> raw_features = DataDecomposer.decompose(elem);
 			List<com.tinkerpop.blueprints.Vertex> object_definition_list
-				= persistor.findAll(raw_object_definitions);
+				= persistor.findAll(raw_features);
 					
 			//iterate over set to get all actions for object definition list
 			for(com.tinkerpop.blueprints.Vertex v : object_definition_list){

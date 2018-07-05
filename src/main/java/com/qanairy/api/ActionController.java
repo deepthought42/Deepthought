@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.deepthought.models.Action;
 import com.deepthought.models.repository.ActionRepository;
-import com.deepthought.models.repository.ObjectDefinitionRepository;
+import com.deepthought.models.repository.FeatureRepository;
 
 
 /**
@@ -29,7 +29,7 @@ public class ActionController {
 	private ActionRepository action_repo;
 
 	@Autowired
-	private ObjectDefinitionRepository object_definition_repo;
+	private FeatureRepository feature_repo;
 	
 	@RequestMapping(method = RequestMethod.GET)
     public @ResponseBody List<Action> getAll(){

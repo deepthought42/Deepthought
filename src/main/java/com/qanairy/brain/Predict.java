@@ -2,7 +2,7 @@ package com.qanairy.brain;
 
 import java.util.List;
 
-import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.Feature;
 
 
 /**
@@ -17,7 +17,7 @@ public interface Predict<T> {
 	 * 
 	 * @return The object most likely to result in best reward, or the exploratory choice
 	 */
-	public T predict(List<ObjectDefinition> list);
+	public T predict(List<Feature> list);
 	
 	/**
 	 * Returns the predicted reward to be had based on best reward for the object type, or
@@ -26,5 +26,5 @@ public interface Predict<T> {
 	 * @param obj
 	 * @return
 	 */
-	public double predict(ObjectDefinition obj);
+	public double predict(Feature obj);
 }

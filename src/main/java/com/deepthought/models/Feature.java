@@ -16,7 +16,7 @@ import com.deepthought.models.edges.ActionWeight;
  * Defines objects that are available to the system for learning against
  */
 @NodeEntity
-public class ObjectDefinition {
+public class Feature {
 
 	@Id 
 	@GeneratedValue 
@@ -29,7 +29,7 @@ public class ObjectDefinition {
 	@Relationship(type = "HAS_ACTION")
 	private List<ActionWeight> action_weights = new ArrayList<ActionWeight>();
 	
-	public ObjectDefinition(){}
+	public Feature(){}
 	
 	/**
 	 * Instantiates a new object definition
@@ -41,7 +41,7 @@ public class ObjectDefinition {
 	 * 
 	 * @pre actions != null
 	 */
-	public ObjectDefinition(String value, String type, List<ActionWeight> actions) {
+	public Feature(String value, String type, List<ActionWeight> actions) {
 		assert actions != null;
 		
 		this.value = value;
@@ -57,7 +57,7 @@ public class ObjectDefinition {
 	 * @param value
 	 * @param type
 	 */
-	public ObjectDefinition(String value, String type) {
+	public Feature(String value, String type) {
 		this.value = value;
 		this.type = type;
 		this.key = generateKey();
@@ -65,7 +65,7 @@ public class ObjectDefinition {
 	}
 
 	public String generateKey() {
-		return DigestUtils.sha256Hex(getValue());
+		return DigestUtils.sha256Hex(getValue()+":"+getType());
 	}
 
 	public String getType() {
@@ -98,5 +98,17 @@ public class ObjectDefinition {
 	 */
 	public List<ActionWeight> getActionWeights(){
 		return this.action_weights;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (this == o) return true;
+        if (!(o instanceof Feature)) return false;
+        
+        Feature that = (Feature)o;
+        if(this.getKey().equals(that.getKey())){
+        	return true;
+        }
+        return false;
 	}
 }

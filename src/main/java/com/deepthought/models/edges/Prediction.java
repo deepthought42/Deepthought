@@ -11,13 +11,13 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import com.deepthought.models.Action;
-import com.deepthought.models.Feature;
+import com.deepthought.models.MemoryRecord;
 
 /**
  * 
  */
-@RelationshipEntity(type = "HAS_ACTION")
-public class ActionWeight {
+@RelationshipEntity(type = "PREDICTION")
+public class Prediction {
 	@Id 
 	@GeneratedValue   
 	private Long relationshipId;
@@ -26,7 +26,7 @@ public class ActionWeight {
     private double weight;
     
 	@StartNode 
-	private Feature feature;
+	private MemoryRecord memory;
     
 	@EndNode   
 	private Action action;
@@ -50,8 +50,8 @@ public class ActionWeight {
     	this.weight = weight;
     }
 
-	public void setFeature(Feature feature) {
-		this.feature = feature;
+	public void setMemoryRecord(MemoryRecord memory) {
+		this.memory = memory;
 	}
 
 	public List<String> getLabels() {

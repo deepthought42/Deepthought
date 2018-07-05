@@ -6,16 +6,16 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import com.deepthought.models.Feature;
-import com.deepthought.models.Vocabulary;
 
 /**
  * 
  */
-public interface VocabularyRepository extends Neo4jRepository<Vocabulary, Long> {
+public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 
-	Vocabulary findByLabel(@Param("label") String laberl);
-	Vocabulary findByKey(@Param("key") String key);
-
-    @Query("MATCH (o:Feature)<-[r:HAS_ACTION]-(a:Action) RETURN m,r,a LIMIT {limit}")
+	Feature findByValue(@Param("value") String value);
+	Feature findByKey(@Param("key") String key);
+	Feature findByType(@Param("type") String type);
+	
+    @Query("MATCH (a:Action)<-[r:HAS_ACTION]-(o:Feature) RETURN o,r,a LIMIT {limit}")
     Collection<Feature> graph(@Param("limit") int limit);
 }

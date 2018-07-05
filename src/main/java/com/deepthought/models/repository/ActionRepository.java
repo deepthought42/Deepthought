@@ -15,6 +15,6 @@ public interface ActionRepository extends Neo4jRepository<Action, Long> {
 
 	Action findByKey(@Param("key") String key);
 
-    @Query("MATCH (o:ObjectDefinition)-[r:HAS_ACTION]->(a:Action) RETURN o,r,a LIMIT {limit}")
+    @Query("MATCH (o:Feature)-[r:HAS_ACTION]->(a:Action) RETURN o,r,a LIMIT {limit}")
     Collection<Action> graph(@Param("limit") int limit);
 }

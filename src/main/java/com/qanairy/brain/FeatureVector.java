@@ -8,28 +8,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.deepthought.models.Action;
-import com.deepthought.models.ObjectDefinition;
+import com.deepthought.models.Feature;
 import com.deepthought.models.Vocabulary;
 import com.deepthought.models.repository.ActionRepository;
-import com.deepthought.models.repository.ObjectDefinitionRepository;
+import com.deepthought.models.repository.FeatureRepository;
 
 @Component
 public class FeatureVector {
 
 	@Autowired
-	private static ObjectDefinitionRepository obj_def_repo;
+	private static FeatureRepository obj_def_repo;
 	
 	@Autowired
 	private static ActionRepository action_repo;
 	
-	public static double[][] loadPolicy(List<ObjectDefinition> def_list, List<ObjectDefinition> actions, HashMap<String, Integer> vocabulary_record, Vocabulary vocab){
+	public static double[][] loadPolicy(List<Feature> def_list, List<Feature> actions, HashMap<String, Integer> vocabulary_record, Vocabulary vocab){
 		double[][] vocab_policy = new double[vocabulary_record.keySet().size()][actions.size()];
 
 
 		System.err.println("concatenating action features into 2d array for vocabulary");
 		//set actions for object definition to action probabilities
 		int k = 0;
-		for(ObjectDefinition def : def_list){
+		for(Feature def : def_list){
 			//load action policy for object definition
 			obj_def_repo.save(def);
 			/*
@@ -50,13 +50,13 @@ public class FeatureVector {
 	}
 	
 	
-	public static HashMap<String, Integer> load(List<ObjectDefinition> def_list, List<ObjectDefinition> object_definitions){
+	public static HashMap<String, Integer> load(List<Feature> def_list, List<Feature> features){
 		HashMap<String, Integer> vocabulary_record = new HashMap<String, Integer>();
 
     	int i = 0;
-    	for(ObjectDefinition definition : def_list){
+    	for(Feature definition : def_list){
     		boolean has_match = false;
-    		for(ObjectDefinition record_definition : object_definitions){
+    		for(Feature record_definition : features){
     			if(record_definition.equals(definition)){
     				vocabulary_record.put(record_definition.getValue(), 1);
     				has_match = true;
