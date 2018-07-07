@@ -45,12 +45,12 @@ public class FeaturePolicy {
     }
   
     
-    public List<String> getPolicyActions(){
+    public List<String> getPolicyFeatures(){
     	return this.policy_actions;
     }
     
-    public void setPolicyActions(List<String> policy_actions){
-    	this.policy_actions = policy_actions;
+    public void setPolicyFeatures(List<String> policy_features){
+    	this.policy_features = policy_features;
     }
 	
     public List<Double> getPolicyWeights(){
