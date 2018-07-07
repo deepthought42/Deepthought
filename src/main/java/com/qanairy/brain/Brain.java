@@ -209,7 +209,7 @@ public class Brain {
 	 * @throws NullPointerException
 	 * @throws IOException 
 	 */
-	public void learn(List<Feature> object_definition_list,
+	public void learn(List<Feature> feature_list,
 					  Map<String,Double> predicted_action_vector,
 					  Action actual_action,
 					  boolean isRewarded)
@@ -222,9 +222,9 @@ public class Brain {
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
 
-		System.err.println("object definition list size :: "+object_definition_list.size());
+		System.err.println("object definition list size :: "+feature_list.size());
 		// 2. create record based on vocabulary
-		for(Feature feature : object_definition_list){
+		for(Feature feature : feature_list){
 			vocabulary.appendToVocabulary(feature);
 		}
 		
@@ -234,7 +234,7 @@ public class Brain {
 		int idx = 0;
 		for(Feature vocab_feature : vocabulary.getFeatures()){
 			boolean[] state = new boolean[vocabulary.getFeatures().size()];
-			if(object_definition_list.contains(vocab_feature)){
+			if(feature_list.contains(vocab_feature)){
 				state[idx] = true;
 			}
 			else{
@@ -272,9 +272,9 @@ public class Brain {
 		
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
 		
-		System.err.println("doing stuff with object definition list "+object_definition_list.size());
+		System.err.println("doing stuff with object definition list "+feature_list.size());
 		//Reinforce probabilities for the component objects of this element
-		for(Feature feature : object_definition_list){
+		for(Feature feature : feature_list){
 			System.err.println("Object defintion to be updated ..."+feature.getValue());
 			//NEED TO LOOK UP OBJECT DEFINITION IN MEMORY, IF IT EXISTS, THEN IT SHOULD BE LOADED AND USED, 
 			//IF NOT THEN IT SHOULD BE CREATED, POPULATED, AND SAVED
@@ -290,7 +290,7 @@ public class Brain {
 			List<ActionWeight> action_weight_list = feature.getActionWeights();
 			System.err.println("action weight list size :: "+action_weight_list.size());
 			double last_value = 0.0;
-			System.err.println("Checkinf if known action...");
+			System.err.println("Checking if known action...");
 			ActionWeight known_action_weight = null;
 			boolean is_known_action = false;
 			for(ActionWeight action_weight : action_weight_list){
@@ -624,11 +624,11 @@ public class Brain {
 			HashMap<String, Double> full_action_map = new HashMap<String, Double>(0);
 			//find vertex for given element
 			List<Object> raw_features = DataDecomposer.decompose(elem);
-			List<com.tinkerpop.blueprints.Vertex> object_definition_list
+			List<com.tinkerpop.blueprints.Vertex> feature_list
 				= persistor.findAll(raw_features);
 					
 			//iterate over set to get all actions for object definition list
-			for(com.tinkerpop.blueprints.Vertex v : object_definition_list){
+			for(com.tinkerpop.blueprints.Vertex v : feature_list){
 				HashMap<String, Double> action_map = v.getProperty("actions");
 				if(action_map != null && !action_map.isEmpty()){
 					for(String action : action_map.keySet()){
@@ -646,7 +646,7 @@ public class Brain {
 			
 			for(String action : full_action_map.keySet()){
 				double probability = 0.0;
-				probability = full_action_map.get(action)/(double)object_definition_list.size();
+				probability = full_action_map.get(action)/(double)feature_list.size();
 
 				//cumulative_probability[action_idx] += probability;
 				full_action_map.put(action, probability);
@@ -658,6 +658,36 @@ public class Brain {
 		*/
 		
 		return null;
+	}
+
+	public void train(List<Feature> feature_list, String label) {
+		//REINFORCEMENT LEARNING
+				System.err.println( " Initiating learning");
+				
+				//learning model
+				// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
+				Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
+
+				System.err.println("object definition list size :: "+feature_list.size());
+				// 2. create record based on vocabulary
+				for(Feature feature : feature_list){
+					vocabulary.appendToVocabulary(feature);
+				}
+				
+				System.err.println("vocabulary :: "+vocabulary);
+				System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
+				// 2. create state vertex from vocabulary 
+				int idx = 0;
+				for(Feature vocab_feature : vocabulary.getFeatures()){
+					boolean[] state = new boolean[vocabulary.getFeatures().size()];
+					if(feature_list.contains(vocab_feature)){
+						state[idx] = true;
+					}
+					else{
+						state[idx] = false;
+					}
+					idx++;
+				}
 	}
 
 }

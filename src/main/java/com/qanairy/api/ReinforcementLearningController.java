@@ -144,4 +144,14 @@ public class ReinforcementLearningController {
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
 	    brain.learn(feature_list, predicted, action, isRewarded);
     }
+    
+    @RequestMapping(value ="/train", method = RequestMethod.POST)
+    public  @ResponseBody void train(@RequestParam(value="json_object", required=true) String json_object, 
+    								 @RequestParam String label) 
+    										 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException{
+    
+    	JSONObject json_obj = new JSONObject(json_object);
+    	List<Feature> feature_list = DataDecomposer.decompose(json_obj);
+    	brain.train(feature_list, label);
+    }
 }
