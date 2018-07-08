@@ -9,7 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.models.edges.ActionWeight;
+import com.deepthought.models.edges.FeatureWeight;
 
 
 /**
@@ -27,7 +27,7 @@ public class Feature {
 	private String key;
 	
 	@Relationship(type = "HAS_ACTION")
-	private List<ActionWeight> action_weights = new ArrayList<ActionWeight>();
+	private List<FeatureWeight> feature_weights = new ArrayList<FeatureWeight>();
 	
 	public Feature(){}
 	
@@ -41,13 +41,13 @@ public class Feature {
 	 * 
 	 * @pre actions != null
 	 */
-	public Feature(String value, String type, List<ActionWeight> actions) {
+	public Feature(String value, String type, List<FeatureWeight> actions) {
 		assert actions != null;
 		
 		this.value = value;
 		this.type = type;
 		this.key = generateKey();
-		this.action_weights = actions;
+		this.feature_weights = actions;
 	}
 	
 	/**
@@ -61,7 +61,7 @@ public class Feature {
 		this.value = value;
 		this.type = type;
 		this.key = generateKey();
-		this.action_weights = new ArrayList<ActionWeight>();
+		this.feature_weights = new ArrayList<FeatureWeight>();
 	}
 
 	public String generateKey() {
@@ -96,8 +96,8 @@ public class Feature {
 	 * Gets list of probabilities associated with actions for this object definition
 	 * @return
 	 */
-	public List<ActionWeight> getActionWeights(){
-		return this.action_weights;
+	public List<FeatureWeight> getFeatureWeights(){
+		return this.feature_weights;
 	}
 	
 	@Override
