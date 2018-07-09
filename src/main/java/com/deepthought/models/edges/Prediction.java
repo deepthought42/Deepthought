@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Action;
 import com.deepthought.models.MemoryRecord;
 
 /**
@@ -29,17 +29,17 @@ public class Prediction {
 	private MemoryRecord memory;
     
 	@EndNode   
-	private Feature feature;
+	private Action action;
 
 	@Property
 	private List<String> labels = new ArrayList<String>();
     
-    public Feature getFeature(){
-    	return this.feature;
+    public Action getAction(){
+    	return this.action;
     }
     
-    public void setFeature(Feature feature){
-    	this.feature = feature;
+    public void setAction(Action action){
+    	this.action = action;
     }
     
     public double getWeight(){

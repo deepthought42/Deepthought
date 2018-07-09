@@ -21,10 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
 import com.deepthought.models.Vocabulary;
+import com.deepthought.models.repository.ActionRepository;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.VocabularyRepository;
+import com.qanairy.brain.ActionFactory;
 import com.qanairy.brain.Brain;
 import com.qanairy.brain.FeatureVector;
 import com.qanairy.db.DataDecomposer;
@@ -40,7 +43,10 @@ public class ReinforcementLearningController {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private FeatureRepository feature_repo;
+	private ActionRepository action_repo;
+
+	@Autowired
+	private FeatureRepository object_definition_repo;
 	
 	@Autowired
 	private VocabularyRepository vocabulary_repo;
@@ -60,17 +66,16 @@ public class ReinforcementLearningController {
      * @throws MalformedURLException 
      */
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
-    public @ResponseBody Map<Feature, Double> predict(@RequestBody String obj, String end_vocab_name) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
+    public @ResponseBody Map<Action, Double> predict(@RequestBody String obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
     	System.err.println("digesting Object : " +obj);
     	List<Feature> features = DataDecomposer.decompose(new JSONObject(obj));
     	System.err.println("Finished decomposing object into value list with length :: "+features.size());
     	
     	System.err.println("loading vocabulary");
     	//LOAD VOCABULARY
-    	String start_label = "internet";
-    	String end_label = "action";
-    	
-    	List<Feature> def_list = IterableUtils.toList(feature_repo.findAll());
+    	String label = "internet";
+
+    	List<Feature> def_list = IterableUtils.toList(object_definition_repo.findAll());
     	
     	//Vocabulary vocab = Vocabulary.load(label);
     
@@ -80,7 +85,7 @@ public class ReinforcementLearningController {
     	
     	System.err.println("loading universal action set");
     	//Setting action features to probabilities set for each object definitions actions
-    	List<Feature> actions = IterableUtils.toList(vocabulary_repo.findAllFeatures(end_vocab_name));
+    	List<Action> actions = IterableUtils.toList(action_repo.findAll());
     	/*Vocabulary action_vocab = Vocabulary.load("actions");
     	
     	for(Action action : actions){
@@ -90,7 +95,7 @@ public class ReinforcementLearningController {
     	*/
     	
     	// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 vocabulary context)
-		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), start_label);
+		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
 		Vocabulary vocab_record = vocabulary_repo.findByKey("internet");
 		
 		if(vocab_record != null){
@@ -101,7 +106,7 @@ public class ReinforcementLearningController {
 		}
 		
     	System.err.println("Predicting...");
-    	Map<Feature, Double> prediction_vector = brain.predict(features, actions, vocabulary);
+    	Map<Action, Double> prediction_vector = brain.predict(features, actions, vocabulary);
 		System.err.println("prediction found. produced vector :: "+prediction_vector.keySet().size());
 		
     	return prediction_vector;
@@ -131,13 +136,13 @@ public class ReinforcementLearningController {
     	System.err.println("object definition list size :: "+feature_list.size());
     	Map<String, Double> predicted = new HashMap<String, Double>();
     	
-    	Feature feature = new Feature(action_name, action_value);
-    	Feature feature_record = feature_repo.findByKey(feature.getKey());
-    	if(feature_record != null){
-    		feature = feature_record;
+    	Action action = new Action(action_name, action_value);
+    	Action action_record = action_repo.findByKey(action.getKey());
+    	if(action_record != null){
+    		action = action_record;
     	}
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
-	    brain.learn(feature_list, predicted, feature, isRewarded);
+	    brain.learn(feature_list, predicted, action, isRewarded);
     }
     
     @RequestMapping(value ="/train", method = RequestMethod.POST)

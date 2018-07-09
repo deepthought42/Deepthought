@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.ObjectDefinition;
 import com.qanairy.db.DataDecomposer;
 
 public class DataDecomposerTests {
@@ -28,10 +28,10 @@ public class DataDecomposerTests {
 			}
 			
 			try {
-				List<Feature> feature_list = DataDecomposer.decompose(json_obj);
+				List<ObjectDefinition> object_definition_list = DataDecomposer.decompose(json_obj);
 				
-				Map<String, Feature> map = new HashMap<String, Feature>();
-				for(Feature obj : feature_list){
+				Map<String, ObjectDefinition> map = new HashMap<String, ObjectDefinition>();
+				for(ObjectDefinition obj : object_definition_list){
 					map.put(obj.getValue(), obj);
 				}
 				

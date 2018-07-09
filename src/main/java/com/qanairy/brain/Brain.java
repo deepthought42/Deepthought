@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
@@ -43,7 +43,7 @@ public class Brain {
 	
 	public Brain(){}
 	
-	public Map<Feature, Double> predict(List<Feature> features, List<Feature> end_features, Vocabulary vocabulary){
+	public Map<Action, Double> predict(List<Feature> features, List<Action> actions, Vocabulary vocabulary){
 			
 			//Call predict method and get anticipated reward for given action against all datums
 			//	-- method needed for prediction 
@@ -63,7 +63,7 @@ public class Brain {
 			    	}
 			    }
 			    
-			    System.err.println("-----------    max computed action is ....." + end_features[maxIdx]);
+			    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
 			    return new HashMap<String, Double>();
 			}
 			else{
@@ -102,7 +102,7 @@ public class Brain {
 		memory.setEndVocabulary(end_vocab);
 		memory = memory_repo.save(memory);
 		
-		List<Feature> known_end_features = new ArrayList<Feature>();
+		List<Feature> known_actions = new ArrayList<Feature>();
 		Map<Feature, Map<String, Double>> unordered_feature_policy = new HashMap<Feature, Map<String, Double>>();
 		// 4. for each feature
 		for(Feature feature : features){
@@ -110,19 +110,19 @@ public class Brain {
 			feature = feature_repo.findByKey(feature.getKey());
 			
 			Map<String, Double> action_policy = new HashMap<String, Double>();
-			List<String> policy_end_features = new ArrayList<String>();
+			List<String> policy_actions = new ArrayList<String>();
 			List<Double> policy_weights = new ArrayList<Double>();
 			
 			// 4.1) load action weights for policy
-			List<FeatureWeight> action_weights = new ArrayList<FeatureWeight>(); //feature.getFeatureWeights();
+			List<FeatureWeight> action_weights = feature.getFeatureWeights();
 			for(FeatureWeight weight : action_weights){
 				List<String> labels = weight.getLabels();
 				double probability = weight.getWeight();
-				policy_end_features.add(weight.getEndFeature().getKey());
+				policy_actions.add(weight.getEndFeature().getKey());
 				policy_weights.add(probability);
 				action_policy.put(weight.getEndFeature().getKey(), probability);
-				if(!known_end_features.contains(weight.getEndFeature())){
-					known_end_features.add(weight.getEndFeature());
+				if(!known_actions.contains(weight.getEndFeature())){
+					known_actions.add(weight.getEndFeature());
 				}
 				System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");	
 			}
@@ -130,14 +130,14 @@ public class Brain {
 			
 			unordered_feature_policy.put(feature, action_policy);
 		}
-		System.err.println("Total known end_features :: "+known_end_features.size());
+		System.err.println("Total known actions :: "+known_actions.size());
 
 		// 5. Generate feature vector
 		Set<Feature> feature_vector = unordered_feature_policy.keySet();
 		
 		// 5.1 build ordered feature matrix
 		
-		double[][] weight_matrix = new double[feature_vector.size()][known_end_features.size()];
+		double[][] weight_matrix = new double[feature_vector.size()][known_actions.size()];
 		List<String> start_feature_keys = new ArrayList<String>();
 		List<String> end_feature_keys = new ArrayList<String>();
 		
@@ -148,16 +148,16 @@ public class Brain {
 			System.err.println("loading action policy for : "+feature.getValue());
 			int action_idx = 0;
 			
-			for(Feature end_feature : known_end_features){
-				end_feature_keys.add(end_feature.getKey());
-				System.err.println("Feature key :: "+end_feature.getKey());
+			for(Feature end_feature : known_actions){
+				end_feature_keys.add(action.getKey());
+				System.err.println("Action key :: "+action.getKey());
 				System.err.println("action_policy :: "+action_policy);
-				Double action_weight = action_policy.get(end_feature.getKey());
+				Double action_weight = action_policy.get(action.getKey());
 				if(action_weight == null){
-					System.err.println("Feature weight is null");
+					System.err.println("Action weight is null");
 					weight_matrix[feature_idx][action_idx] = 0.0;
 				}else{
-					System.err.println("Feature weight is "+action_weight);
+					System.err.println("Action weight is "+action_weight);
 
 					weight_matrix[feature_idx][action_idx] = action_weight;
 				}
@@ -170,8 +170,8 @@ public class Brain {
 		memory.setFeaturePolicy(weight_matrix);
 	
 		// 6. generate prediction using feature vector and policy matrix (1*(policies)^Transpose = Y)
-		Map<Feature, Double> prediction_map = new HashMap<Feature, Double>();
-		double[] prediction = new double[known_end_features.size()];
+		Map<Action, Double> prediction_map = new HashMap<Action, Double>();
+		double[] prediction = new double[known_actions.size()];
 		for(int i=0; i<weight_matrix[0].length; i++){
 			double action_weight = 0.0;
 			for(int j=0; j<weight_matrix.length; j++){
@@ -182,7 +182,7 @@ public class Brain {
 			prediction[i] = action_weight;
 			memory.setPrediction(prediction);
 			memory = memory_repo.save(memory);
-			prediction_map.put(known_end_features.get(i), action_weight);
+			prediction_map.put(known_actions.get(i), action_weight);
 		}
 		
 		memory.setStartFeatureKeys(start_feature_keys);
@@ -208,7 +208,7 @@ public class Brain {
 	 */
 	public void learn(List<Feature> feature_list,
 					  Map<String,Double> predicted_action_vector,
-					  Feature actual_action,
+					  Action actual_action,
 					  boolean isRewarded)
 						  throws IllegalArgumentException, IllegalAccessException, 
 							  NullPointerException, IOException{
@@ -284,14 +284,14 @@ public class Brain {
 			if(feature_record != null){
 				feature = feature_record;
 			}
-			List<FeatureWeight> end_feature_weight_list = new ArrayList<FeatureWeight>();//feature.getFeatureWeights();
-			System.err.println("action weight list size :: "+end_feature_weight_list.size());
+			List<FeatureWeight> action_weight_list = feature.getFeatureWeights();
+			System.err.println("action weight list size :: "+action_weight_list.size());
 			double last_value = 0.0;
 			System.err.println("Checking if known action...");
 			FeatureWeight known_action_weight = null;
 			boolean is_known_action = false;
-			for(FeatureWeight action_weight : end_feature_weight_list){
-				if(action_weight.getEndFeature().getKey().equals(actual_action.getKey())){
+			for(FeatureWeight action_weight : action_weight_list){
+				if(action_weight.getAction().getKey().equals(actual_action.getKey())){
 					System.err.println("Last action : "+actual_action.getKey() + " exists in action_map for object");
 					last_value = action_weight.getWeight();
 					known_action_weight = action_weight;
@@ -311,9 +311,9 @@ public class Brain {
 			
 			if(known_action_weight == null){
 				known_action_weight = new FeatureWeight();
-				known_action_weight.setEndFeature(actual_action);
-				known_action_weight.setStartFeature(feature);
-				//feature.getFeatureWeights().add(known_action_weight);
+				known_action_weight.setAction(actual_action);
+				known_action_weight.setFeature(feature);
+				feature.getFeatureWeights().add(known_action_weight);
 			}
 			known_action_weight.setWeight(q_learn_val);
 
@@ -337,7 +337,7 @@ public class Brain {
 			//Save states
 			/** Handled already in memory Registry I think...LEAVE THIS UNTIL VERIFIED ITS NOT NEEDED
 
-			if(prev_obj != null && !(prev_obj.getData() instanceof Feature)){
+			if(prev_obj != null && !(prev_obj.getData() instanceof Action)){
 				Vertex prev_vertex = persistor.find(prev_obj);
 				Vertex current_vertex = persistor.find(obj);
 				ArrayList<Integer> path_ids = new ArrayList<Integer>();
@@ -346,7 +346,7 @@ public class Brain {
 				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Component", "GOES_TO");
 				e.setProperty("path_ids", path_ids);
 			}
-			else if(prev_obj != null && prev_obj.getData() instanceof Feature){
+			else if(prev_obj != null && prev_obj.getData() instanceof Action){
 				Vertex prev_vertex = persistor.find(prev_obj);
 				Vertex current_vertex = persistor.find(obj);
 				ArrayList<Integer> path_ids = new ArrayList<Integer>();
@@ -402,7 +402,7 @@ public class Brain {
 	 * @param vocabulary
 	 * @return
 	 */
-	private List<List<Feature>> loadFeaturePolicies(List<Feature> object_list, Vocabulary vocabulary){
+	private List<List<Feature>> loadActionPolicies(List<Feature> object_list, Vocabulary vocabulary){
 		return null;
 		
 	}
@@ -417,7 +417,7 @@ public class Brain {
 	/**
 	 * 
 	 */
-	private void saveFeaturePolicies(){
+	private void saveActionPolicies(){
 		
 	}
 	
@@ -462,14 +462,14 @@ public class Brain {
 
 			//Get last action experienced in path
 			for(int idx = path.getPath().size()-1; idx >= 0 ; idx--){
-				if(path.getPath().get(idx).getData() instanceof Feature){
-					last_action = ((Feature)path.getPath().get(idx).getData()).getName();
+				if(path.getPath().get(idx).getData() instanceof Action){
+					last_action = ((Action)path.getPath().get(idx).getData()).getName();
 					break;
 				}
 			}
 			
 			//load vocabulary weights
-			VocabularyWeights vocab_weights = VocabularyWeights.load("html_end_features");
+			VocabularyWeights vocab_weights = VocabularyWeights.load("html_actions");
 			
 			//Run through object definitions and make sure that they are all included in the vocabulary
 			Random rand = new Random();
@@ -482,8 +482,8 @@ public class Brain {
 <<<<<<< HEAD
 					//this.vocab.appendToWeights(feature.getValue(), rand.nextFloat());
 					
-					//add new end_features entry to match vocab
-					ArrayList<Float> action_weights = new ArrayList<Float>(Arrays.asList(new Float[FeatureFactory.getFeatures().length]));
+					//add new actions entry to match vocab
+					ArrayList<Float> action_weights = new ArrayList<Float>(Arrays.asList(new Float[ActionFactory.getActions().length]));
 					
 					
 					//for(int weight_idx = 0 ; weight_idx < action_weights.size(); weight_idx++){
@@ -495,7 +495,7 @@ public class Brain {
 
 >>>>>>> f8550e37a7b03a9e5d435acb6d8ce040379bea09
 					//add weights to vocabulary weights;
-					for(String action : FeatureFactory.getFeatures()){
+					for(String action : ActionFactory.getActions()){
 						vocab_weights.appendToWeights(feature.getValue(), action, rand.nextFloat()); 
 					}
 					
@@ -511,13 +511,13 @@ public class Brain {
 			vocab_weights.save();
 			
 			//Create experience record and weight record
-			Boolean[][] experience_record = new Boolean[this.vocab.getValueList().size()][FeatureFactory.getFeatures().length];
-			double[][] weight_record = new double[this.vocab.getValueList().size()][FeatureFactory.getFeatures().length];
+			Boolean[][] experience_record = new Boolean[this.vocab.getValueList().size()][ActionFactory.getActions().length];
+			double[][] weight_record = new double[this.vocab.getValueList().size()][ActionFactory.getActions().length];
 			
 			for(Feature feature : featureinitionList){
 				int value_idx = this.vocab.getValueList().indexOf(feature.getValue() );
-				for(int i=0; i < FeatureFactory.getFeatures().length; i++){
-					if(FeatureFactory.getFeatures()[i].equals(last_action)){
+				for(int i=0; i < ActionFactory.getActions().length; i++){
+					if(ActionFactory.getActions()[i].equals(last_action)){
 						vocabularyExperienceRecord.set(value_idx, Boolean.TRUE);
 						experience_record[value_idx][i] = Boolean.TRUE;
 					}
@@ -526,7 +526,7 @@ public class Brain {
 					}
 					
 					//place weights into 2 dimensional array for NN computations later
-					weight_record[value_idx][i] = vocab_weights.getVocabulary_weights().get(feature.getValue()).get(FeatureFactory.getFeatures()[i]);
+					weight_record[value_idx][i] = vocab_weights.getVocabulary_weights().get(feature.getValue()).get(ActionFactory.getActions()[i]);
 				}
 			}
 			
@@ -541,13 +541,13 @@ public class Brain {
 			
 			// apply reinforcement learning
 			// based on result of crawl and predicted values, updated predicted values
-			String[] end_features = FeatureFactory.getFeatures();
-			float[] predictions = new float[end_features.length];
+			String[] actions = ActionFactory.getActions();
+			float[] predictions = new float[actions.length];
 			for(int action_index = 0; action_index < predictions.length; action_index++){
-				if(end_features[action_index].equals(last_action) && isValuable.equals(Boolean.TRUE)){
+				if(actions[action_index].equals(last_action) && isValuable.equals(Boolean.TRUE)){
 					predictions[action_index] += 1;
 				}
-				else if(end_features[action_index].equals(last_action) && isValuable.equals(Boolean.FALSE)){
+				else if(actions[action_index].equals(last_action) && isValuable.equals(Boolean.FALSE)){
 					predictions[action_index] -= 1;
 				}
 			}
@@ -567,7 +567,7 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public HashMap<String, Double> calculateFeatureProbabilities(Feature pageElement) throws IllegalArgumentException, IllegalAccessException{
+	public HashMap<String, Double> calculateActionProbabilities(Feature pageElement) throws IllegalArgumentException, IllegalAccessException{
 		/*List<Feature> definitions = DataDecomposer.decompose(pageElement);
 
 		System.err.println(getSelf().hashCode() + " -> GETTING BEST ACTION PROBABILITY...");
@@ -579,7 +579,7 @@ public class Brain {
 			
 			while(memory_iterator.hasNext()){
 				com.tinkerpop.blueprints.Vertex mem_vertex = memory_iterator.next();
-				HashMap<String, Double> action_map = mem_vertex.getProperty("end_features");
+				HashMap<String, Double> action_map = mem_vertex.getProperty("actions");
 				double probability = 0.0;
 				if(action_map != null){
 					for(String action: action_map.keySet()){
@@ -591,7 +591,7 @@ public class Brain {
 					}
 				}
 				else{
-					for(String action: FeatureFactory.getFeatures()){						
+					for(String action: ActionFactory.getActions()){						
 						cumulative_action_map.put(action, probability);
 					}
 				}
@@ -624,9 +624,9 @@ public class Brain {
 			List<com.tinkerpop.blueprints.Vertex> feature_list
 				= persistor.findAll(raw_features);
 					
-			//iterate over set to get all end_features for object definition list
+			//iterate over set to get all actions for object definition list
 			for(com.tinkerpop.blueprints.Vertex v : feature_list){
-				HashMap<String, Double> action_map = v.getProperty("end_features");
+				HashMap<String, Double> action_map = v.getProperty("actions");
 				if(action_map != null && !action_map.isEmpty()){
 					for(String action : action_map.keySet()){
 						if(!full_action_map.containsKey(action)){
