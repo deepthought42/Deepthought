@@ -1,20 +1,26 @@
 package com.qanairy.brain;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
 import com.deepthought.models.Vocabulary;
+import com.deepthought.models.repository.ActionRepository;
 import com.deepthought.models.repository.FeatureRepository;
 
 @Component
 public class FeatureVector {
 
 	@Autowired
-	private static FeatureRepository feature_repo;
+	private static FeatureRepository obj_def_repo;
+	
+	@Autowired
+	private static ActionRepository action_repo;
 	
 	public static double[][] loadPolicy(List<Feature> def_list, List<Feature> actions, HashMap<String, Integer> vocabulary_record, Vocabulary vocab){
 		double[][] vocab_policy = new double[vocabulary_record.keySet().size()][actions.size()];
@@ -22,9 +28,10 @@ public class FeatureVector {
 
 		System.err.println("concatenating action features into 2d array for vocabulary");
 		//set actions for object definition to action probabilities
+		int k = 0;
 		for(Feature def : def_list){
 			//load action policy for object definition
-			feature_repo.save(def);
+			obj_def_repo.save(def);
 			/*
 			Iterator<PolicyEdge> object_action_policy_iter = def.getPolicyEdges().iterator();
 			
@@ -37,6 +44,7 @@ public class FeatureVector {
 				}
 			}
 			*/
+			k++;
 		}
 		return vocab_policy;
 	}

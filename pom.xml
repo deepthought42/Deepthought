@@ -4,7 +4,7 @@
 
   <groupId>Qanairy</groupId>
   <artifactId>deepthought</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>deepthought</name>
@@ -12,6 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring.version>5.0.6.RELEASE</spring.version>
     <java.version>1.8</java.version>
     <springboot.version>2.0.2.RELEASE</springboot.version>
   </properties>
@@ -19,6 +20,15 @@
 	<build>
 	  	<plugins>
 	  		<plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-surefire-plugin</artifactId>
+		        <version>2.20.1</version>
+		        <configuration>
+		          <groups>Regression</groups>
+		        </configuration>
+		    </plugin>
+	      
+	  	 	<plugin>
 	            <groupId>org.apache.maven.plugins</groupId>
 	            <artifactId>maven-compiler-plugin</artifactId>
 	            <configuration>
@@ -66,12 +76,6 @@
 	    <version>${springboot.version}</version>
 	</dependency>
 	
-	<dependency>
-	  <groupId>org.springframework.boot</groupId>
-	  <artifactId>spring-boot-starter-actuator</artifactId>
-	  <version>${springboot.version}</version>
-	</dependency>
-		
 	<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
 	<dependency>
 	    <groupId>org.springframework.boot</groupId>
