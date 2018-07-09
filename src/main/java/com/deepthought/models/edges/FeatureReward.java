@@ -7,11 +7,11 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Action;
+import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 
 /**
- * A rich edge that contains the reward attributed to a given action for a memory record
+ * A rich edge that contains the reward attributed to a given feature for a memory record
  */
 @RelationshipEntity(type = "REWARDED")
 public class FeatureReward {
@@ -26,14 +26,14 @@ public class FeatureReward {
 	private MemoryRecord memory;
     
 	@EndNode   
-	private Action action;
+	private Feature feature;
     
-    public Action getAction(){
-    	return this.action;
+    public Feature getFeature(){
+    	return this.feature;
     }
     
-    public void setAction(Action action){
-    	this.action = action;
+    public void setFeature(Feature feature){
+    	this.feature = feature;
     }
     
     public double getReward(){

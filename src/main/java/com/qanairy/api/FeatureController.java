@@ -11,35 +11,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.deepthought.models.Action;
-import com.deepthought.models.repository.ActionRepository;
+import com.deepthought.models.Feature;
 import com.deepthought.models.repository.FeatureRepository;
-
 
 /**
  *	API endpoints for interacting with {@link Domain} data
  */
 @RestController
-@RequestMapping("/actions")
-public class ActionController {
+@RequestMapping("/features")
+public class FeatureController {
 	
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-	@Autowired
-	private ActionRepository action_repo;
 
 	@Autowired
 	private FeatureRepository feature_repo;
 	
 	@RequestMapping(method = RequestMethod.GET)
-    public @ResponseBody List<Action> getAll(){
-		return IterableUtils.toList(action_repo.findAll());
+    public @ResponseBody List<Feature> getAll(){
+		return IterableUtils.toList(feature_repo.findAll());
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public void createAction(@RequestParam(value="name", required=true) String name,
+	public void createFeature(@RequestParam(value="name", required=true) String name,
 							 @RequestParam(value="value", required=true) String value){
-		Action action = new Action(name, value);
-		action_repo.save(action);
+		Feature feature = new Feature(name, value);
+		feature_repo.save(feature);
 	}
+	
 }
