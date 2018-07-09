@@ -7,6 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
 import com.deepthought.models.edges.FeatureWeight;
@@ -22,12 +23,15 @@ public class Feature {
 	@GeneratedValue 
 	private Long id;
     
+	@Property
 	private String value;
+	@Property
 	private String type;
+	@Property
 	private String key;
 	
-	@Relationship(type = "HAS_ACTION")
-	private List<FeatureWeight> feature_weights = new ArrayList<FeatureWeight>();
+	//@Relationship(type = "HAS_FEATURE")
+	//private List<FeatureWeight> feature_weights = new ArrayList<FeatureWeight>();
 	
 	public Feature(){}
 	
@@ -37,17 +41,17 @@ public class Feature {
 	 * @param uid
 	 * @param value
 	 * @param type
-	 * @param actions
+	 * @param features
 	 * 
-	 * @pre actions != null
+	 * @pre features != null
 	 */
-	public Feature(String value, String type, List<FeatureWeight> actions) {
-		assert actions != null;
+	public Feature(String value, String type, List<FeatureWeight> features) {
+		assert features != null;
 		
 		this.value = value;
 		this.type = type;
 		this.key = generateKey();
-		this.feature_weights = actions;
+		//this.feature_weights = features;
 	}
 	
 	/**
@@ -61,7 +65,7 @@ public class Feature {
 		this.value = value;
 		this.type = type;
 		this.key = generateKey();
-		this.feature_weights = new ArrayList<FeatureWeight>();
+		//this.feature_weights = new ArrayList<FeatureWeight>();
 	}
 
 	public String generateKey() {
@@ -93,13 +97,13 @@ public class Feature {
 	}
 	
 	/**
-	 * Gets list of probabilities associated with actions for this object definition
+	 * Gets list of probabilities associated with features for this object definition
 	 * @return
 	 */
-	public List<FeatureWeight> getFeatureWeights(){
+	/*public List<FeatureWeight> getFeatureWeights(){
 		return this.feature_weights;
 	}
-	
+	*/
 	@Override
 	public boolean equals(Object o){
 		if (this == o) return true;
