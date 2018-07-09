@@ -17,7 +17,8 @@ import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
-import com.deepthought.models.edges.FeatureWeight;
+import com.deepthought.models.edges.ActionWeight;
+import com.deepthought.models.edges.FeaturePolicy;
 import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
@@ -97,12 +98,10 @@ public class Brain {
 		}
 		vocabulary = vocabulary_repo.save(vocabulary);
 		
-		Vocabulary end_vocab = vocabulary_repo.findByKey("action");
-		memory.setStartVocabulary(vocabulary);
-		memory.setEndVocabulary(end_vocab);
+		memory.setVocabulary(vocabulary);
 		memory = memory_repo.save(memory);
 		
-		List<Feature> known_actions = new ArrayList<Feature>();
+		List<Action> known_actions = new ArrayList<Action>();
 		Map<Feature, Map<String, Double>> unordered_feature_policy = new HashMap<Feature, Map<String, Double>>();
 		// 4. for each feature
 		for(Feature feature : features){
@@ -114,22 +113,35 @@ public class Brain {
 			List<Double> policy_weights = new ArrayList<Double>();
 			
 			// 4.1) load action weights for policy
-			List<FeatureWeight> action_weights = feature.getFeatureWeights();
-			for(FeatureWeight weight : action_weights){
+			List<ActionWeight> action_weights = feature.getActionWeights();
+			for(ActionWeight weight : action_weights){
 				List<String> labels = weight.getLabels();
 				double probability = weight.getWeight();
-				policy_actions.add(weight.getEndFeature().getKey());
+				policy_actions.add(weight.getAction().getKey());
 				policy_weights.add(probability);
-				action_policy.put(weight.getEndFeature().getKey(), probability);
-				if(!known_actions.contains(weight.getEndFeature())){
-					known_actions.add(weight.getEndFeature());
+				action_policy.put(weight.getAction().getKey(), probability);
+				if(!known_actions.contains(weight.getAction())){
+					known_actions.add(weight.getAction());
 				}
 				System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");	
+			}
+			
+			if(policy_actions.size() > 0 && policy_weights.size() > 0){
+				// 4.2) Add feature action policy to memory record
+				FeaturePolicy feature_policy = new FeaturePolicy();
+				feature_policy.setMemoryRecord(memory);
+				feature_policy.setFeature(feature);
+				feature_policy.setPolicyActions(policy_actions);
+				feature_policy.setPolicyWeights(policy_weights);
+				memory.getFeaturePolicies().add(feature_policy);
 			}
 			// 4.3) append policy to policy matrix
 			
 			unordered_feature_policy.put(feature, action_policy);
 		}
+		memory = memory_repo.save(memory);
+
+
 		System.err.println("Total known actions :: "+known_actions.size());
 
 		// 5. Generate feature vector
@@ -138,18 +150,14 @@ public class Brain {
 		// 5.1 build ordered feature matrix
 		
 		double[][] weight_matrix = new double[feature_vector.size()][known_actions.size()];
-		List<String> start_feature_keys = new ArrayList<String>();
-		List<String> end_feature_keys = new ArrayList<String>();
 		
 		int feature_idx = 0;
 		for(Feature feature : feature_vector){
-			start_feature_keys.add(feature.getKey());
 			Map<String, Double> action_policy = unordered_feature_policy.get(feature);
 			System.err.println("loading action policy for : "+feature.getValue());
 			int action_idx = 0;
 			
-			for(Feature end_feature : known_actions){
-				end_feature_keys.add(action.getKey());
+			for(Action action : known_actions){
 				System.err.println("Action key :: "+action.getKey());
 				System.err.println("action_policy :: "+action_policy);
 				Double action_weight = action_policy.get(action.getKey());
@@ -166,29 +174,24 @@ public class Brain {
 			feature_idx++;
 		}
 			
-		// 5.2) Add feature action policy to memory record
-		memory.setFeaturePolicy(weight_matrix);
-	
 		// 6. generate prediction using feature vector and policy matrix (1*(policies)^Transpose = Y)
 		Map<Action, Double> prediction_map = new HashMap<Action, Double>();
-		double[] prediction = new double[known_actions.size()];
+		
 		for(int i=0; i<weight_matrix[0].length; i++){
 			double action_weight = 0.0;
 			for(int j=0; j<weight_matrix.length; j++){
 				System.err.println("Adding to action weight :: "+ weight_matrix[j][i]);
 				action_weight += weight_matrix[j][i];
 			}
-			
-			prediction[i] = action_weight;
-			memory.setPrediction(prediction);
+			Prediction prediction = new Prediction();
+			prediction.setAction(known_actions.get(i));
+			prediction.setMemoryRecord(memory);
+			prediction.setWeight(action_weight);
+			memory.getActionPrediction().add(prediction);
 			memory = memory_repo.save(memory);
 			prediction_map.put(known_actions.get(i), action_weight);
 		}
 		
-		memory.setStartFeatureKeys(start_feature_keys);
-		memory.setEndFeatureKeys(end_feature_keys);
-
-		memory = memory_repo.save(memory);
 		//	6.1) Store predictions in memory record
 		
 		// 7. return prediction map
@@ -284,13 +287,13 @@ public class Brain {
 			if(feature_record != null){
 				feature = feature_record;
 			}
-			List<FeatureWeight> action_weight_list = feature.getFeatureWeights();
+			List<ActionWeight> action_weight_list = feature.getActionWeights();
 			System.err.println("action weight list size :: "+action_weight_list.size());
 			double last_value = 0.0;
 			System.err.println("Checking if known action...");
-			FeatureWeight known_action_weight = null;
+			ActionWeight known_action_weight = null;
 			boolean is_known_action = false;
-			for(FeatureWeight action_weight : action_weight_list){
+			for(ActionWeight action_weight : action_weight_list){
 				if(action_weight.getAction().getKey().equals(actual_action.getKey())){
 					System.err.println("Last action : "+actual_action.getKey() + " exists in action_map for object");
 					last_value = action_weight.getWeight();
@@ -310,10 +313,10 @@ public class Brain {
 			double q_learn_val = q_learn.calculate(last_value, actual_reward, estimated_reward );
 			
 			if(known_action_weight == null){
-				known_action_weight = new FeatureWeight();
+				known_action_weight = new ActionWeight();
 				known_action_weight.setAction(actual_action);
 				known_action_weight.setFeature(feature);
-				feature.getFeatureWeights().add(known_action_weight);
+				feature.getActionWeights().add(known_action_weight);
 			}
 			known_action_weight.setWeight(q_learn_val);
 
