@@ -27,7 +27,6 @@ import com.deepthought.models.Vocabulary;
 import com.deepthought.models.repository.ActionRepository;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.VocabularyRepository;
-import com.qanairy.brain.ActionFactory;
 import com.qanairy.brain.Brain;
 import com.qanairy.brain.FeatureVector;
 import com.qanairy.db.DataDecomposer;
@@ -46,7 +45,7 @@ public class ReinforcementLearningController {
 	private ActionRepository action_repo;
 
 	@Autowired
-	private FeatureRepository object_definition_repo;
+	private FeatureRepository feature_repo;
 	
 	@Autowired
 	private VocabularyRepository vocabulary_repo;
@@ -66,7 +65,7 @@ public class ReinforcementLearningController {
      * @throws MalformedURLException 
      */
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
-    public @ResponseBody Map<Action, Double> predict(@RequestBody String obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
+    public @ResponseBody Map<Action, Double> predict(@RequestParam(value="json_object", required=true) String obj, @RequestParam(value="prediction_list")  List<String> prediction_list) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
     	System.err.println("digesting Object : " +obj);
     	List<Feature> features = DataDecomposer.decompose(new JSONObject(obj));
     	System.err.println("Finished decomposing object into value list with length :: "+features.size());
@@ -75,7 +74,7 @@ public class ReinforcementLearningController {
     	//LOAD VOCABULARY
     	String label = "internet";
 
-    	List<Feature> def_list = IterableUtils.toList(object_definition_repo.findAll());
+    	List<Feature> def_list = IterableUtils.toList(feature_repo.findAll());
     	
     	//Vocabulary vocab = Vocabulary.load(label);
     
@@ -84,8 +83,21 @@ public class ReinforcementLearningController {
     	HashMap<String, Integer> vocabulary_record =  FeatureVector.load(def_list, features);
     	
     	System.err.println("loading universal action set");
+    	List<Feature> output_features = new ArrayList<Feature>();
+    	for(String name : prediction_list){
+    		Feature feature = new Feature(name, name.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+    		Feature feature_record = feature_repo.findByKey(feature.getKey());
+    		if(feature_record != null){
+    			feature = feature_record;
+    		}
+    		else{
+    			feature = feature_repo.save(feature);
+    		}
+    		
+    		output_features.add(feature);
+    	}
     	//Setting action features to probabilities set for each object definitions actions
-    	List<Action> actions = IterableUtils.toList(action_repo.findAll());
+    	
     	/*Vocabulary action_vocab = Vocabulary.load("actions");
     	
     	for(Action action : actions){
@@ -106,7 +118,7 @@ public class ReinforcementLearningController {
 		}
 		
     	System.err.println("Predicting...");
-    	Map<Action, Double> prediction_vector = brain.predict(features, actions, vocabulary);
+    	Map<Action, Double> prediction_vector = brain.predict(features, output_features, vocabulary);
 		System.err.println("prediction found. produced vector :: "+prediction_vector.keySet().size());
 		
     	return prediction_vector;

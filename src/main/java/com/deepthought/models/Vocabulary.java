@@ -19,12 +19,11 @@ public class Vocabulary{
 	@Id 
 	@GeneratedValue 
 	private Long id;
+	private String key;
+	private String label = null;
 	
 	@Relationship(type = "HAS_FEATURE")
 	private List<Feature> features = new ArrayList<Feature>();
-	private String key;
-
-	private String label = null;
 	
 	public Vocabulary(){}
 	

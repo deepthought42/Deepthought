@@ -25,7 +25,7 @@ public class FeaturePolicy {
 	private Long relationshipId;
     
 	@Property
-	private List<String> policy_actions = new ArrayList<String>();
+	private List<String> policy_features = new ArrayList<String>();
 	
 	@Property
 	private List<Double> policy_weights = new ArrayList<Double>();
@@ -46,7 +46,7 @@ public class FeaturePolicy {
   
     
     public List<String> getPolicyFeatures(){
-    	return this.policy_actions;
+    	return this.policy_features;
     }
     
     public void setPolicyFeatures(List<String> policy_features){

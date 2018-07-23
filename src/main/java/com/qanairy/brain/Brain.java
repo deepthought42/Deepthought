@@ -44,7 +44,7 @@ public class Brain {
 	
 	public Brain(){}
 	
-	public Map<Action, Double> predict(List<Feature> features, List<Action> actions, Vocabulary vocabulary){
+	public Map<Action, Double> predict(List<Feature> features, List<Feature> result_features, Vocabulary vocabulary){
 			
 			//Call predict method and get anticipated reward for given action against all datums
 			//	-- method needed for prediction 
@@ -84,24 +84,66 @@ public class Brain {
 		// 3. if any features are not in vocabulary add them to the vocabulary
 		for(Feature feature : features){
 			boolean feature_already_exists = false;
-			for(Feature vocab_feature : vocabulary.getFeatures()){
-				if(vocab_feature.equals(feature)){
-					feature_already_exists = true;
-					break;
+			System.err.println("Vocabulary features size :: "+vocabulary.getFeatures().size());
+			if(vocabulary.getFeatures().isEmpty()){
+				System.err.println("vocab features is empty");
+			}
+			else{
+				for(Feature vocab_feature : vocabulary.getFeatures()){
+					System.err.println("Feature :: "+feature);
+					System.err.println("Vocab feature :: "+vocab_feature);
+					if(vocab_feature.equals(feature)){
+						feature_already_exists = true;
+						break;
+					}
 				}
 			}
 			
 			if(!feature_already_exists){
-				feature = feature_repo.findByKey(feature.getKey());
+				Feature feature_record = feature_repo.findByKey(feature.getKey());
+				if(feature_record != null){
+					feature = feature_record;
+				}
+				else{
+					feature = feature_repo.save(feature);
+				}
 				vocabulary.getFeatures().add(feature);
 			}
 		}
 		vocabulary = vocabulary_repo.save(vocabulary);
 		
-		memory.setVocabulary(vocabulary);
+		// 3.1. if any result features are not in vocabulary add them to the vocabulary
+		for(Feature feature : result_features){
+			boolean feature_already_exists = false;
+			for(Feature vocab_feature : vocabulary.getFeatures()){
+				if(vocabulary.getFeatures().isEmpty()){
+					System.err.println("vocab features is empty");
+				}
+				else{
+					if(vocab_feature.equals(feature)){
+						feature_already_exists = true;
+						break;
+					}
+				}
+			}
+			
+			if(!feature_already_exists){
+				Feature feature_record = feature_repo.findByKey(feature.getKey());
+				if(feature_record != null){
+					feature = feature_record;
+				}
+				else{
+					feature = feature_repo.save(feature);
+				}
+				vocabulary.getFeatures().add(feature);
+			}
+		}
+		vocabulary = vocabulary_repo.save(vocabulary);
+		
+		memory.setStartVocabulary(vocabulary);
 		memory = memory_repo.save(memory);
 		
-		List<Action> known_actions = new ArrayList<Action>();
+		List<Feature> result_feature = new ArrayList<Feature>();
 		Map<Feature, Map<String, Double>> unordered_feature_policy = new HashMap<Feature, Map<String, Double>>();
 		// 4. for each feature
 		for(Feature feature : features){
@@ -120,10 +162,10 @@ public class Brain {
 				policy_actions.add(weight.getAction().getKey());
 				policy_weights.add(probability);
 				action_policy.put(weight.getAction().getKey(), probability);
-				if(!known_actions.contains(weight.getAction())){
-					known_actions.add(weight.getAction());
+				if(!result_feature.contains(weight.getAction())){
+					result_feature.add(weight.getAction());
 				}
-				System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");	
+				System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");
 			}
 			
 			if(policy_actions.size() > 0 && policy_weights.size() > 0){
@@ -131,7 +173,7 @@ public class Brain {
 				FeaturePolicy feature_policy = new FeaturePolicy();
 				feature_policy.setMemoryRecord(memory);
 				feature_policy.setFeature(feature);
-				feature_policy.setPolicyActions(policy_actions);
+				feature_policy.setPolicyFeatures(policy_actions);
 				feature_policy.setPolicyWeights(policy_weights);
 				memory.getFeaturePolicies().add(feature_policy);
 			}
