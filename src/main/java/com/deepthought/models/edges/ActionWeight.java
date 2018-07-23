@@ -29,17 +29,17 @@ public class ActionWeight {
 	private Feature feature;
     
 	@EndNode   
-	private Action action;
+	private Feature end_feature;
 
 	@Property
 	private List<String> labels = new ArrayList<String>();
     
-    public Action getAction(){
-    	return this.action;
+    public Feature getEndFeature(){
+    	return this.end_feature;
     }
     
-    public void setAction(Action action){
-    	this.action = action;
+    public void setEndFeature(Feature feature){
+    	this.end_feature = feature;
     }
     
     public double getWeight(){

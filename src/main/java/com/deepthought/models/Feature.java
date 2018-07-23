@@ -53,7 +53,6 @@ public class Feature {
 	/**
 	 * 
 	 * 
-	 * @param uid
 	 * @param value
 	 * @param type
 	 */

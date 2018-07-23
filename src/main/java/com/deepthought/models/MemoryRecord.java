@@ -1,8 +1,6 @@
 package com.deepthought.models;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -29,7 +27,10 @@ public class MemoryRecord {
 	private String key;
 
 	@Relationship(type = "HAS_VOCABULARY")
-	private Vocabulary vocabulary;
+	private Vocabulary start_vocabulary;
+	
+	@Relationship(type = "HAS_VOCABULARY")
+	private Vocabulary end_vocabulary;
 	
 	@Relationship(type = "REWARDED")
 	private ActionReward rewarded_action;
@@ -40,12 +41,12 @@ public class MemoryRecord {
 	@Relationship(type = "PREDICTION")
 	private Set<Prediction> action_prediction = new HashSet<Prediction>();
 	
-	public Vocabulary getVocabulary(){
-		return this.vocabulary;
+	public Vocabulary getStartVocabulary(){
+		return this.start_vocabulary;
 	}
 	
-	public void setVocabulary(Vocabulary vocab){
-		this.vocabulary = vocab;
+	public void setStartVocabulary(Vocabulary vocab){
+		this.start_vocabulary = vocab;
 	}
 	
 	public String getKey() {
