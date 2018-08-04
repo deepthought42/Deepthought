@@ -10,11 +10,11 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Action;
+import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 
 /**
- * 
+ * Encapsulates data for a predicted weight for a result feature in connection with a {@link MemoryRecord}
  */
 @RelationshipEntity(type = "PREDICTION")
 public class Prediction {
@@ -29,17 +29,17 @@ public class Prediction {
 	private MemoryRecord memory;
     
 	@EndNode   
-	private Action action;
+	private Feature result_feature;
 
 	@Property
 	private List<String> labels = new ArrayList<String>();
     
-    public Action getAction(){
-    	return this.action;
+    public Feature getEndFeature(){
+    	return this.result_feature;
     }
     
-    public void setAction(Action action){
-    	this.action = action;
+    public void setEndFeature(Feature result_feature){
+    	this.result_feature = result_feature;
     }
     
     public double getWeight(){

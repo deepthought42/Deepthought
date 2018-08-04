@@ -19,8 +19,7 @@ public class Vocabulary{
 	@Id 
 	@GeneratedValue 
 	private Long id;
-	private String key;
-	private String label = null;
+	private String label;
 	
 	@Relationship(type = "HAS_FEATURE")
 	private List<Feature> features = new ArrayList<Feature>();
@@ -34,7 +33,6 @@ public class Vocabulary{
 	 */
 	public Vocabulary(String listLabel) {
 		setLabel(listLabel);
-		this.setKey(label);
 	}
 	
 	/**
@@ -45,8 +43,6 @@ public class Vocabulary{
 	public Vocabulary(List<Feature> features, String label) {
 		setLabel(label);
 		setFeatures(features);
-		this.setKey(label);
-
 	}
 
 	/**
@@ -77,13 +73,5 @@ public class Vocabulary{
 	
 	public List<Feature> getFeatures() {
 		return this.features;
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
 	}
 }

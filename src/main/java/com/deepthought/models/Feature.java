@@ -3,13 +3,12 @@ package com.deepthought.models;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.models.edges.ActionWeight;
+import com.deepthought.models.edges.FeatureWeight;
 
 
 /**
@@ -23,11 +22,9 @@ public class Feature {
 	private Long id;
     
 	private String value;
-	private String type;
-	private String key;
 	
-	@Relationship(type = "HAS_ACTION")
-	private List<ActionWeight> action_weights = new ArrayList<ActionWeight>();
+	@Relationship(type = "HAS_RELATED_FEATURE")
+	private List<FeatureWeight> feature_weights = new ArrayList<FeatureWeight>();
 	
 	public Feature(){}
 	
@@ -37,17 +34,15 @@ public class Feature {
 	 * @param uid
 	 * @param value
 	 * @param type
-	 * @param actions
+	 * @param features
 	 * 
-	 * @pre actions != null
+	 * @pre features != null
 	 */
-	public Feature(String value, String type, List<ActionWeight> actions) {
-		assert actions != null;
+	public Feature(String value, List<FeatureWeight> features) {
+		assert features != null;
 		
 		this.value = value;
-		this.type = type;
-		this.key = generateKey();
-		this.action_weights = actions;
+		this.feature_weights = features;
 	}
 	
 	/**
@@ -56,29 +51,11 @@ public class Feature {
 	 * @param value
 	 * @param type
 	 */
-	public Feature(String value, String type) {
+	public Feature(String value) {
 		this.value = value;
-		this.type = type;
-		this.key = generateKey();
-		this.action_weights = new ArrayList<ActionWeight>();
+		this.feature_weights = new ArrayList<FeatureWeight>();
 	}
 
-	public String generateKey() {
-		return DigestUtils.sha256Hex(getValue()+":"+getType());
-	}
-
-	public String getType() {
-		return type;
-	}
-	
-	public String getKey(){
-		return this.key;
-	}
-	
-	public void setKey(String key){
-		this.key = key;
-	}
-	
 	public String getValue(){
 		return this.value;
 	}
@@ -92,11 +69,11 @@ public class Feature {
 	}
 	
 	/**
-	 * Gets list of probabilities associated with actions for this object definition
+	 * Gets list of probabilities associated with features for this object definition
 	 * @return
 	 */
-	public List<ActionWeight> getActionWeights(){
-		return this.action_weights;
+	public List<FeatureWeight> getFeatureWeights(){
+		return this.feature_weights;
 	}
 	
 	@Override
@@ -105,7 +82,7 @@ public class Feature {
         if (!(o instanceof Feature)) return false;
         
         Feature that = (Feature)o;
-        if(this.getKey().equals(that.getKey())){
+        if(this.getValue().equals(that.getValue())){
         	return true;
         }
         return false;

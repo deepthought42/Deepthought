@@ -9,5 +9,4 @@ import com.deepthought.models.MemoryRecord;
  * 
  */
 public interface MemoryRecordRepository extends Neo4jRepository<MemoryRecord, Long> {
-	MemoryRecord findByKey(@Param("key") String key);
 }

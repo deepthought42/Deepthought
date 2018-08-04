@@ -1,17 +1,13 @@
 package com.deepthought.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Date;
+import java.util.List;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
-
-import com.deepthought.models.edges.ActionReward;
-import com.deepthought.models.edges.FeaturePolicy;
-import com.deepthought.models.edges.Prediction;
 
 /**
  * 
@@ -24,60 +20,92 @@ public class MemoryRecord {
 	private Long id;
 	
 	@Property
-	private String key;
+	private Date date;
 
 	@Relationship(type = "HAS_VOCABULARY")
-	private Vocabulary start_vocabulary;
+	private Vocabulary input_vocabulary;
 	
 	@Relationship(type = "HAS_VOCABULARY")
-	private Vocabulary end_vocabulary;
+	private Vocabulary output_vocabulary;
 	
 	@Relationship(type = "REWARDED")
-	private ActionReward rewarded_action;
+	private Feature rewarded_feature;
 	
-	@Relationship(type = "FEATURE_POLICY")
-	private Set<FeaturePolicy> feature_policies = new HashSet<FeaturePolicy>();
+	private List<String> input_feature_keys;
+	private List<String> output_feature_keys;
 	
-	@Relationship(type = "PREDICTION")
-	private Set<Prediction> action_prediction = new HashSet<Prediction>();
+	private double[][] policy_matrix;
+	private double[] prediction;
 	
-	public Vocabulary getStartVocabulary(){
-		return this.start_vocabulary;
-	}
-	
-	public void setStartVocabulary(Vocabulary vocab){
-		this.start_vocabulary = vocab;
+	public MemoryRecord(){
+		setDate(new Date());
 	}
 	
-	public String getKey() {
-		return key;
+	public Vocabulary getInputVocabulary(){
+		return this.input_vocabulary;
+	}
+	
+	public void setInputVocabulary(Vocabulary vocab){
+		this.input_vocabulary = vocab;
+	}
+	
+	public Vocabulary getOutputVocabulary(){
+		return this.output_vocabulary;
+	}
+	
+	public void setOutputVocabulary(Vocabulary vocab){
+		this.output_vocabulary = vocab;
+	}
+	
+	public Long getID() {
+		return id;
+	}
+	
+	public Date getDate() {
+		return date;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
-	public ActionReward getRewardedAction() {
-		return rewarded_action;
+	public Feature getRewardedFeature() {
+		return rewarded_feature;
 	}
 
-	public void setRewardedAction(ActionReward rewarded_action) {
-		this.rewarded_action = rewarded_action;
+	public void setRewardedFeature(Feature rewarded_feature) {
+		this.rewarded_feature = rewarded_feature;
 	}
 
-	public Set<FeaturePolicy> getFeaturePolicies() {
-		return feature_policies;
+	public double[] getPrediction() {
+		return prediction;
 	}
 
-	public void setFeaturePolicies(Set<FeaturePolicy> feature_policies) {
-		this.feature_policies = feature_policies;
+	public void setPrediction(double[] prediction) {
+		this.prediction = prediction;
 	}
 
-	public Set<Prediction> getActionPrediction() {
-		return action_prediction;
+	public List<String> getInputFeatureValues() {
+		return input_feature_keys;
 	}
 
-	public void setActionPrediction(Set<Prediction> action_prediction) {
-		this.action_prediction = action_prediction;
+	public void setInputFeatureValues(List<String> input_feature_keys) {
+		this.input_feature_keys = input_feature_keys;
+	}
+
+	public List<String> getOutputFeatureKeys() {
+		return output_feature_keys;
+	}
+
+	public void setOutputFeatureKeys(List<String> output_feature_keys) {
+		this.output_feature_keys = output_feature_keys;
+	}
+
+	public double[][] getPolicyMatrix() {
+		return policy_matrix;
+	}
+
+	public void setPolicyMatrix(double[][] policy_matrix) {
+		this.policy_matrix = policy_matrix;
 	}
 }

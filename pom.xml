@@ -90,6 +90,11 @@
 	    <artifactId>json</artifactId>
 	    <version>20180130</version>
 	</dependency>
-
+	<!-- https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp -->
+	<dependency>
+	    <groupId>edu.stanford.nlp</groupId>
+	    <artifactId>stanford-corenlp</artifactId>
+	    <version>3.9.1</version>
+	</dependency>
   </dependencies>
 </project>

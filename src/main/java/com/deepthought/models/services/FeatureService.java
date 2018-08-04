@@ -13,12 +13,7 @@ public class FeatureService {
     private FeatureRepository featureRepository;
 
     @Transactional(readOnly = true)
-    public Feature findByName(String name) {
-        return featureRepository.findByKey(name);
-    }
-
-    @Transactional(readOnly = true)
-    public Feature findByKey(String title) {
-        return featureRepository.findByKey(title);
+    public Feature findByValue(String value) {
+        return featureRepository.findByValue(value);
     }
 }

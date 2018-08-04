@@ -10,17 +10,16 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
 
 /**
  * 
  */
-@RelationshipEntity(type = "HAS_ACTION")
-public class ActionWeight {
+@RelationshipEntity(type = "HAS_RELATED_FEATURE")
+public class FeatureWeight {
 	@Id 
 	@GeneratedValue   
-	private Long relationshipId;
+	private Long id;
     
 	@Property  
     private double weight;
@@ -34,6 +33,10 @@ public class ActionWeight {
 	@Property
 	private List<String> labels = new ArrayList<String>();
     
+	public long getId(){
+		return this.id;
+	}
+	
     public Feature getEndFeature(){
     	return this.end_feature;
     }

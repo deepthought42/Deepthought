@@ -63,7 +63,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new Feature(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+		        		objDef = new Feature(stringVal.toString());
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -85,7 +85,7 @@ public class DataDecomposer {
 		        	String[] words = value.toString().split("\\s+");
 		        	System.err.println("parsing string .....");
 		        	for(String word : words){
-		        		objDef = new Feature(word, key);
+		        		objDef = new Feature(word);
 		        		objDefList.add(objDef);
 		        	}		        	
 		        }
@@ -108,14 +108,13 @@ public class DataDecomposer {
 	 */
 	public static List<Feature> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
 		List<Feature> objDefList = new ArrayList<Feature>();
-		JSONObject jsonObject = new JSONObject();
     	System.err.println("Creating object definition for String");
     	String[] words = value.toString().split("\\s+");
     	System.err.println("VALUE :: " +value.toString());
     	System.err.println("words :: "+words.length);
     	for(String word : words){
     		System.err.println("word :: "+word);
-    		Feature objDef = new Feature(word, "");
+    		Feature objDef = new Feature(word);
     		objDefList.add(objDef);
     	}
 	        	
@@ -165,7 +164,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new Feature(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+		        		objDef = new Feature(stringVal.toString());
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -183,7 +182,7 @@ public class DataDecomposer {
 		        	System.err.println("words :: "+words.length);
 		        	for(String word : words){
 		        		System.err.println("word :: "+word);
-		        		objDef = new Feature(word, "");
+		        		objDef = new Feature(word);
 		        		objDefList.add(objDef);
 		        	}
 		        	
@@ -232,7 +231,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new Feature(stringVal.toString(), stringVal.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+		        		objDef = new Feature(stringVal.toString());
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -248,7 +247,7 @@ public class DataDecomposer {
 		        	String[] words = value.toString().split("\\s+");
 
 		        	for(String word : words){
-		        		objDef = new Feature(word, "");
+		        		objDef = new Feature(word);
 		        		objDefList.add(objDef);
 		        	}
 		        }
