@@ -4,26 +4,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
-import com.deepthought.models.edges.ActionWeight;
-import com.deepthought.models.edges.FeaturePolicy;
-import com.deepthought.models.edges.Prediction;
+import com.deepthought.models.edges.FeatureWeight;
 import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.models.repository.FeatureWeightRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
-import com.deepthought.models.repository.VocabularyRepository;
 
+import edu.stanford.nlp.util.ArrayUtils;
 
 /**
  * Provides ability to predict and learn from data
@@ -37,209 +34,26 @@ public class Brain {
 	private FeatureRepository feature_repo;
 	
 	@Autowired
-	private MemoryRecordRepository memory_repo;
+	private FeatureWeightRepository feature_weight_repo;
 	
 	@Autowired
-	private VocabularyRepository vocabulary_repo;
+	private MemoryRecordRepository memory_repo;
 	
 	public Brain(){}
 	
-	public Map<Action, Double> predict(List<Feature> features, List<Feature> result_features, Vocabulary vocabulary){
+	public double[] predict(double[][] policy){
 			
-			//Call predict method and get anticipated reward for given action against all datums
-			//	-- method needed for prediction 
-			//START PREDICT METHOD
-				
-			//Flip a coin to determine whether we should exploit/optimize or explore
-			/*double coin = rand.nextDouble();
-			if(coin > .5){
-				//Get Best action_weight prediction
-				double max = -1.0;
-				int maxIdx = 0;
-			    for(int j = 0; j < action_weights.size(); j++){
-			    	if(action_weights.get(j) > max){
-			    		System.err.println("MAX WEIGHT FOR NOW :: "+max);
-			    		max=action_weights.get(j);
-			    		maxIdx = j;
-			    	}
-			    }
-			    
-			    System.err.println("-----------    max computed action is ....." + actions[maxIdx]);
-			    return new HashMap<String, Double>();
-			}
-			else{
-				System.err.println("Coin was flipped and exploration was chosen. OH MY GOD I HAVE NO IDEA WHAT TO DO!");
-				return new HashMap<String, Double>();
-			}*/
-		
-
-		
-		
-		
-		// 1. Create a memory record for prediction
-		MemoryRecord memory = new MemoryRecord();
-		
-		// 2. add vocabulary to memory record
-		
-		// 3. if any features are not in vocabulary add them to the vocabulary
-		for(Feature feature : features){
-			boolean feature_already_exists = false;
-			System.err.println("Vocabulary features size :: "+vocabulary.getFeatures().size());
-			if(vocabulary.getFeatures().isEmpty()){
-				System.err.println("vocab features is empty");
-			}
-			else{
-				for(Feature vocab_feature : vocabulary.getFeatures()){
-					System.err.println("Feature :: "+feature);
-					System.err.println("Vocab feature :: "+vocab_feature);
-					if(vocab_feature.equals(feature)){
-						feature_already_exists = true;
-						break;
-					}
-				}
+		double[] prediction = new double[policy[0].length];
+		for(int idx1 = 0; idx1 < policy[0].length; idx1++){
+			double sum = 0.0;
+			for(int idx2 = 0; idx2 < policy.length; idx2++){
+				sum += policy[idx2][idx1];
 			}
 			
-			if(!feature_already_exists){
-				Feature feature_record = feature_repo.findByKey(feature.getKey());
-				if(feature_record != null){
-					feature = feature_record;
-				}
-				else{
-					feature = feature_repo.save(feature);
-				}
-				vocabulary.getFeatures().add(feature);
-			}
+			prediction[idx1] = sum;
 		}
-		vocabulary = vocabulary_repo.save(vocabulary);
-		
-		// 3.1. if any result features are not in vocabulary add them to the vocabulary
-		for(Feature feature : result_features){
-			boolean feature_already_exists = false;
-			for(Feature vocab_feature : vocabulary.getFeatures()){
-				if(vocabulary.getFeatures().isEmpty()){
-					System.err.println("vocab features is empty");
-				}
-				else{
-					if(vocab_feature.equals(feature)){
-						feature_already_exists = true;
-						break;
-					}
-				}
-			}
-			
-			if(!feature_already_exists){
-				Feature feature_record = feature_repo.findByKey(feature.getKey());
-				if(feature_record != null){
-					feature = feature_record;
-				}
-				else{
-					feature = feature_repo.save(feature);
-				}
-				vocabulary.getFeatures().add(feature);
-			}
-		}
-		vocabulary = vocabulary_repo.save(vocabulary);
-		
-		memory.setStartVocabulary(vocabulary);
-		memory = memory_repo.save(memory);
-		
-		List<Feature> result_feature = new ArrayList<Feature>();
-		Map<Feature, Map<String, Double>> unordered_feature_policy = new HashMap<Feature, Map<String, Double>>();
-		// 4. for each feature
-		for(Feature feature : features){
-			System.err.println("Feature iteration :: "+feature);
-			feature = feature_repo.findByKey(feature.getKey());
-			
-			Map<String, Double> action_policy = new HashMap<String, Double>();
-			List<String> policy_actions = new ArrayList<String>();
-			List<Double> policy_weights = new ArrayList<Double>();
-			
-			// 4.1) load action weights for policy
-			List<ActionWeight> action_weights = feature.getActionWeights();
-			for(ActionWeight weight : action_weights){
-				List<String> labels = weight.getLabels();
-				double probability = weight.getWeight();
-				policy_actions.add(weight.getAction().getKey());
-				policy_weights.add(probability);
-				action_policy.put(weight.getAction().getKey(), probability);
-				if(!result_feature.contains(weight.getAction())){
-					result_feature.add(weight.getAction());
-				}
-				System.err.println("Label :: "+labels.size() + " ; P() :: " + probability + "%");
-			}
-			
-			if(policy_actions.size() > 0 && policy_weights.size() > 0){
-				// 4.2) Add feature action policy to memory record
-				FeaturePolicy feature_policy = new FeaturePolicy();
-				feature_policy.setMemoryRecord(memory);
-				feature_policy.setFeature(feature);
-				feature_policy.setPolicyFeatures(policy_actions);
-				feature_policy.setPolicyWeights(policy_weights);
-				memory.getFeaturePolicies().add(feature_policy);
-			}
-			// 4.3) append policy to policy matrix
-			
-			unordered_feature_policy.put(feature, action_policy);
-		}
-		memory = memory_repo.save(memory);
-
-
-		System.err.println("Total known actions :: "+known_actions.size());
-
-		// 5. Generate feature vector
-		Set<Feature> feature_vector = unordered_feature_policy.keySet();
-		
-		// 5.1 build ordered feature matrix
-		
-		double[][] weight_matrix = new double[feature_vector.size()][known_actions.size()];
-		
-		int feature_idx = 0;
-		for(Feature feature : feature_vector){
-			Map<String, Double> action_policy = unordered_feature_policy.get(feature);
-			System.err.println("loading action policy for : "+feature.getValue());
-			int action_idx = 0;
-			
-			for(Action action : known_actions){
-				System.err.println("Action key :: "+action.getKey());
-				System.err.println("action_policy :: "+action_policy);
-				Double action_weight = action_policy.get(action.getKey());
-				if(action_weight == null){
-					System.err.println("Action weight is null");
-					weight_matrix[feature_idx][action_idx] = 0.0;
-				}else{
-					System.err.println("Action weight is "+action_weight);
-
-					weight_matrix[feature_idx][action_idx] = action_weight;
-				}
-				action_idx++;
-			}
-			feature_idx++;
-		}
-			
-		// 6. generate prediction using feature vector and policy matrix (1*(policies)^Transpose = Y)
-		Map<Action, Double> prediction_map = new HashMap<Action, Double>();
-		
-		for(int i=0; i<weight_matrix[0].length; i++){
-			double action_weight = 0.0;
-			for(int j=0; j<weight_matrix.length; j++){
-				System.err.println("Adding to action weight :: "+ weight_matrix[j][i]);
-				action_weight += weight_matrix[j][i];
-			}
-			Prediction prediction = new Prediction();
-			prediction.setAction(known_actions.get(i));
-			prediction.setMemoryRecord(memory);
-			prediction.setWeight(action_weight);
-			memory.getActionPrediction().add(prediction);
-			memory = memory_repo.save(memory);
-			prediction_map.put(known_actions.get(i), action_weight);
-		}
-		
-		//	6.1) Store predictions in memory record
-		
-		// 7. return prediction map
-		
-		
-		return prediction_map;
+		prediction = ArrayUtils.normalize(prediction);
+		return prediction;
 	}
 		
 	/**
@@ -251,42 +65,49 @@ public class Brain {
 	 * @throws NullPointerException
 	 * @throws IOException 
 	 */
-	public void learn(List<Feature> feature_list,
-					  Map<String,Double> predicted_action_vector,
-					  Action actual_action,
+	public void learn(long memory_id,
+					  Feature actual_feature,
 					  boolean isRewarded)
 						  throws IllegalArgumentException, IllegalAccessException, 
 							  NullPointerException, IOException{
 		//REINFORCEMENT LEARNING
 		System.err.println( " Initiating learning");
 		
-		//learning model
-		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
-		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
-
-		System.err.println("object definition list size :: "+feature_list.size());
-		// 2. create record based on vocabulary
-		for(Feature feature : feature_list){
-			vocabulary.appendToVocabulary(feature);
-		}
-		
-		System.err.println("vocabulary :: "+vocabulary);
-		System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
-		// 2. create state vertex from vocabulary 
-		int idx = 0;
-		for(Feature vocab_feature : vocabulary.getFeatures()){
-			boolean[] state = new boolean[vocabulary.getFeatures().size()];
-			if(feature_list.contains(vocab_feature)){
-				state[idx] = true;
-			}
-			else{
-				state[idx] = false;
-			}
-			idx++;
-		}
+		//Load memory from database
+		Optional<MemoryRecord> memory_record = memory_repo.findById(memory_id);
 		
 		// 2a. load known action policies/probabilities for each object definition in the definition list
+		MemoryRecord memory = memory_record.get();
+		
+		// 3. determine reward/regret score based on productivity status
+		//Q-LEARNING VARIABLES
+		final double learning_rate = .08;
+		final double discount_factor = .08;
 
+		//set estimated reward using prediction from memory.
+		// if actual feature is the most likely feature then set to 1
+		int pred_idx = 0;
+		double largest_pred = 0.0;
+		String most_likely_feature_value = "";
+		for(String prediction_feature_value: memory.getOutputFeatureKeys()){
+			if(prediction_feature_value.equals(actual_feature.getValue())){
+				if(largest_pred < memory.getPrediction()[pred_idx]){
+					largest_pred = memory.getPrediction()[pred_idx];
+					most_likely_feature_value = prediction_feature_value;
+				}
+			}
+			pred_idx++;
+		}
+		
+		double estimated_reward = 0.0;
+		
+		if(most_likely_feature_value.equals(actual_feature.getValue())){
+			estimated_reward = 1.0;
+		}
+		else{
+			estimated_reward = -1.0;
+		}
+		
 		// 3. determine reward/regret score based on productivity status
 		double actual_reward = 0.0;
 		
@@ -299,113 +120,45 @@ public class Brain {
 			actual_reward = -1.0;
 		}
 		
-		System.err.println("Set award :: "+actual_reward);
 		
-		// 4. apply reward/regret to predicted_action_vector
-		// 5. perform backpropagation through network supporting result
 		
-		System.err.println("Setting up for q-learning");
-		//Q-LEARNING VARIABLES
-		final double learning_rate = .08;
-		final double discount_factor = .08;
-		
-		//machine learning algorithm should produce this value
-		double estimated_reward = 1.0;
+		System.err.println("Set reward :: "+actual_reward);
 		
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
 		
-		System.err.println("doing stuff with object definition list "+feature_list.size());
-		//Reinforce probabilities for the component objects of this element
-		for(Feature feature : feature_list){
-			System.err.println("Object defintion to be updated ..."+feature.getValue());
-			//NEED TO LOOK UP OBJECT DEFINITION IN MEMORY, IF IT EXISTS, THEN IT SHOULD BE LOADED AND USED, 
-			//IF NOT THEN IT SHOULD BE CREATED, POPULATED, AND SAVED
-			String key = feature.generateKey();
-			System.err.println("Object definition key :: "+key);
-			System.err.println("REPO :: "+feature_repo);
-			Feature feature_record = feature_repo.findByKey(key);
-			
-			System.err.println("object def retrieved :: "+feature_record);
-			if(feature_record != null){
-				feature = feature_record;
+		for(String input_key : memory.getInputFeatureValues()){
+			for(String output_key : memory.getOutputFeatureKeys()){
+				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
+				System.err.println("features size :: "+features.size());
+				System.err.println("feature weights size :: "+features.get(0).getFeatureWeights().size());
+				FeatureWeight feature_weight = features.get(0).getFeatureWeights().get(0);
+				double q_learn_val = q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward );
+				//updated feature weight with q_learn_val
+				feature_weight.setWeight(q_learn_val);
+				
+				System.err.println(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_feature.getValue()+"...Q LEARN VAL : "+q_learn_val);
+				System.err.println("feature weight :: "+feature_weight.getWeight());
+				
+				feature_weight_repo.save(feature_weight);
+				
+				/*
+				System.err.println("Object definition :: "+actual_feature);
+				System.err.println("Object definition value :: "+actual_feature.getValue());
+				
+				feature_repo.save(actual_feature);
+				*/
 			}
-			List<ActionWeight> action_weight_list = feature.getActionWeights();
-			System.err.println("action weight list size :: "+action_weight_list.size());
-			double last_value = 0.0;
-			System.err.println("Checking if known action...");
-			ActionWeight known_action_weight = null;
-			boolean is_known_action = false;
-			for(ActionWeight action_weight : action_weight_list){
-				if(action_weight.getAction().getKey().equals(actual_action.getKey())){
-					System.err.println("Last action : "+actual_action.getKey() + " exists in action_map for object");
-					last_value = action_weight.getWeight();
-					known_action_weight = action_weight;
-					is_known_action = true;
-				}
-			}
-			
-			System.err.println("last reward : "+last_value);
-			System.err.println("actual_reward : "+actual_reward);
-			System.err.println("estimated_reward : "+estimated_reward);
-			
-			if(!is_known_action){
-				Random rand = new Random();
-				last_value = rand.nextFloat();
-			}
-			double q_learn_val = q_learn.calculate(last_value, actual_reward, estimated_reward );
-			
-			if(known_action_weight == null){
-				known_action_weight = new ActionWeight();
-				known_action_weight.setAction(actual_action);
-				known_action_weight.setFeature(feature);
-				feature.getActionWeights().add(known_action_weight);
-			}
-			known_action_weight.setWeight(q_learn_val);
-
-			System.err.println(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_action+"...Q LEARN VAL : "+q_learn_val);
-
-			System.err.println("Object definition :: "+feature);
-			System.err.println("Object definition key :: "+feature.getKey());
-			System.err.println("Object definition value :: "+feature.getValue());
-			feature_repo.save(feature);
 		}
 		
+		
+		
+				
 		
 		//Learning process
 		//	1. identify vocabulary that this set of object info belongs to
 		//  2. Create record based on vocabulary
 		//  3. load known vocabulary action policies
 		//  4. perform matrix math to inline update vocabulary policies for record based on reward/penalty for productivity  
-		//  5. 
-		//  6. 
-	
-			//Save states
-			/** Handled already in memory Registry I think...LEAVE THIS UNTIL VERIFIED ITS NOT NEEDED
-
-			if(prev_obj != null && !(prev_obj.getData() instanceof Action)){
-				Vertex prev_vertex = persistor.find(prev_obj);
-				Vertex current_vertex = persistor.find(obj);
-				ArrayList<Integer> path_ids = new ArrayList<Integer>();
-				path_ids.add(path.hashCode());
-				System.err.println("Adding GOES_TO transition");
-				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Component", "GOES_TO");
-				e.setProperty("path_ids", path_ids);
-			}
-			else if(prev_obj != null && prev_obj.getData() instanceof Action){
-				Vertex prev_vertex = persistor.find(prev_obj);
-				Vertex current_vertex = persistor.find(obj);
-				ArrayList<Integer> path_ids = new ArrayList<Integer>();
-				path_ids.add(path.hashCode());
-				System.err.println("Adding GOES_TO transition");
-				Edge e = persistor.addEdge(prev_vertex, current_vertex, "Transition", "GOES_TO");
-				e.setProperty("path_ids", path_ids);
-			}
-			
-			
-			
-			System.err.println("SAVING NOW...");
-			persistor.save();
-			*/
 	}
 	
 	/**
@@ -468,15 +221,12 @@ public class Brain {
 	
 	@Deprecated
 	public static synchronized void registerPath(Object path){
-		
-		
 		/**
 		 * THIS NEXT BLOCK IS A WORK IN PROGRESS THAT WILL NOT BE ADDED UNTIL AFTER THE PROTOTYPE IS COMPLETE
 		 * 
 		 * THIS NEEDS TO BE MOVED TO A DIFFERENT ACTOR FOR MACHINE LEARNING. THIS METHOD IS NOT LONGER USED
 		 * 
 		 * !!!!!!!!!!!!!!!     DO NOT DELETE           !!!
-		 * 
 		 */
 		/*
 		for(PathObject<?> pathObj : path.getPath()){
@@ -528,12 +278,12 @@ public class Brain {
 					//this.vocab.appendToWeights(feature.getValue(), rand.nextFloat());
 					
 					//add new actions entry to match vocab
-					ArrayList<Float> action_weights = new ArrayList<Float>(Arrays.asList(new Float[ActionFactory.getActions().length]));
+					ArrayList<Float> end_feature_weights = new ArrayList<Float>(Arrays.asList(new Float[ActionFactory.getActions().length]));
 					
 					
-					//for(int weight_idx = 0 ; weight_idx < action_weights.size(); weight_idx++){
+					//for(int weight_idx = 0 ; weight_idx < end_feature_weights.size(); weight_idx++){
 						//System.err.println("SETTING ACTION WIGHT : "+rand.nextFloat());
-					//	action_weights.set(weight_idx, rand.nextFloat());
+					//	end_feature_weights.set(weight_idx, rand.nextFloat());
 					//}
 =======
 					vocab_weights.appendToVocabulary(feature.getValue());
@@ -544,7 +294,7 @@ public class Brain {
 						vocab_weights.appendToWeights(feature.getValue(), action, rand.nextFloat()); 
 					}
 					
-					//action_weights_list.add(action_weights);
+					//end_feature_weights_list.add(end_feature_weights);
 					vocabularyExperienceRecord.add(true);
 
 				}
@@ -603,50 +353,6 @@ public class Brain {
 		 */
 		
 	}
-
-	/**
-	 * Calculates the rewards
-	 * 
-	 * @param action_rewards
-	 * @param pageElement
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 */
-	public HashMap<String, Double> calculateActionProbabilities(Feature pageElement) throws IllegalArgumentException, IllegalAccessException{
-		/*List<Feature> definitions = DataDecomposer.decompose(pageElement);
-
-		System.err.println(getSelf().hashCode() + " -> GETTING BEST ACTION PROBABILITY...");
-		HashMap<String, Double> cumulative_action_map = new HashMap<String, Double>();
-		
-		for(Object obj : definitions){
-			Iterable<com.tinkerpop.blueprints.Vertex> memory_vertex_iter = persistor.findVertices(obj);
-			Iterator<com.tinkerpop.blueprints.Vertex> memory_iterator = memory_vertex_iter.iterator();
-			
-			while(memory_iterator.hasNext()){
-				com.tinkerpop.blueprints.Vertex mem_vertex = memory_iterator.next();
-				HashMap<String, Double> action_map = mem_vertex.getProperty("actions");
-				double probability = 0.0;
-				if(action_map != null){
-					for(String action: action_map.keySet()){
-						if(cumulative_action_map.containsKey(action)){
-							probability += cumulative_action_map.get(action);
-						}
-						
-						cumulative_action_map.put(action, probability);
-					}
-				}
-				else{
-					for(String action: ActionFactory.getActions()){						
-						cumulative_action_map.put(action, probability);
-					}
-				}
-			}
-		}
-		return cumulative_action_map;
-		*/
-		return null;
-	}
-	
 	
 	/**
 	 * Calculate all estimated element probabilities
@@ -701,35 +407,85 @@ public class Brain {
 		
 		return null;
 	}
+	
+	public double[][] generatePolicy(List<Feature> input_features, List<Feature> output_features){
+		// 1. Create a memory record for prediction
+		Random random = new Random();
+		double[][] policy = new double[input_features.size()][output_features.size()];
+		System.err.println("###################################################################");
+		System.err.println("input features size :: "+input_features.size());
+		System.err.println("output features size :: "+output_features.size());
+		
+		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){
+			System.err.println("Getting input feature weights for feature :: " +input_features.get(in_idx).getValue());
+			
+			for(int out_idx = 0; out_idx < output_features.size(); out_idx++){
+				List<Feature> features = feature_repo.getConnectedFeatures(input_features.get(in_idx).getValue(), output_features.get(out_idx).getValue());	
+				double weight = -1.0;
+
+				if(!features.isEmpty()){
+					for(FeatureWeight feature_weight : features.get(0).getFeatureWeights()){	
+						if(feature_weight.getEndFeature().equals(output_features.get(out_idx))){
+							weight = feature_weight.getWeight();
+						}
+					}
+				}
+				else{
+					weight = random.nextDouble();
+					FeatureWeight feature_weight = new FeatureWeight();
+					feature_weight.setEndFeature(output_features.get(out_idx));
+					feature_weight.setWeight(weight);
+					feature_weight.setFeature(input_features.get(in_idx));
+					Feature input_feature = input_features.get(in_idx);
+					Feature input_feature_record = feature_repo.findByValue(input_feature.getValue());
+					if(input_feature_record == null){
+						input_feature = feature_repo.save(input_feature);
+					}
+					else{
+						input_feature = input_feature_record;
+					}
+					
+					input_feature.getFeatureWeights().add(feature_weight);
+					feature_repo.save(input_feature);
+				}
+				
+				policy[in_idx][out_idx] = weight;
+			}
+		}
+		System.err.println("###################################################################");
+
+		
+		return policy;
+	}
 
 	public void train(List<Feature> feature_list, String label) {
 		//REINFORCEMENT LEARNING
-				System.err.println( " Initiating learning");
-				
-				//learning model
-				// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
-				Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
+		System.err.println( " Initiating learning");
+		
+		//learning model
+		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
+		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
 
-				System.err.println("object definition list size :: "+feature_list.size());
-				// 2. create record based on vocabulary
-				for(Feature feature : feature_list){
-					vocabulary.appendToVocabulary(feature);
-				}
-				
-				System.err.println("vocabulary :: "+vocabulary);
-				System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
-				// 2. create state vertex from vocabulary 
-				int idx = 0;
-				for(Feature vocab_feature : vocabulary.getFeatures()){
-					boolean[] state = new boolean[vocabulary.getFeatures().size()];
-					if(feature_list.contains(vocab_feature)){
-						state[idx] = true;
-					}
-					else{
-						state[idx] = false;
-					}
-					idx++;
-				}
+		System.err.println("object definition list size :: "+feature_list.size());
+		// 2. create record based on vocabulary
+		for(Feature feature : feature_list){
+			vocabulary.appendToVocabulary(feature);
+		}
+		
+		System.err.println("vocabulary :: "+vocabulary);
+		System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
+		// 2. create state vertex from vocabulary 
+		int idx = 0;
+		for(Feature vocab_feature : vocabulary.getFeatures()){
+			boolean[] state = new boolean[vocabulary.getFeatures().size()];
+			if(feature_list.contains(vocab_feature)){
+				state[idx] = true;
+			}
+			else{
+				state[idx] = false;
+			}
+			idx++;
+		}
 	}
 
 }

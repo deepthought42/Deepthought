@@ -1,9 +1,7 @@
 package com.deepthought.models.edges;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -30,6 +28,9 @@ public class FeaturePolicy {
 	@Property
 	private List<Double> policy_weights = new ArrayList<Double>();
     
+	@Property  
+    private double reward;
+	
 	@StartNode 
 	private MemoryRecord memory;
     
@@ -64,4 +65,12 @@ public class FeaturePolicy {
 	public void setFeature(Feature feature) {
 		this.feature = feature;
 	}
+	
+	public double getReward(){
+    	return this.reward;
+    }
+    
+    public void setReward(double reward){
+    	this.reward = reward;
+    }
 }

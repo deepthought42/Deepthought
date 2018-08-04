@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,22 +14,19 @@ import org.omg.CORBA.UnknownUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.neo4j.util.IterableUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.deepthought.models.Action;
 import com.deepthought.models.Feature;
+import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
-import com.deepthought.models.repository.ActionRepository;
 import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.models.repository.MemoryRecordRepository;
 import com.deepthought.models.repository.VocabularyRepository;
 import com.qanairy.brain.Brain;
-import com.qanairy.brain.FeatureVector;
 import com.qanairy.db.DataDecomposer;
 
 
@@ -40,15 +38,15 @@ import com.qanairy.db.DataDecomposer;
 public class ReinforcementLearningController {
 	
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-	@Autowired
-	private ActionRepository action_repo;
-
+	
 	@Autowired
 	private FeatureRepository feature_repo;
 	
 	@Autowired
 	private VocabularyRepository vocabulary_repo;
+	
+	@Autowired
+	private MemoryRecordRepository memory_repo;
 	
 	@Autowired
 	private Brain brain;
@@ -65,64 +63,81 @@ public class ReinforcementLearningController {
      * @throws MalformedURLException 
      */
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
-    public @ResponseBody Map<Action, Double> predict(@RequestParam(value="json_object", required=true) String obj, @RequestParam(value="prediction_list")  List<String> prediction_list) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
+    public @ResponseBody MemoryRecord predict(@RequestParam(value="json_object", required=true) String obj,
+			  								  @RequestParam(value="input_vocab_label") String input_vocab_label,
+    										  @RequestParam(value="output_vocab_label") String output_vocab_label) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
     	System.err.println("digesting Object : " +obj);
-    	List<Feature> features = DataDecomposer.decompose(new JSONObject(obj));
-    	System.err.println("Finished decomposing object into value list with length :: "+features.size());
+    	//Break down object into list of features
+    	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(obj));
     	
     	System.err.println("loading vocabulary");
-    	//LOAD VOCABULARY
-    	String label = "internet";
+    	//LOAD VOCABULARIES FOR INPUT AND OUTPUT
+    	Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
+    	//for each feature, check if feature is in input_vocab
+    	List<String> input_feature_keys = new ArrayList<String>();
 
-    	List<Feature> def_list = IterableUtils.toList(feature_repo.findAll());
-    	
-    	//Vocabulary vocab = Vocabulary.load(label);
-    
-    	System.err.println("Setting object definitions as features in vocabulary" );
-    	//SETTING VOCABULARY FEATURES TO 1 FOR EACH OBJECT DEFINITION
-    	HashMap<String, Integer> vocabulary_record =  FeatureVector.load(def_list, features);
-    	
-    	System.err.println("loading universal action set");
-    	List<Feature> output_features = new ArrayList<Feature>();
-    	for(String name : prediction_list){
-    		Feature feature = new Feature(name, name.getClass().getSimpleName().replace(".", "").replace("[","").replace("]",""));
-    		Feature feature_record = feature_repo.findByKey(feature.getKey());
-    		if(feature_record != null){
-    			feature = feature_record;
+    	for(Feature feature : input_features){
+    		Feature feature_record = vocabulary_repo.findFeatureByKey(input_vocab_label, feature.getValue());
+    		//   if feature is not present in input_vocab then add feature to input_vocab
+    		if(feature_record == null){
+    			feature_record = feature_repo.findByValue(feature.getValue());
+    			if(feature_record == null){
+    				feature = feature_repo.save(feature);
+    			}
+    			else{
+    				feature = feature_record;
+    			}
+    			
+    			boolean feature_already_linked = false;
+    			for(Feature out_feature : input_vocab.getFeatures()){
+    				if(out_feature.equals(feature)){
+    					feature_already_linked = true;
+    					break;
+    				}
+    			}
+    			
+    			if(!feature_already_linked){
+	    			input_vocab.getFeatures().add(feature);
+	    			input_vocab = vocabulary_repo.save(input_vocab);
+    			}
     		}
-    		else{
-    			feature = feature_repo.save(feature);
-    		}
-    		
-    		output_features.add(feature);
+    		input_feature_keys.add(feature.getValue());
+
     	}
-    	//Setting action features to probabilities set for each object definitions actions
     	
-    	/*Vocabulary action_vocab = Vocabulary.load("actions");
+    	Vocabulary output_vocab = vocabulary_repo.findByLabel(output_vocab_label);
     	
-    	for(Action action : actions){
-    		action_vocab.appendToVocabulary(action.getKey());
+    	List<Feature> output_features = output_vocab.getFeatures();
+    	List<String> output_feature_keys = new ArrayList<String>();
+    	for(Feature out_feature : output_features){
+    		output_feature_keys.add(out_feature.getValue());
     	}
-		double[][] vocab_policy = FeatureVector.loadPolicy(def_list, features, vocabulary_record, action_vocab);
-    	*/
     	
-    	// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 vocabulary context)
-		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
-		Vocabulary vocab_record = vocabulary_repo.findByKey("internet");
-		
-		if(vocab_record != null){
-			vocabulary = vocab_record;
-		}
-		else{
-			vocabulary = vocabulary_repo.save(vocabulary);
-		}
-		
+    	//load feature vector for output_vocab
+    	System.err.println("loading output feature set");
+    	
+    	//generate policy for input vocab feature vector and output vocab feature vector
+		//double[][] vocab_policy = FeatureVector.loadPolicy(features, output_vocab.getFeatures(), vocabulary_record, output_vocab);
+    	double[][] policy = brain.generatePolicy(input_features, output_features);
+
+    	//generate prediction
     	System.err.println("Predicting...");
-    	Map<Action, Double> prediction_vector = brain.predict(features, output_features, vocabulary);
-		System.err.println("prediction found. produced vector :: "+prediction_vector.keySet().size());
+    	double[] prediction = brain.predict(policy);
+    	
+    	//create memory and save vocabularies, policy matrix and prediction vector
+    	MemoryRecord memory = new MemoryRecord();
+    	memory.setInputVocabulary(input_vocab);
+    	memory.setOutputVocabulary(output_vocab);
+    	memory.setPolicyMatrix(policy);
+    	memory.setInputFeatureValues(input_feature_keys);
+    	memory.setOutputFeatureKeys(output_feature_keys);
+    	memory.setPrediction(prediction);
+		memory = memory_repo.save(memory);
 		
-    	return prediction_vector;
-    }
+    	
+    	//return memory
+    	return memory;
+	}
     
     /**
      * 
@@ -137,24 +152,26 @@ public class ReinforcementLearningController {
      * @throws IOException
      */
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
-    public  @ResponseBody void learn(@RequestParam(value="json_object", required=true) String json_object, 
-    								 @RequestParam String prediction_key, 
-    								 @RequestParam String action_name,
-    								 @RequestParam String action_value,
+    public  @ResponseBody void learn(@RequestParam long memory_id, 
+    								 @RequestParam String feature_value,
     								 @RequestParam boolean isRewarded) throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException{
-    	JSONObject json_obj = new JSONObject(json_object);
-    	List<Feature> feature_list = DataDecomposer.decompose(json_obj);
+    	//JSONObject json_obj = new JSONObject(json_object);
+    	//List<Feature> feature_list = DataDecomposer.decompose(json_obj);
     	
-    	System.err.println("object definition list size :: "+feature_list.size());
+    	Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
+    	MemoryRecord memory = optional_memory.get();
+    	
+    	
+    	//System.err.println("object definition list size :: "+feature_list.size());
     	Map<String, Double> predicted = new HashMap<String, Double>();
     	
-    	Action action = new Action(action_name, action_value);
-    	Action action_record = action_repo.findByKey(action.getKey());
-    	if(action_record != null){
-    		action = action_record;
+    	Feature feature = new Feature(feature_value);
+    	Feature feature_record = feature_repo.findByValue(feature.getValue());
+    	if(feature_record != null){
+    		feature = feature_record;
     	}
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
-	    brain.learn(feature_list, predicted, action, isRewarded);
+	    brain.learn(memory.getID(), feature, isRewarded); //feature_list, predicted, feature, isRewarded);
     }
     
     @RequestMapping(value ="/train", method = RequestMethod.POST)
