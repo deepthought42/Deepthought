@@ -14,10 +14,12 @@ import org.omg.CORBA.UnknownUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.deepthought.models.Feature;
@@ -31,12 +33,14 @@ import com.qanairy.db.DataDecomposer;
 
 
 /**
- *	API endpoints for interacting with {@link Domain} data
+ *	API endpoints for learning and making predictions. This set of endpoints allows interacting with the knowledge graph
+ *	 to generate, update and retrieve weight matices(models) for any given input feature set and output set
  */
 @RestController
 @RequestMapping("/rl")
 public class ReinforcementLearningController {
 	
+	@SuppressWarnings("unused")
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
@@ -64,9 +68,11 @@ public class ReinforcementLearningController {
      */
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
     public @ResponseBody MemoryRecord predict(@RequestParam(value="json_object", required=true) String obj,
-			  								  @RequestParam(value="input_vocab_label") String input_vocab_label,
-    										  @RequestParam(value="output_vocab_label") String output_vocab_label) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
+			  								  @RequestParam(value="input_vocab_label", required=true) String input_vocab_label,
+    										  @RequestParam(value="output_vocab_label", required=true) String output_vocab_label,
+    										  @RequestParam(value="new_output_features", required=false) List<String> new_output_features) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
     	System.err.println("digesting Object : " +obj);
+    	System.err.println("new output features :: "+new_output_features);
     	//Break down object into list of features
     	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(obj));
     	
@@ -105,7 +111,44 @@ public class ReinforcementLearningController {
 
     	}
     	
+		List<Feature> new_features = new ArrayList<Feature>();
+    	if(new_output_features != null && !new_output_features.isEmpty()){
+			for(String value : new_output_features){
+				Feature feature_record = feature_repo.findByValue(value);
+				if(feature_record==null){
+					Feature new_feature = new Feature(value);
+					new_features.add(new_feature);
+				}
+				
+			}
+    	}
+    	
     	Vocabulary output_vocab = vocabulary_repo.findByLabel(output_vocab_label);
+    	if(output_vocab == null){
+    		if(new_output_features == null || new_output_features.isEmpty()){
+    			throw new EmptyVocabularyException();
+    		}
+    		
+    		output_vocab = new Vocabulary(new_features, output_vocab_label);
+    		vocabulary_repo.save(output_vocab);
+    	}
+    	else{
+    		for(Feature feature : new_features){
+    			boolean feature_already_exists = false;
+    			for(Feature existing_feature : output_vocab.getFeatures()){
+    				if(existing_feature.getValue().equals(feature.getValue())){
+    					feature_already_exists = true;
+    					break;
+    				}
+    			}
+    			
+    			if(feature_already_exists){
+    				continue;
+    			}
+    			
+    			output_vocab.appendToVocabulary(feature);
+    		}
+    	}
     	
     	List<Feature> output_features = output_vocab.getFeatures();
     	List<String> output_feature_keys = new ArrayList<String>();
@@ -183,4 +226,16 @@ public class ReinforcementLearningController {
     	List<Feature> feature_list = DataDecomposer.decompose(json_obj);
     	brain.train(feature_list, label);
     }
+}
+
+@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+class EmptyVocabularyException extends RuntimeException {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7200878662560716216L;
+
+	public EmptyVocabularyException() {
+		super("Features list for output vocabulary cannot be empty or null");
+	}
 }

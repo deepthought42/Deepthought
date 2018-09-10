@@ -40,7 +40,8 @@ public class DataDecomposer {
 			if(value!=null){
 	        	Feature objDef = null;
 	        	System.err.println("System class :: "+value.getClass());
-	        	if(value.toString().substring(0, 2).equals("[{")){
+	        	System.err.println("VALUE BEING READ :::  "+value.toString());
+	        	if(value.toString().length()>=3 && value.toString().substring(0, 2).equals("[{")){
 	        		System.err.println("converting to json string");
 	        		String json_string = value.toString().substring(1, value.toString().length()-1);
 		        	JSONObject obj = new JSONObject(json_string);
