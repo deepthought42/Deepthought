@@ -9,10 +9,14 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
+import com.deepthought.models.serializers.MemoryRecordSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * 
  */
 @NodeEntity
+@JsonSerialize(using = MemoryRecordSerializer.class)
 public class MemoryRecord {
 
 	@Id 
@@ -31,8 +35,8 @@ public class MemoryRecord {
 	@Relationship(type = "REWARDED")
 	private Feature rewarded_feature;
 	
-	private List<String> input_feature_keys;
-	private List<String> output_feature_keys;
+	private List<String> input_feature_values;
+	private List<String> output_feature_values;
 	
 	private double[][] policy_matrix;
 	private double[] prediction;
@@ -86,19 +90,19 @@ public class MemoryRecord {
 	}
 
 	public List<String> getInputFeatureValues() {
-		return input_feature_keys;
+		return input_feature_values;
 	}
 
-	public void setInputFeatureValues(List<String> input_feature_keys) {
-		this.input_feature_keys = input_feature_keys;
+	public void setInputFeatureValues(List<String> input_feature_values) {
+		this.input_feature_values = input_feature_values;
 	}
 
 	public List<String> getOutputFeatureKeys() {
-		return output_feature_keys;
+		return output_feature_values;
 	}
 
-	public void setOutputFeatureKeys(List<String> output_feature_keys) {
-		this.output_feature_keys = output_feature_keys;
+	public void setOutputFeatureKeys(List<String> output_feature_values) {
+		this.output_feature_values = output_feature_values;
 	}
 
 	public double[][] getPolicyMatrix() {
