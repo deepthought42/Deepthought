@@ -66,10 +66,10 @@ public class Brain {
 	 * @throws IOException 
 	 */
 	public void learn(long memory_id,
-					  Feature actual_feature,
-					  boolean isRewarded)
+					  Feature actual_feature)
 						  throws IllegalArgumentException, IllegalAccessException, 
 							  NullPointerException, IOException{
+		
 		//REINFORCEMENT LEARNING
 		System.err.println( " Initiating learning");
 		
@@ -111,14 +111,6 @@ public class Brain {
 		// 3. determine reward/regret score based on productivity status
 		double actual_reward = 0.0;
 		
-		if(isRewarded){
-			actual_reward = 5.0;
-		}
-		else{
-			//nothing changed so there was no reward for that combination. We want to remember this in the future
-			// so we set it to a negative value to simulate regret
-			actual_reward = -1.0;
-		}
 		
 		
 		
@@ -128,6 +120,17 @@ public class Brain {
 		
 		for(String input_key : memory.getInputFeatureValues()){
 			for(String output_key : memory.getOutputFeatureKeys()){
+				memory.getRewardedFeature();
+				//if actual feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
+				if(output_key.equals(memory.getPredictedFeature().getValue()) && actual_feature.equals(memory.getPrediction()) ||
+						output_key.equals(actual_feature.getValue())){
+					actual_reward = 5.0;
+				}
+				else{
+					//nothing changed so there was no reward for that combination. We want to remember this in the future
+					// so we set it to a negative value to simulate regret
+					actual_reward = -1.0;
+				}
 				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
 				System.err.println("features size :: "+features.size());
 				System.err.println("feature weights size :: "+features.get(0).getFeatureWeights().size());

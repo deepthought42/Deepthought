@@ -3,9 +3,7 @@ package com.qanairy.api;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.json.JSONException;
@@ -167,6 +165,15 @@ public class ReinforcementLearningController {
     	System.err.println("Predicting...");
     	double[] prediction = brain.predict(policy);
     	
+    	Feature predicted_feature = null;
+    	double max_pred = 0.0;
+    	int max_idx = 0;
+    	for(int idx = 0; idx<prediction.length; idx++){
+    		if(prediction[idx] > max_pred){
+    			max_idx = idx;
+    		}
+    	}
+    	
     	//create memory and save vocabularies, policy matrix and prediction vector
     	MemoryRecord memory = new MemoryRecord();
     	memory.setInputVocabulary(input_vocab);
@@ -175,6 +182,7 @@ public class ReinforcementLearningController {
     	memory.setInputFeatureValues(input_feature_keys);
     	memory.setOutputFeatureKeys(output_feature_keys);
     	memory.setPrediction(prediction);
+    	memory.setPredictedFeature(output_features.get(max_idx));
 		memory = memory_repo.save(memory);
 		
     	
@@ -196,8 +204,7 @@ public class ReinforcementLearningController {
      */
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
     public  @ResponseBody void learn(@RequestParam long memory_id, 
-    								 @RequestParam String feature_value,
-    								 @RequestParam boolean isRewarded) throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException{
+    								 @RequestParam String feature_value) throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException{
     	//JSONObject json_obj = new JSONObject(json_object);
     	//List<Feature> feature_list = DataDecomposer.decompose(json_obj);
     	
@@ -206,7 +213,6 @@ public class ReinforcementLearningController {
     	
     	
     	//System.err.println("object definition list size :: "+feature_list.size());
-    	Map<String, Double> predicted = new HashMap<String, Double>();
     	
     	Feature feature = new Feature(feature_value);
     	Feature feature_record = feature_repo.findByValue(feature.getValue());
@@ -214,7 +220,7 @@ public class ReinforcementLearningController {
     		feature = feature_record;
     	}
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
-	    brain.learn(memory.getID(), feature, isRewarded); //feature_list, predicted, feature, isRewarded);
+	    brain.learn(memory.getID(), feature); //feature_list, predicted, feature, isRewarded);
     }
     
     @RequestMapping(value ="/train", method = RequestMethod.POST)
