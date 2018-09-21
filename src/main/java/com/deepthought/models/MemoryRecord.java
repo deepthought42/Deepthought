@@ -35,6 +35,9 @@ public class MemoryRecord {
 	@Relationship(type = "REWARDED")
 	private Feature rewarded_feature;
 	
+	@Relationship(type = "PREDICTED")
+	private Feature predicted_feature;
+	
 	private List<String> input_feature_values;
 	private List<String> output_feature_values;
 	
@@ -87,6 +90,14 @@ public class MemoryRecord {
 
 	public void setPrediction(double[] prediction) {
 		this.prediction = prediction;
+	}
+	
+	public Feature getPredictedFeature() {
+		return this.predicted_feature;
+	}
+	
+	public void setPredictedFeature(Feature predicted_feature){
+		this.predicted_feature = predicted_feature;
 	}
 
 	public List<String> getInputFeatureValues() {
