@@ -69,12 +69,12 @@ public class ReinforcementLearningController {
 			  								  @RequestParam(value="input_vocab_label", required=true) String input_vocab_label,
     										  @RequestParam(value="output_vocab_label", required=true) String output_vocab_label,
     										  @RequestParam(value="new_output_features", required=false) List<String> new_output_features) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
-    	System.err.println("digesting Object : " +obj);
-    	System.err.println("new output features :: "+new_output_features);
+    	log.info("digesting Object : " +obj);
+    	log.info("new output features :: "+new_output_features);
     	//Break down object into list of features
     	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(obj));
     	
-    	System.err.println("loading vocabulary");
+    	log.info("loading vocabulary");
     	//LOAD VOCABULARIES FOR INPUT AND OUTPUT
     	Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
     	//for each feature, check if feature is in input_vocab
@@ -155,14 +155,14 @@ public class ReinforcementLearningController {
     	}
     	
     	//load feature vector for output_vocab
-    	System.err.println("loading output feature set");
+    	log.info("loading output feature set");
     	
     	//generate policy for input vocab feature vector and output vocab feature vector
 		//double[][] vocab_policy = FeatureVector.loadPolicy(features, output_vocab.getFeatures(), vocabulary_record, output_vocab);
     	double[][] policy = brain.generatePolicy(input_features, output_features);
 
     	//generate prediction
-    	System.err.println("Predicting...");
+    	log.info("Predicting...");
     	double[] prediction = brain.predict(policy);
     	
     	Feature predicted_feature = null;
@@ -212,7 +212,7 @@ public class ReinforcementLearningController {
     	MemoryRecord memory = optional_memory.get();
     	
     	
-    	//System.err.println("object definition list size :: "+feature_list.size());
+    	//log.info("object definition list size :: "+feature_list.size());
     	
     	Feature feature = new Feature(feature_value);
     	Feature feature_record = feature_repo.findByValue(feature.getValue());

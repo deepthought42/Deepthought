@@ -35,21 +35,21 @@ public class DataDecomposer {
 		
 		while(iter.hasNext()){
 			String key = iter.next();
-			System.err.println("Object Field Name :: "+key);
+			log.info("Object Field Name :: "+key);
 			Object value = jsonObject.get(key);
 			if(value!=null){
 	        	Feature objDef = null;
-	        	System.err.println("System class :: "+value.getClass());
-	        	System.err.println("VALUE BEING READ :::  "+value.toString());
+	        	log.info("System class :: "+value.getClass());
+	        	log.info("VALUE BEING READ :::  "+value.toString());
 	        	if(value.toString().length()>=3 && value.toString().substring(0, 2).equals("[{")){
-	        		System.err.println("converting to json string");
+	        		log.info("converting to json string");
 	        		String json_string = value.toString().substring(1, value.toString().length()-1);
 		        	JSONObject obj = new JSONObject(json_string);
 		        	List<Feature> definition_list = decompose(obj);
 		        	objDefList.addAll(definition_list);
 	        	}
 	        	else if(value.getClass().equals(ArrayList.class)){
-		        	System.err.println("Deconstructing Array list");
+		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
 		        	List<Feature> decomposedList = decomposeArrayList(list);
@@ -60,7 +60,7 @@ public class DataDecomposer {
 	        		System.out.println("JSON :: "+json);
 	        	}
 		        else if(value.getClass().equals(String[].class)){
-		        	System.err.println("Deconstructing String array");
+		        	log.info("Deconstructing String array");
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
@@ -69,14 +69,14 @@ public class DataDecomposer {
 		            }
 		        }
 		        else if(value.getClass().equals(Object[].class)){
-		        	System.err.println("Deconstructing Object list");
+		        	log.info("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
 		        	List<Feature> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(JSONArray.class)){
-		        	System.err.println("Deconstructing JSONArray list");
+		        	log.info("Deconstructing JSONArray list");
 		        	JSONArray array = new JSONArray(value.toString());
 		        	for(int idx=0; idx<array.length(); idx++){
 		        		objDefList.addAll(decompose(array.get(idx).toString()));
@@ -84,18 +84,18 @@ public class DataDecomposer {
 		        }
 		        else{
 		        	String[] words = value.toString().split("\\s+");
-		        	System.err.println("parsing string .....");
+		        	log.info("parsing string .....");
 		        	for(String word : words){
 		        		objDef = new Feature(word);
 		        		objDefList.add(objDef);
 		        	}		        	
 		        }
-	        	System.err.println("Ending list size :: "+objDefList.size());
+	        	log.info("Ending list size :: "+objDefList.size());
 
 			}
         }
 		
-		//System.err.println("Object definition List size :: "+objDefList.size());
+		//log.info("Object definition List size :: "+objDefList.size());
 		return objDefList;
 		
 	}
@@ -109,12 +109,12 @@ public class DataDecomposer {
 	 */
 	public static List<Feature> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
 		List<Feature> objDefList = new ArrayList<Feature>();
-    	System.err.println("Creating object definition for String");
+    	log.info("Creating object definition for String");
     	String[] words = value.toString().split("\\s+");
-    	System.err.println("VALUE :: " +value.toString());
-    	System.err.println("words :: "+words.length);
+    	log.info("VALUE :: " +value.toString());
+    	log.info("words :: "+words.length);
     	for(String word : words){
-    		System.err.println("word :: "+word);
+    		log.info("word :: "+word);
     		Feature objDef = new Feature(word);
     		objDefList.add(objDef);
     	}
@@ -139,29 +139,29 @@ public class DataDecomposer {
 		}
 		Class<?> objClass = obj.getClass();
 	    Field[] fields = objClass.getFields();
-        System.err.println("LIST CLASS:: "+ objClass);
-        System.err.println("FIELD COUNT : "+ fields.length);
+        log.info("LIST CLASS:: "+ objClass);
+        log.info("FIELD COUNT : "+ fields.length);
 	    for(Field field : fields) {
 	        Object value = field.get(obj);
 	        if(value!=null){
 	        	Feature objDef = null;
 	        		
 	        	if(value.getClass().equals(ArrayList.class)){
-		        	System.err.println("Deconstructing Array list");
+		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
 		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(ArrayList.class)){
-		        	System.err.println("Deconstructing Array list");
+		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
 		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(String[].class)){
-		        	System.err.println("Deconstructing String array");
+		        	log.info("Deconstructing String array");
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
@@ -170,19 +170,19 @@ public class DataDecomposer {
 		            }
 		        }
 		        else if(value.getClass().equals(Object[].class)){
-		        	System.err.println("Deconstructing Object list");
+		        	log.info("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
 		        	List<Feature> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else{
-		        	System.err.println("Creating object definition for field");
+		        	log.info("Creating object definition for field");
 		        	String[] words = value.toString().split("\\s+");
-		        	System.err.println("VALUE :: " +value.toString());
-		        	System.err.println("words :: "+words.length);
+		        	log.info("VALUE :: " +value.toString());
+		        	log.info("words :: "+words.length);
 		        	for(String word : words){
-		        		System.err.println("word :: "+word);
+		        		log.info("word :: "+word);
 		        		objDef = new Feature(word);
 		        		objDefList.add(objDef);
 		        	}
@@ -206,7 +206,7 @@ public class DataDecomposer {
 		List<Feature> objDefList = new ArrayList<Feature>();
 		
 		Class<?> objClass = map.getClass();
-        System.err.println("LIST CLASS:: "+ objClass);
+        log.info("LIST CLASS:: "+ objClass);
 
 		for(Object key : map.keySet()){
 			Object value = map.get(key);
@@ -214,21 +214,21 @@ public class DataDecomposer {
 	        	Feature objDef = null;
 	        		
 	        	if(value.getClass().equals(ArrayList.class)){
-		        	System.err.println("Deconstructing Array list");
+		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
 		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(ArrayList.class)){
-		        	System.err.println("Deconstructing Array list");
+		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
 		        	List<Feature> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(String[].class)){
-		        	System.err.println("Deconstructing String array");
+		        	log.info("Deconstructing String array");
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
@@ -237,14 +237,14 @@ public class DataDecomposer {
 		            }
 		        }
 		        else if(value.getClass().equals(Object[].class)){
-		        	System.err.println("Deconstructing Object list");
+		        	log.info("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
 		        	List<Feature> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else{
-		        	System.err.println("Creating object definition for field");
+		        	log.info("Creating object definition for field");
 		        	String[] words = value.toString().split("\\s+");
 
 		        	for(String word : words){
