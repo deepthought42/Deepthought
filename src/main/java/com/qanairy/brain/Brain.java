@@ -71,7 +71,7 @@ public class Brain {
 							  NullPointerException, IOException{
 		
 		//REINFORCEMENT LEARNING
-		System.err.println( " Initiating learning");
+		log.info( " Initiating learning");
 		
 		//Load memory from database
 		Optional<MemoryRecord> memory_record = memory_repo.findById(memory_id);
@@ -114,7 +114,7 @@ public class Brain {
 		
 		
 		
-		System.err.println("Set reward :: "+actual_reward);
+		log.info("Set reward :: "+actual_reward);
 		
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
 		
@@ -122,9 +122,14 @@ public class Brain {
 			for(String output_key : memory.getOutputFeatureKeys()){
 				memory.getRewardedFeature();
 				//if actual feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
-				if(output_key.equals(memory.getPredictedFeature().getValue()) && actual_feature.equals(memory.getPrediction()) ||
+				if(output_key.equals(memory.getPredictedFeature().getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue()) ||
 						output_key.equals(actual_feature.getValue())){
-					actual_reward = 5.0;
+					log.info("SETTING ACTUAL REWARD TO 2 because actual feature matches predicted feature");
+					actual_reward = 2.0;
+				}
+				//if output isn't equal to the actual feature or the predicted feature, don't affect weights
+				else if(!output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
+					actual_reward = 0.0;
 				}
 				else{
 					//nothing changed so there was no reward for that combination. We want to remember this in the future
@@ -132,21 +137,21 @@ public class Brain {
 					actual_reward = -1.0;
 				}
 				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
-				System.err.println("features size :: "+features.size());
-				System.err.println("feature weights size :: "+features.get(0).getFeatureWeights().size());
+				log.info("features size :: "+features.size());
+				log.info("feature weights size :: "+features.get(0).getFeatureWeights().size());
 				FeatureWeight feature_weight = features.get(0).getFeatureWeights().get(0);
 				double q_learn_val = q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward );
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
 				
-				System.err.println(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_feature.getValue()+"...Q LEARN VAL : "+q_learn_val);
-				System.err.println("feature weight :: "+feature_weight.getWeight());
+				log.info(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_feature.getValue()+"...Q LEARN VAL : "+q_learn_val);
+				log.info("feature weight :: "+feature_weight.getWeight());
 				
 				feature_weight_repo.save(feature_weight);
 				
 				/*
-				System.err.println("Object definition :: "+actual_feature);
-				System.err.println("Object definition value :: "+actual_feature.getValue());
+				log.info("Object definition :: "+actual_feature);
+				log.info("Object definition value :: "+actual_feature.getValue());
 				
 				feature_repo.save(actual_feature);
 				*/
@@ -285,7 +290,7 @@ public class Brain {
 					
 					
 					//for(int weight_idx = 0 ; weight_idx < end_feature_weights.size(); weight_idx++){
-						//System.err.println("SETTING ACTION WIGHT : "+rand.nextFloat());
+						//log.info("SETTING ACTION WIGHT : "+rand.nextFloat());
 					//	end_feature_weights.set(weight_idx, rand.nextFloat());
 					//}
 =======
@@ -415,12 +420,12 @@ public class Brain {
 		// 1. Create a memory record for prediction
 		Random random = new Random();
 		double[][] policy = new double[input_features.size()][output_features.size()];
-		System.err.println("###################################################################");
-		System.err.println("input features size :: "+input_features.size());
-		System.err.println("output features size :: "+output_features.size());
+		log.info("###################################################################");
+		log.info("input features size :: "+input_features.size());
+		log.info("output features size :: "+output_features.size());
 		
 		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){
-			System.err.println("Getting input feature weights for feature :: " +input_features.get(in_idx).getValue());
+			log.info("Getting input feature weights for feature :: " +input_features.get(in_idx).getValue());
 			
 			for(int out_idx = 0; out_idx < output_features.size(); out_idx++){
 				List<Feature> features = feature_repo.getConnectedFeatures(input_features.get(in_idx).getValue(), output_features.get(out_idx).getValue());	
@@ -455,7 +460,7 @@ public class Brain {
 				policy[in_idx][out_idx] = weight;
 			}
 		}
-		System.err.println("###################################################################");
+		log.info("###################################################################");
 
 		
 		return policy;
@@ -463,20 +468,20 @@ public class Brain {
 
 	public void train(List<Feature> feature_list, String label) {
 		//REINFORCEMENT LEARNING
-		System.err.println( " Initiating learning");
+		log.info( " Initiating learning");
 		
 		//learning model
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
 
-		System.err.println("object definition list size :: "+feature_list.size());
+		log.info("object definition list size :: "+feature_list.size());
 		// 2. create record based on vocabulary
 		for(Feature feature : feature_list){
 			vocabulary.appendToVocabulary(feature);
 		}
 		
-		System.err.println("vocabulary :: "+vocabulary);
-		System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
+		log.info("vocabulary :: "+vocabulary);
+		log.info("vocab value list size   :: "+vocabulary.getFeatures().size());
 		// 2. create state vertex from vocabulary 
 		int idx = 0;
 		for(Feature vocab_feature : vocabulary.getFeatures()){

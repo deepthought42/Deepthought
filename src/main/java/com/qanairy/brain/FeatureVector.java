@@ -1,9 +1,10 @@
 package com.qanairy.brain;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import com.deepthought.models.repository.FeatureRepository;
 
 @Component
 public class FeatureVector {
+	private static Logger log = LoggerFactory.getLogger(FeatureVector.class);
 
 	@Autowired
 	private static FeatureRepository obj_def_repo;
@@ -21,7 +23,7 @@ public class FeatureVector {
 		double[][] vocab_policy = new double[input_features.size()][output_features.size()];
 
 
-		System.err.println("concatenating action features into 2d array for vocabulary");
+		log.info("concatenating action features into 2d array for vocabulary");
 		//set output_features for object definition to action probabilities
 		for(Feature def : input_features){
 			//load action policy for object definition
@@ -46,7 +48,6 @@ public class FeatureVector {
 	public static HashMap<String, Integer> load(List<Feature> input_features, List<Feature> output_features){
 		HashMap<String, Integer> vocabulary_record = new HashMap<String, Integer>();
 		
-    	int i = 0;
     	for(Feature definition : input_features){
     		boolean has_match = false;
     		for(Feature record_definition : output_features){
@@ -60,9 +61,7 @@ public class FeatureVector {
     		if(!has_match){
     			vocabulary_record.put(definition.getValue(), 0);
     		}
-    		
-    		i++;
-    	}
+       	}
     	
     	return vocabulary_record;
 	}
