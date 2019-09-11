@@ -81,8 +81,8 @@ public class Brain {
 		
 		// 3. determine reward/regret score based on productivity status
 		//Q-LEARNING VARIABLES
-		final double learning_rate = .08;
-		final double discount_factor = .08;
+		final double learning_rate = .1;
+		final double discount_factor = .1;
 
 		//set estimated reward using prediction from memory.
 		// if actual feature is the most likely feature then set to 1
@@ -117,7 +117,7 @@ public class Brain {
 		log.info("Set reward :: "+actual_reward);
 		
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
-		
+		List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
 		for(String input_key : memory.getInputFeatureValues()){
 			for(String output_key : memory.getOutputFeatureKeys()){
 				memory.getRewardedFeature();
@@ -140,15 +140,13 @@ public class Brain {
 				log.info("features size :: "+features.size());
 				log.info("feature weights size :: "+features.get(0).getFeatureWeights().size());
 				FeatureWeight feature_weight = features.get(0).getFeatureWeights().get(0);
-				double q_learn_val = q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward );
+				log.info("feature weight before   :: "+feature_weight.getWeight());
+				double q_learn_val = Math.abs(q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward ));
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
-				
+				features_weights.add(feature_weight);
 				log.info(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_feature.getValue()+"...Q LEARN VAL : "+q_learn_val);
-				log.info("feature weight :: "+feature_weight.getWeight());
-				
-				feature_weight_repo.save(feature_weight);
-				
+
 				/*
 				log.info("Object definition :: "+actual_feature);
 				log.info("Object definition value :: "+actual_feature.getValue());
@@ -158,9 +156,19 @@ public class Brain {
 			}
 		}
 		
+		double total = 0;
+		for(FeatureWeight feature_weight : features_weights){
+			log.info("feature weight :: "+feature_weight.getWeight());
+			total += feature_weight.getWeight();
+		}
 		
-		
-				
+		log.info("-----------------------------------------------------------------------------------------------------------");
+
+		for(FeatureWeight feature_weight : features_weights){
+			feature_weight.setWeight(feature_weight.getWeight()/total);
+			FeatureWeight output_feature = feature_weight_repo.save(feature_weight);
+			log.info("feature weight after saving :: "+output_feature.getWeight());
+		}
 		
 		//Learning process
 		//	1. identify vocabulary that this set of object info belongs to
@@ -370,13 +378,13 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<Feature> pageElements) 
+	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<Feature> ElementStates) 
 			throws IllegalArgumentException, IllegalAccessException
 	{
 		/*
 		ArrayList<HashMap<String, Double>> element_action_map_list = new ArrayList<HashMap<String, Double>>(0);
 				
-		for(PageElement elem : pageElements){
+		for(ElementState elem : ElementStates){
 			HashMap<String, Double> full_action_map = new HashMap<String, Double>(0);
 			//find vertex for given element
 			List<Object> raw_features = DataDecomposer.decompose(elem);

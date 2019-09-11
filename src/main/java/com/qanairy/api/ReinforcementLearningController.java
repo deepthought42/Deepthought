@@ -1,14 +1,12 @@
 package com.qanairy.api;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.omg.CORBA.UnknownUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,15 +52,18 @@ public class ReinforcementLearningController {
 	private Brain brain;
 	
     /**
-     * Create a new {@link Domain domain}
-     * @throws NullPointerException 
-     * @throws IllegalAccessException 
-     * @throws IllegalArgumentException 
-     * @throws JSONException 
      * 
-     * @throws UnknownUserException 
-     * @throws UnknownAccountException 
-     * @throws MalformedURLException 
+     * @param obj
+     * @param input_vocab_label
+     * @param output_vocab_label
+     * @param new_output_features
+     * 
+     * @return
+     * 
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws NullPointerException
+     * @throws JSONException
      */
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
     public @ResponseBody MemoryRecord predict(@RequestParam(value="json_object", required=true) String obj,
@@ -162,7 +163,7 @@ public class ReinforcementLearningController {
     	double[][] policy = brain.generatePolicy(input_features, output_features);
 
     	//generate prediction
-    	log.info("Predicting...");
+    	log.info("Predicting...  "+policy);
     	double[] prediction = brain.predict(policy);
     	
     	Feature predicted_feature = null;
@@ -211,9 +212,7 @@ public class ReinforcementLearningController {
     	Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
     	MemoryRecord memory = optional_memory.get();
     	
-    	
     	//log.info("object definition list size :: "+feature_list.size());
-    	
     	Feature feature = new Feature(feature_value);
     	Feature feature_record = feature_repo.findByValue(feature.getValue());
     	if(feature_record != null){
