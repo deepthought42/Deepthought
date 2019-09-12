@@ -166,7 +166,6 @@ public class ReinforcementLearningController {
     	log.info("Predicting...  "+policy);
     	double[] prediction = brain.predict(policy);
     	
-    	Feature predicted_feature = null;
     	double max_pred = 0.0;
     	int max_idx = 0;
     	for(int idx = 0; idx<prediction.length; idx++){
