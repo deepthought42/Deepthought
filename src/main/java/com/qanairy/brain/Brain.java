@@ -109,43 +109,50 @@ public class Brain {
 		}
 		
 		// 3. determine reward/regret score based on productivity status
-		double actual_reward = 0.0;
-		
-		
-		
+		double actual_reward = 0.0;		
 		
 		log.info("Set reward :: "+actual_reward);
-		
+		log.info("memory output features :: "+memory.getOutputFeatureKeys());
+		log.info("actual value :: "+actual_feature.getValue());
+		log.info("-----------------------------------------------------------------------------------------------------------");
+		log.info("-----------------------------------------------------------------------------------------------------------");
+
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
-		List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
-		for(String input_key : memory.getInputFeatureValues()){
-			for(String output_key : memory.getOutputFeatureKeys()){
+		for(String output_key : memory.getOutputFeatureKeys()){
+			double total = 0;
+			List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
+			log.warn("Set output key :: "+output_key);
+			for(String input_key : memory.getInputFeatureValues()){
 				memory.getRewardedFeature();
-				//if actual feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
-				if(output_key.equals(memory.getPredictedFeature().getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue()) ||
-						output_key.equals(actual_feature.getValue())){
-					log.info("SETTING ACTUAL REWARD TO 2 because actual feature matches predicted feature");
+				
+				//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
+				if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
+					log.warn("REWARD   ::    2");
 					actual_reward = 2.0;
 				}
-				//if output isn't equal to the actual feature or the predicted feature, don't affect weights
-				else if(!output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
-					actual_reward = 0.0;
+				else if(output_key.equals(actual_feature.getValue())){
+					log.warn("REWARD   ::   1");
+					actual_reward = 1.0;
 				}
-				else{
-					//nothing changed so there was no reward for that combination. We want to remember this in the future
-					// so we set it to a negative value to simulate regret
+				//if output isn't equal to the actual feature or the predicted feature, don't affect weights
+				else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
+					log.warn("REWARD   ::     -1");
 					actual_reward = -1.0;
 				}
+				else {
+					log.warn("REWARD   ::    0");
+					//nothing changed so there was no reward for that combination. We want to remember this in the future
+					// so we set it to a negative value to simulate regret
+					actual_reward = 0.0;
+				}
+				
 				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
-				log.info("features size :: "+features.size());
-				log.info("feature weights size :: "+features.get(0).getFeatureWeights().size());
 				FeatureWeight feature_weight = features.get(0).getFeatureWeights().get(0);
 				log.info("feature weight before   :: "+feature_weight.getWeight());
 				double q_learn_val = Math.abs(q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward ));
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
 				features_weights.add(feature_weight);
-				log.info(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_feature.getValue()+"...Q LEARN VAL : "+q_learn_val);
 
 				/*
 				log.info("Object definition :: "+actual_feature);
@@ -153,22 +160,18 @@ public class Brain {
 				
 				feature_repo.save(actual_feature);
 				*/
+				total += feature_weight.getWeight();
 			}
-		}
-		
-		double total = 0;
-		for(FeatureWeight feature_weight : features_weights){
-			log.info("feature weight :: "+feature_weight.getWeight());
-			total += feature_weight.getWeight();
+
+			for(FeatureWeight feature_weight : features_weights){
+				feature_weight.setWeight(feature_weight.getWeight()/total);
+				FeatureWeight output_feature = feature_weight_repo.save(feature_weight);
+				log.info("feature weight after saving :: "+output_feature.getWeight());
+			}
 		}
 		
 		log.info("-----------------------------------------------------------------------------------------------------------");
 
-		for(FeatureWeight feature_weight : features_weights){
-			feature_weight.setWeight(feature_weight.getWeight()/total);
-			FeatureWeight output_feature = feature_weight_repo.save(feature_weight);
-			log.info("feature weight after saving :: "+output_feature.getWeight());
-		}
 		
 		//Learning process
 		//	1. identify vocabulary that this set of object info belongs to
