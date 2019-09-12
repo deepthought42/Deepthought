@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -69,19 +70,59 @@ public class ReinforcementLearningController {
     public @ResponseBody MemoryRecord predict(@RequestParam(value="json_object", required=true) String obj,
 			  								  @RequestParam(value="input_vocab_label", required=true) String input_vocab_label,
     										  @RequestParam(value="output_vocab_label", required=true) String output_vocab_label,
-    										  @RequestParam(value="new_output_features", required=false) List<String> new_output_features) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
+    										  @RequestParam(value="new_output_features", required=false) String[] new_output_features) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
     	log.info("digesting Object : " +obj);
-    	log.info("new output features :: "+new_output_features);
+    	log.info("new output features :: "+ArrayUtils.toString(new_output_features));
+    	log.info("new output features SIZE  :: "+new_output_features.length);
+
+
+    	for(String output_key : new_output_features){
+        	log.info("new output feature :: "+output_key);
+        	
+    	}
+    	log.info(" ************************************************************************ ");
+
     	//Break down object into list of features
     	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(obj));
+    	List<Feature> new_features = new ArrayList<Feature>();
+    	if(new_output_features != null && !ArrayUtils.isEmpty(new_output_features)){
+			for(String value : new_output_features){
+				Feature feature_record = feature_repo.findByValue(value);
+				if(feature_record==null){
+					value = value.replace("[", "");
+		        	value = value.replace("]", "");
+					Feature new_feature = new Feature(value);
+					new_features.add(new_feature);
+				}
+				
+			}
+    	}
     	
     	log.info("loading vocabulary");
     	//LOAD VOCABULARIES FOR INPUT AND OUTPUT
     	Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
     	//for each feature, check if feature is in input_vocab
     	List<String> input_feature_keys = new ArrayList<String>();
-
-    	for(Feature feature : input_features){
+    	
+    	List<Feature> scrubbed_input_features = new ArrayList<Feature>();
+    	List<String> seen_features = new ArrayList<String>();
+		for(Feature input_feature : input_features){
+			boolean input_equals_output = false;
+	    	for(Feature output_feature : new_features){
+    			if(output_feature.getValue().equalsIgnoreCase(input_feature.getValue())){
+    				input_equals_output = true;
+    			}
+    		}
+    		
+    		if(!input_equals_output && input_feature.getValue() != null && !input_feature.getValue().equals("null") && !input_feature.getValue().trim().isEmpty()
+    				&& !seen_features.contains(input_feature.getValue())){
+    			scrubbed_input_features.add(input_feature);
+    		}
+    		
+    		seen_features.add(input_feature.getValue());
+    	}
+    	
+    	for(Feature feature : scrubbed_input_features){
     		Feature feature_record = vocabulary_repo.findFeatureByKey(input_vocab_label, feature.getValue());
     		//   if feature is not present in input_vocab then add feature to input_vocab
     		if(feature_record == null){
@@ -110,21 +151,11 @@ public class ReinforcementLearningController {
 
     	}
     	
-		List<Feature> new_features = new ArrayList<Feature>();
-    	if(new_output_features != null && !new_output_features.isEmpty()){
-			for(String value : new_output_features){
-				Feature feature_record = feature_repo.findByValue(value);
-				if(feature_record==null){
-					Feature new_feature = new Feature(value);
-					new_features.add(new_feature);
-				}
-				
-			}
-    	}
+		
     	
     	Vocabulary output_vocab = vocabulary_repo.findByLabel(output_vocab_label);
     	if(output_vocab == null){
-    		if(new_output_features == null || new_output_features.isEmpty()){
+    		if(new_output_features == null || ArrayUtils.isEmpty(new_output_features)){
     			throw new EmptyVocabularyException();
     		}
     		
@@ -150,9 +181,9 @@ public class ReinforcementLearningController {
     	}
     	
     	List<Feature> output_features = output_vocab.getFeatures();
-    	List<String> output_feature_keys = new ArrayList<String>();
-    	for(Feature out_feature : output_features){
-    		output_feature_keys.add(out_feature.getValue());
+    	String[] output_feature_keys = new String[output_features.size()];
+    	for(int i=0; i< output_features.size(); i++){
+    		output_feature_keys[i] = output_features.get(i).getValue();
     	}
     	
     	//load feature vector for output_vocab
@@ -160,7 +191,7 @@ public class ReinforcementLearningController {
     	
     	//generate policy for input vocab feature vector and output vocab feature vector
 		//double[][] vocab_policy = FeatureVector.loadPolicy(features, output_vocab.getFeatures(), vocabulary_record, output_vocab);
-    	double[][] policy = brain.generatePolicy(input_features, output_features);
+    	double[][] policy = brain.generatePolicy(scrubbed_input_features, output_features);
 
     	//generate prediction
     	log.info("Predicting...  "+policy);

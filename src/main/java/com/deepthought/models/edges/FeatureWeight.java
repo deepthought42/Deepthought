@@ -56,6 +56,10 @@ public class FeatureWeight {
 	public void setFeature(Feature feature) {
 		this.feature = feature;
 	}
+	
+	public Feature getFeature() {
+		return this.feature;
+	}
 
 	public List<String> getLabels() {
 		return this.labels;
