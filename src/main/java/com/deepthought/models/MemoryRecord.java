@@ -34,14 +34,14 @@ public class MemoryRecord {
 	@Relationship(type = "HAS_VOCABULARY")
 	private Vocabulary output_vocabulary;
 	
-	@Relationship(type = "REWARDED")
-	private Feature rewarded_feature;
+	@Relationship(type = "DESIRED_FEATURE")
+	private Feature desired_feature;
 	
 	@Relationship(type = "PREDICTED")
 	private Feature predicted_feature;
 	
 	private List<String> input_feature_values;
-	private List<String> output_feature_values;
+	private String[] output_feature_values;
 	
 	private String policy_matrix_json;
 	private double[] prediction;
@@ -79,14 +79,6 @@ public class MemoryRecord {
 		this.date = date;
 	}
 
-	public Feature getRewardedFeature() {
-		return rewarded_feature;
-	}
-
-	public void setRewardedFeature(Feature rewarded_feature) {
-		this.rewarded_feature = rewarded_feature;
-	}
-
 	public double[] getPrediction() {
 		return prediction;
 	}
@@ -111,11 +103,11 @@ public class MemoryRecord {
 		this.input_feature_values = input_feature_values;
 	}
 
-	public List<String> getOutputFeatureKeys() {
+	public String[] getOutputFeatureKeys() {
 		return output_feature_values;
 	}
 
-	public void setOutputFeatureKeys(List<String> output_feature_values) {
+	public void setOutputFeatureKeys(String[] output_feature_values) {
 		this.output_feature_values = output_feature_values;
 	}
 
@@ -129,5 +121,13 @@ public class MemoryRecord {
         Gson gson = new GsonBuilder().create();
 
 		this.policy_matrix_json = gson.toJson(policy_matrix);
+	}
+
+	public Feature getDesiredFeature() {
+		return desired_feature;
+	}
+
+	public void setDesiredFeature(Feature feature) {
+		desired_feature = feature;
 	}
 }
