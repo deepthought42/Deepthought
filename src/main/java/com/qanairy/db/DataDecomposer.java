@@ -109,10 +109,7 @@ public class DataDecomposer {
 	 */
 	public static List<Feature> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
 		List<Feature> objDefList = new ArrayList<Feature>();
-    	log.info("Creating object definition for String");
     	String[] words = value.toString().split("\\s+");
-    	log.info("VALUE :: " +value.toString());
-    	log.info("words :: "+words.length);
     	for(String word : words){
     		log.info("word :: "+word);
     		Feature objDef = new Feature(word);
