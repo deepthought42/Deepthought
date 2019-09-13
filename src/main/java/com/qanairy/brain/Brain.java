@@ -75,11 +75,7 @@ public class Brain {
 	public void learn(long memory_id,
 					  Feature actual_feature)
 						  throws IllegalArgumentException, IllegalAccessException, 
-							  NullPointerException, IOException{
-		
-		//REINFORCEMENT LEARNING
-		log.info( " Initiating learning");
-		
+							  NullPointerException, IOException{		
 		//Load memory from database
 		Optional<MemoryRecord> memory_record = memory_repo.findById(memory_id);
 		
@@ -109,35 +105,27 @@ public class Brain {
 		//replace wit steps to estimate reward for an output feature independent of actual desired output feature
 		double estimated_reward = 1.0;
 		
-		
 		// 3. determine reward/regret score based on productivity status
 		double actual_reward = 0.0;		
-		
-		log.info("Set reward :: "+actual_reward);
-		log.info("memory output features :: "+memory.getOutputFeatureKeys());
-		log.info("actual value :: "+actual_feature.getValue());
-		log.info("-----------------------------------------------------------------------------------------------------------");
-		log.info("-----------------------------------------------------------------------------------------------------------");
-
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
 		for(String output_key : memory.getOutputFeatureKeys()){
 			
 			//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
 			if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
-				log.warn("REWARD   ::    2");
+				log.debug("REWARD   ::    2");
 				actual_reward = 2.0;
 			}
 			else if(output_key.equals(actual_feature.getValue())){
-				log.warn("REWARD   ::   1");
+				log.debug("REWARD   ::   1");
 				actual_reward = 1.0;
 			}
 			//if output isn't equal to the actual feature or the predicted feature, don't affect weights
 			else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
-				log.warn("REWARD   ::     -1");
+				log.debug("REWARD   ::     -1");
 				actual_reward = -1.0;
 			}
 			else {
-				log.warn("REWARD   ::    0");
+				log.debug("REWARD   ::    0");
 				//nothing changed so there was no reward for that combination. We want to remember this in the future
 				// so we set it to a negative value to simulate regret
 				actual_reward = 0.0;
@@ -145,7 +133,6 @@ public class Brain {
 			
 			double total = 0;
 			List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
-			log.warn("Set output key :: "+output_key);
 			for(String input_key : memory.getInputFeatureValues()){
 				memory.setDesiredFeature(actual_feature);
 				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
@@ -154,14 +141,10 @@ public class Brain {
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
 				features_weights.add(feature_weight);
-				log.warn("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
+				log.debug("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
 				feature_weight_repo.save(feature_weight);
 			}
-		}
-		
-		log.info("-----------------------------------------------------------------------------------------------------------");
-
-		
+		}		
 	}
 	
 	/**
