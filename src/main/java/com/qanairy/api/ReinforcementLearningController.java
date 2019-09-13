@@ -70,18 +70,8 @@ public class ReinforcementLearningController {
     public @ResponseBody MemoryRecord predict(@RequestParam(value="json_object", required=true) String obj,
 			  								  @RequestParam(value="input_vocab_label", required=true) String input_vocab_label,
     										  @RequestParam(value="output_vocab_label", required=true) String output_vocab_label,
-    										  @RequestParam(value="new_output_features", required=false) String[] new_output_features) throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
-    	log.info("digesting Object : " +obj);
-    	log.info("new output features :: "+ArrayUtils.toString(new_output_features));
-    	log.info("new output features SIZE  :: "+new_output_features.length);
-
-
-    	for(String output_key : new_output_features){
-        	log.info("new output feature :: "+output_key);
-        	
-    	}
-    	log.info(" ************************************************************************ ");
-
+    										  @RequestParam(value="new_output_features", required=false) String[] new_output_features) 
+    												  throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
     	//Break down object into list of features
     	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(obj));
     	List<Feature> new_features = new ArrayList<Feature>();
@@ -98,7 +88,7 @@ public class ReinforcementLearningController {
 			}
     	}
     	
-    	log.info("loading vocabulary");
+    	log.debug("loading vocabulary");
     	//LOAD VOCABULARIES FOR INPUT AND OUTPUT
     	Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
     	//for each feature, check if feature is in input_vocab
@@ -187,14 +177,14 @@ public class ReinforcementLearningController {
     	}
     	
     	//load feature vector for output_vocab
-    	log.info("loading output feature set");
+    	log.debug("loading output feature set");
     	
     	//generate policy for input vocab feature vector and output vocab feature vector
 		//double[][] vocab_policy = FeatureVector.loadPolicy(features, output_vocab.getFeatures(), vocabulary_record, output_vocab);
     	double[][] policy = brain.generatePolicy(scrubbed_input_features, output_features);
 
     	//generate prediction
-    	log.info("Predicting...  "+policy);
+    	log.debug("Predicting...  "+policy);
     	double[] prediction = brain.predict(policy);
     	
     	double max_pred = 0.0;
