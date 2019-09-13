@@ -59,6 +59,13 @@ public class Brain {
 	/**
 	 * Reads path and performs learning tasks
 	 * 
+	 * 
+		//Learning process
+		//	1. identify vocabulary that this set of object info belongs to
+		//  2. Create record based on vocabulary
+		//  3. load known vocabulary action policies
+		//  4. perform matrix math to inline update vocabulary policies for record based on reward/penalty for productivity  
+	 * 
 	 * @param path an {@link ArrayList} of graph vertex indices. Order matters
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
@@ -147,27 +154,14 @@ public class Brain {
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
 				features_weights.add(feature_weight);
-
-				FeatureWeight output_feature = feature_weight_repo.save(feature_weight);
-				log.info("feature weight after saving :: " + output_feature.getFeature().getValue() + "   :::    "+output_feature.getWeight());
-				/*
-				log.info("Object definition :: "+actual_feature);
-				log.info("Object definition value :: "+actual_feature.getValue());
-				
-				feature_repo.save(actual_feature);
-				*/
-				//total += feature_weight.getWeight();
+				log.warn("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
+				feature_weight_repo.save(feature_weight);
 			}
 		}
 		
 		log.info("-----------------------------------------------------------------------------------------------------------");
 
 		
-		//Learning process
-		//	1. identify vocabulary that this set of object info belongs to
-		//  2. Create record based on vocabulary
-		//  3. load known vocabulary action policies
-		//  4. perform matrix math to inline update vocabulary policies for record based on reward/penalty for productivity  
 	}
 	
 	/**
@@ -425,9 +419,7 @@ public class Brain {
 		log.info("input features size :: "+input_features.size());
 		log.info("output features size :: "+output_features.size());
 		
-		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){
-			log.info("Getting input feature weights for feature :: " +input_features.get(in_idx).getValue());
-			
+		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){			
 			for(int out_idx = 0; out_idx < output_features.size(); out_idx++){
 				List<Feature> features = feature_repo.getConnectedFeatures(input_features.get(in_idx).getValue(), output_features.get(out_idx).getValue());	
 				double weight = -1.0;
