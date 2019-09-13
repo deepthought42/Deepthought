@@ -131,7 +131,6 @@ public class Brain {
 				actual_reward = 0.0;
 			}
 			
-			double total = 0;
 			List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
 			for(String input_key : memory.getInputFeatureValues()){
 				memory.setDesiredFeature(actual_feature);
