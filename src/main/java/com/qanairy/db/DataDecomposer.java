@@ -41,10 +41,10 @@ public class DataDecomposer {
 	        	Feature objDef = null;
 	        	log.info("System class :: "+value.getClass());
 	        	log.info("VALUE BEING READ :::  "+value.toString());
-	        	if(value.toString().length()>=3 && value.toString().substring(0, 2).equals("[{")){
+	        	if(value.toString().length()>=3 && value.toString().substring(0, 1).equals("{")){
 	        		log.info("converting to json string");
-	        		String json_string = value.toString().substring(1, value.toString().length()-1);
-		        	JSONObject obj = new JSONObject(json_string);
+	        		//String json_string = value.toString().substring(1, value.toString().length()-1);
+		        	JSONObject obj = new JSONObject(value.toString());
 		        	List<Feature> definition_list = decompose(obj);
 		        	objDefList.addAll(definition_list);
 	        	}
