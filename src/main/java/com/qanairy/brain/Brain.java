@@ -113,11 +113,11 @@ public class Brain {
 			//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
 			if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
 				log.debug("REWARD   ::    2");
-				actual_reward = 2.0;
+				actual_reward = 3.0;
 			}
 			else if(output_key.equals(actual_feature.getValue())){
 				log.debug("REWARD   ::   1");
-				actual_reward = 1.0;
+				actual_reward = 2.0;
 			}
 			//if output isn't equal to the actual feature or the predicted feature, don't affect weights
 			else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
