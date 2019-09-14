@@ -11,6 +11,8 @@ import org.neo4j.ogm.annotation.Relationship;
 
 import com.deepthought.models.serializers.MemoryRecordSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * 
@@ -32,17 +34,21 @@ public class MemoryRecord {
 	@Relationship(type = "HAS_VOCABULARY")
 	private Vocabulary output_vocabulary;
 	
-	@Relationship(type = "REWARDED")
-	private Feature rewarded_feature;
+	@Relationship(type = "DESIRED_FEATURE")
+	private Feature desired_feature;
+	
+	@Relationship(type = "PREDICTED")
+	private Feature predicted_feature;
 	
 	private List<String> input_feature_values;
-	private List<String> output_feature_values;
+	private String[] output_feature_values;
 	
-	private double[][] policy_matrix;
+	private String policy_matrix_json;
 	private double[] prediction;
 	
 	public MemoryRecord(){
 		setDate(new Date());
+		policy_matrix_json = "";
 	}
 	
 	public Vocabulary getInputVocabulary(){
@@ -73,20 +79,20 @@ public class MemoryRecord {
 		this.date = date;
 	}
 
-	public Feature getRewardedFeature() {
-		return rewarded_feature;
-	}
-
-	public void setRewardedFeature(Feature rewarded_feature) {
-		this.rewarded_feature = rewarded_feature;
-	}
-
 	public double[] getPrediction() {
 		return prediction;
 	}
 
 	public void setPrediction(double[] prediction) {
 		this.prediction = prediction;
+	}
+	
+	public Feature getPredictedFeature() {
+		return this.predicted_feature;
+	}
+	
+	public void setPredictedFeature(Feature predicted_feature){
+		this.predicted_feature = predicted_feature;
 	}
 
 	public List<String> getInputFeatureValues() {
@@ -97,19 +103,31 @@ public class MemoryRecord {
 		this.input_feature_values = input_feature_values;
 	}
 
-	public List<String> getOutputFeatureKeys() {
+	public String[] getOutputFeatureKeys() {
 		return output_feature_values;
 	}
 
-	public void setOutputFeatureKeys(List<String> output_feature_values) {
+	public void setOutputFeatureKeys(String[] output_feature_values) {
 		this.output_feature_values = output_feature_values;
 	}
 
 	public double[][] getPolicyMatrix() {
-		return policy_matrix;
+        Gson gson = new GsonBuilder().create();
+
+		return gson.fromJson(policy_matrix_json, double[][].class);
 	}
 
 	public void setPolicyMatrix(double[][] policy_matrix) {
-		this.policy_matrix = policy_matrix;
+        Gson gson = new GsonBuilder().create();
+
+		this.policy_matrix_json = gson.toJson(policy_matrix);
+	}
+
+	public Feature getDesiredFeature() {
+		return desired_feature;
+	}
+
+	public void setDesiredFeature(Feature feature) {
+		desired_feature = feature;
 	}
 }
