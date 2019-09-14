@@ -59,6 +59,13 @@ public class Brain {
 	/**
 	 * Reads path and performs learning tasks
 	 * 
+	 * 
+		//Learning process
+		//	1. identify vocabulary that this set of object info belongs to
+		//  2. Create record based on vocabulary
+		//  3. load known vocabulary action policies
+		//  4. perform matrix math to inline update vocabulary policies for record based on reward/penalty for productivity  
+	 * 
 	 * @param path an {@link ArrayList} of graph vertex indices. Order matters
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
@@ -66,13 +73,9 @@ public class Brain {
 	 * @throws IOException 
 	 */
 	public void learn(long memory_id,
-					  Feature actual_feature,
-					  boolean isRewarded)
+					  Feature actual_feature)
 						  throws IllegalArgumentException, IllegalAccessException, 
-							  NullPointerException, IOException{
-		//REINFORCEMENT LEARNING
-		System.err.println( " Initiating learning");
-		
+							  NullPointerException, IOException{		
 		//Load memory from database
 		Optional<MemoryRecord> memory_record = memory_repo.findById(memory_id);
 		
@@ -81,8 +84,8 @@ public class Brain {
 		
 		// 3. determine reward/regret score based on productivity status
 		//Q-LEARNING VARIABLES
-		final double learning_rate = .08;
-		final double discount_factor = .08;
+		final double learning_rate = .1;
+		final double discount_factor = .1;
 
 		//set estimated reward using prediction from memory.
 		// if actual feature is the most likely feature then set to 1
@@ -99,66 +102,48 @@ public class Brain {
 			pred_idx++;
 		}
 		
-		double estimated_reward = 0.0;
-		
-		if(most_likely_feature_value.equals(actual_feature.getValue())){
-			estimated_reward = 1.0;
-		}
-		else{
-			estimated_reward = -1.0;
-		}
+		//replace wit steps to estimate reward for an output feature independent of actual desired output feature
+		double estimated_reward = 1.0;
 		
 		// 3. determine reward/regret score based on productivity status
-		double actual_reward = 0.0;
-		
-		if(isRewarded){
-			actual_reward = 5.0;
-		}
-		else{
-			//nothing changed so there was no reward for that combination. We want to remember this in the future
-			// so we set it to a negative value to simulate regret
-			actual_reward = -1.0;
-		}
-		
-		
-		
-		System.err.println("Set reward :: "+actual_reward);
-		
+		double actual_reward = 0.0;		
 		QLearn q_learn = new QLearn(learning_rate, discount_factor);
-		
-		for(String input_key : memory.getInputFeatureValues()){
-			for(String output_key : memory.getOutputFeatureKeys()){
+		for(String output_key : memory.getOutputFeatureKeys()){
+			
+			//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
+			if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
+				log.debug("REWARD   ::    2");
+				actual_reward = 3.0;
+			}
+			else if(output_key.equals(actual_feature.getValue())){
+				log.debug("REWARD   ::   1");
+				actual_reward = 2.0;
+			}
+			//if output isn't equal to the actual feature or the predicted feature, don't affect weights
+			else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
+				log.debug("REWARD   ::     -1");
+				actual_reward = -1.0;
+			}
+			else {
+				log.debug("REWARD   ::    0");
+				//nothing changed so there was no reward for that combination. We want to remember this in the future
+				// so we set it to a negative value to simulate regret
+				actual_reward = 0.0;
+			}
+			
+			List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
+			for(String input_key : memory.getInputFeatureValues()){
+				memory.setDesiredFeature(actual_feature);
 				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
-				System.err.println("features size :: "+features.size());
-				System.err.println("feature weights size :: "+features.get(0).getFeatureWeights().size());
 				FeatureWeight feature_weight = features.get(0).getFeatureWeights().get(0);
-				double q_learn_val = q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward );
+				double q_learn_val = Math.abs(q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward ));
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
-				
-				System.err.println(" -> ADDED LAST ACTION TO ACTION MAP :: "+actual_feature.getValue()+"...Q LEARN VAL : "+q_learn_val);
-				System.err.println("feature weight :: "+feature_weight.getWeight());
-				
+				features_weights.add(feature_weight);
+				log.debug("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
 				feature_weight_repo.save(feature_weight);
-				
-				/*
-				System.err.println("Object definition :: "+actual_feature);
-				System.err.println("Object definition value :: "+actual_feature.getValue());
-				
-				feature_repo.save(actual_feature);
-				*/
 			}
-		}
-		
-		
-		
-				
-		
-		//Learning process
-		//	1. identify vocabulary that this set of object info belongs to
-		//  2. Create record based on vocabulary
-		//  3. load known vocabulary action policies
-		//  4. perform matrix math to inline update vocabulary policies for record based on reward/penalty for productivity  
+		}		
 	}
 	
 	/**
@@ -282,7 +267,7 @@ public class Brain {
 					
 					
 					//for(int weight_idx = 0 ; weight_idx < end_feature_weights.size(); weight_idx++){
-						//System.err.println("SETTING ACTION WIGHT : "+rand.nextFloat());
+						//log.info("SETTING ACTION WIGHT : "+rand.nextFloat());
 					//	end_feature_weights.set(weight_idx, rand.nextFloat());
 					//}
 =======
@@ -362,13 +347,13 @@ public class Brain {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<Feature> pageElements) 
+	public ArrayList<HashMap<String, Double>> getEstimatedElementProbabilities(ArrayList<Feature> ElementStates) 
 			throws IllegalArgumentException, IllegalAccessException
 	{
 		/*
 		ArrayList<HashMap<String, Double>> element_action_map_list = new ArrayList<HashMap<String, Double>>(0);
 				
-		for(PageElement elem : pageElements){
+		for(ElementState elem : ElementStates){
 			HashMap<String, Double> full_action_map = new HashMap<String, Double>(0);
 			//find vertex for given element
 			List<Object> raw_features = DataDecomposer.decompose(elem);
@@ -412,13 +397,11 @@ public class Brain {
 		// 1. Create a memory record for prediction
 		Random random = new Random();
 		double[][] policy = new double[input_features.size()][output_features.size()];
-		System.err.println("###################################################################");
-		System.err.println("input features size :: "+input_features.size());
-		System.err.println("output features size :: "+output_features.size());
+		log.info("###################################################################");
+		log.info("input features size :: "+input_features.size());
+		log.info("output features size :: "+output_features.size());
 		
-		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){
-			System.err.println("Getting input feature weights for feature :: " +input_features.get(in_idx).getValue());
-			
+		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){			
 			for(int out_idx = 0; out_idx < output_features.size(); out_idx++){
 				List<Feature> features = feature_repo.getConnectedFeatures(input_features.get(in_idx).getValue(), output_features.get(out_idx).getValue());	
 				double weight = -1.0;
@@ -438,10 +421,7 @@ public class Brain {
 					feature_weight.setFeature(input_features.get(in_idx));
 					Feature input_feature = input_features.get(in_idx);
 					Feature input_feature_record = feature_repo.findByValue(input_feature.getValue());
-					if(input_feature_record == null){
-						input_feature = feature_repo.save(input_feature);
-					}
-					else{
+					if(input_feature_record != null){
 						input_feature = input_feature_record;
 					}
 					
@@ -452,7 +432,7 @@ public class Brain {
 				policy[in_idx][out_idx] = weight;
 			}
 		}
-		System.err.println("###################################################################");
+		log.info("###################################################################");
 
 		
 		return policy;
@@ -460,20 +440,20 @@ public class Brain {
 
 	public void train(List<Feature> feature_list, String label) {
 		//REINFORCEMENT LEARNING
-		System.err.println( " Initiating learning");
+		log.info( " Initiating learning");
 		
 		//learning model
 		// 1. identify vocabulary (NOTE: This is currently hard coded since we only currently care about 1 context)
 		Vocabulary vocabulary = new Vocabulary(new ArrayList<Feature>(), "internet");
 
-		System.err.println("object definition list size :: "+feature_list.size());
+		log.info("object definition list size :: "+feature_list.size());
 		// 2. create record based on vocabulary
 		for(Feature feature : feature_list){
 			vocabulary.appendToVocabulary(feature);
 		}
 		
-		System.err.println("vocabulary :: "+vocabulary);
-		System.err.println("vocab value list size   :: "+vocabulary.getFeatures().size());
+		log.info("vocabulary :: "+vocabulary);
+		log.info("vocab value list size   :: "+vocabulary.getFeatures().size());
 		// 2. create state vertex from vocabulary 
 		int idx = 0;
 		for(Feature vocab_feature : vocabulary.getFeatures()){

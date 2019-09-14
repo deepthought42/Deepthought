@@ -4,7 +4,7 @@
 
   <groupId>Qanairy</groupId>
   <artifactId>deepthought</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>deepthought</name>
@@ -96,5 +96,12 @@
 	    <artifactId>stanford-corenlp</artifactId>
 	    <version>3.9.1</version>
 	</dependency>
+	
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.5</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>
