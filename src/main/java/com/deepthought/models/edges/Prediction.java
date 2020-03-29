@@ -34,11 +34,17 @@ public class Prediction {
 	@Property
 	private List<String> labels = new ArrayList<String>();
     
-    public Feature getEndFeature(){
+    public Prediction(MemoryRecord memory, Feature feature, double weight) {
+		setMemoryRecord(memory);
+		setFeature(feature);
+		setWeight(weight);
+	}
+
+	public Feature getFeature(){
     	return this.result_feature;
     }
     
-    public void setEndFeature(Feature result_feature){
+    public void setFeature(Feature result_feature){
     	this.result_feature = result_feature;
     }
     

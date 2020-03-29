@@ -13,7 +13,8 @@ import org.neo4j.ogm.annotation.StartNode;
 import com.deepthought.models.Feature;
 
 /**
- * 
+ * Acts as a relationship between 2 {@link Feature} nodes within the graph and 
+ * 	holds the most recent policy/model weight for the feature relationship
  */
 @RelationshipEntity(type = "HAS_RELATED_FEATURE")
 public class FeatureWeight {
