@@ -53,6 +53,7 @@ public class Brain {
 			prediction[idx1] = sum;
 		}
 		prediction = ArrayUtils.normalize(prediction);
+		
 		return prediction;
 	}
 		
@@ -102,7 +103,7 @@ public class Brain {
 			pred_idx++;
 		}
 		
-		//replace wit steps to estimate reward for an output feature independent of actual desired output feature
+		//replace with steps to estimate reward for an output feature independent of actual desired output feature
 		double estimated_reward = 1.0;
 		
 		// 3. determine reward/regret score based on productivity status
@@ -113,16 +114,20 @@ public class Brain {
 			//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
 			if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
 				log.debug("REWARD   ::    2");
-				actual_reward = 3.0;
+				actual_reward = 2.0;
 			}
 			else if(output_key.equals(actual_feature.getValue())){
 				log.debug("REWARD   ::   1");
-				actual_reward = 2.0;
+				actual_reward = 1.0;
 			}
 			//if output isn't equal to the actual feature or the predicted feature, don't affect weights
 			else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
-				log.debug("REWARD   ::     -1");
+				log.debug("REWARD   ::     -2");
 				actual_reward = -1.0;
+			}
+			else if(!output_key.equals(actual_feature.getValue())) {
+				log.debug("REWARD   ::     -1");
+				actual_reward = -2.0;
 			}
 			else {
 				log.debug("REWARD   ::    0");

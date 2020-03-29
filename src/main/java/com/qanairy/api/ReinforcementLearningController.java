@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
+import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
+import com.deepthought.models.repository.PredictionRepository;
 import com.deepthought.models.repository.VocabularyRepository;
 import com.qanairy.brain.Brain;
 import com.qanairy.db.DataDecomposer;
@@ -31,7 +33,7 @@ import com.qanairy.db.DataDecomposer;
 
 /**
  *	API endpoints for learning and making predictions. This set of endpoints allows interacting with the knowledge graph
- *	 to generate, update and retrieve weight matices(models) for any given input feature set and output set
+ *	 to generate, update and retrieve weight matrices(models) for any given input feature set and output set
  */
 @RestController
 @RequestMapping("/rl")
@@ -48,6 +50,9 @@ public class ReinforcementLearningController {
 	
 	@Autowired
 	private MemoryRecordRepository memory_repo;
+	
+	@Autowired
+	private PredictionRepository prediction_repo;
 	
 	@Autowired
 	private Brain brain;
@@ -172,9 +177,6 @@ public class ReinforcementLearningController {
     	
     	List<Feature> output_features = output_vocab.getFeatures();
     	String[] output_feature_keys = new String[output_features.size()];
-    	for(int i=0; i< output_features.size(); i++){
-    		output_feature_keys[i] = output_features.get(i).getValue();
-    	}
     	
     	//load feature vector for output_vocab
     	log.debug("loading output feature set");
@@ -186,6 +188,11 @@ public class ReinforcementLearningController {
     	//generate prediction
     	log.debug("Predicting...  "+policy);
     	double[] prediction = brain.predict(policy);
+
+    	//create prediction edges
+    	for(int i=0; i< output_features.size(); i++){
+    		output_feature_keys[i] = output_features.get(i).getValue();
+      	}
     	
     	double max_pred = 0.0;
     	int max_idx = 0;
@@ -194,6 +201,7 @@ public class ReinforcementLearningController {
     			max_idx = idx;
     		}
     	}
+    	
     	
     	//create memory and save vocabularies, policy matrix and prediction vector
     	MemoryRecord memory = new MemoryRecord();
@@ -206,9 +214,12 @@ public class ReinforcementLearningController {
     	memory.setPredictedFeature(output_features.get(max_idx));
 		memory = memory_repo.save(memory);
 		
-    	
-    	//return memory
-    	return memory;
+		//iterate over features to create prediction edges for the memory
+		for(int i=0; i< output_features.size(); i++) {
+    		Prediction prediction_edge = new Prediction(memory, output_features.get(i), prediction[i]);
+		}
+		
+       	return memory;
 	}
     
     /**

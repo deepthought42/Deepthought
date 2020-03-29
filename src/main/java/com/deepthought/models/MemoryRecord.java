@@ -1,5 +1,6 @@
 package com.deepthought.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,13 +10,16 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
+import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.serializers.MemoryRecordSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * 
+ * Stores all data for making predictions and learning from feedback. This node
+ *  also connects to {@link Feature}s through a {@link Prediction} relationship/edge
+ *  that contains the predicted weight for the feature that this memory stores.
  */
 @NodeEntity
 @JsonSerialize(using = MemoryRecordSerializer.class)
@@ -39,6 +43,9 @@ public class MemoryRecord {
 	
 	@Relationship(type = "PREDICTED")
 	private Feature predicted_feature;
+	
+	@Relationship(type = "PREDICTION", direction = Relationship.OUTGOING)
+	private List<Prediction> predictions = new ArrayList<>();
 	
 	private List<String> input_feature_values;
 	private String[] output_feature_values;
