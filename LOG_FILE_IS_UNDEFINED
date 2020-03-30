@@ -1,0 +1,360 @@
+2020-03-29 16:11:47.837  INFO 38944 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 38944 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 16:11:47.839  INFO 38944 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 16:11:47.882  INFO 38944 --- [main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@29647f75: startup date [Sun Mar 29 16:11:47 EDT 2020]; root of context hierarchy
+2020-03-29 16:11:48.625  INFO 38944 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.boot.context.properties.ConversionServiceDeducer$Factory' of type [org.springframework.boot.context.properties.ConversionServiceDeducer$Factory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:11:48.633  INFO 38944 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$59002da2] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:11:48.669  INFO 38944 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'spring.data.neo4j-org.springframework.boot.autoconfigure.data.neo4j.Neo4jProperties' of type [org.springframework.boot.autoconfigure.data.neo4j.Neo4jProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:11:48.673  INFO 38944 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'neo4jConfiguration' of type [com.qanairy.config.Neo4jConfiguration$$EnhancerBySpringCGLIB$$c940554d] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:11:48.691  INFO 38944 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'configuration' of type [org.neo4j.ogm.config.Configuration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:11:48.797  INFO 38944 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 16:11:48.797  INFO 38944 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building annotation class map
+2020-03-29 16:11:48.797  INFO 38944 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 16:11:48.800  INFO 38944 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 16:11:48.822  INFO 38944 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'sessionFactory' of type [org.neo4j.ogm.session.SessionFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:11:49.112  INFO 38944 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 16:11:49.139  INFO 38944 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 16:11:49.140  INFO 38944 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.31
+2020-03-29 16:11:49.152  INFO 38944 --- [localhost-startStop-1] o.a.catalina.core.AprLifecycleListener   : The APR based Apache Tomcat Native library which allows optimal performance in production environments was not found on the java.library.path: [C:\Program Files\Java\jdk1.8.0_221\jre\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;C:/Program Files/Java/jre1.8.0_231/bin/server;C:/Program Files/Java/jre1.8.0_231/bin;C:/Program Files/Java/jre1.8.0_231/lib/amd64;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NGX;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\PuTTY\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Users\brand\Dev\apache-maven-3.6.2-bin\apache-maven-3.6.2/bin;C:\Program Files\Java\jdk1.8.0_221\bin;C:\Gradle\gradle-6.0.1\bin;C:\RailsInstaller\Git\cmd;C:\RailsInstaller\Ruby2.3.3\bin;C:\Users\brand\AppData\Local\Microsoft\WindowsApps;C:\Users\brand\AppData\Local\GitHubDesktop\bin;C:\Users\brand\AppData\Local\atom\bin;C:\Users\brand\AppData\Roaming\npm;C:\Users\brand\eclipse\java-2019-062\eclipse;;.]
+2020-03-29 16:11:49.257  INFO 38944 --- [localhost-startStop-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 16:11:49.257  INFO 38944 --- [localhost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1376 ms
+2020-03-29 16:11:49.391  INFO 38944 --- [localhost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet dispatcherServlet mapped to [/]
+2020-03-29 16:11:49.399  INFO 38944 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2020-03-29 16:11:49.399  INFO 38944 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2020-03-29 16:11:49.400  INFO 38944 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'httpPutFormContentFilter' to: [/*]
+2020-03-29 16:11:49.400  INFO 38944 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'requestContextFilter' to: [/*]
+2020-03-29 16:11:49.569  WARN 38944 --- [main] o.s.d.n.mapping.Neo4jPersistentProperty  : No identity field found for class of type: com.deepthought.models.serializers.MemoryRecordSerializer when creating persistent property for : protected final java.lang.Class com.fasterxml.jackson.databind.ser.std.StdSerializer._handledType
+2020-03-29 16:11:49.575  WARN 38944 --- [main] o.s.d.n.mapping.Neo4jPersistentProperty  : No identity field found for class of type: com.deepthought.models.services.FeatureService when creating persistent property for : private com.deepthought.models.repository.FeatureRepository com.deepthought.models.services.FeatureService.featureRepository
+2020-03-29 16:11:49.577  INFO 38944 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 16:11:49.733  WARN 38944 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 16:11:49.826  INFO 38944 --- [main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2020-03-29 16:11:50.065  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@29647f75: startup date [Sun Mar 29 16:11:47 EDT 2020]; root of context hierarchy
+2020-03-29 16:11:50.122  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/data],methods=[POST]}" onto public java.util.List<com.deepthought.models.Feature> com.qanairy.api.DataController.decompose(org.json.JSONObject) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,org.json.JSONException
+2020-03-29 16:11:50.124  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/rl/predict],methods=[POST]}" onto public com.deepthought.models.MemoryRecord com.qanairy.api.ReinforcementLearningController.predict(java.lang.String,java.lang.String,java.lang.String,java.lang.String[]) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,org.json.JSONException
+2020-03-29 16:11:50.124  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/rl/learn],methods=[POST]}" onto public void com.qanairy.api.ReinforcementLearningController.learn(long,java.lang.String) throws org.json.JSONException,java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,java.io.IOException
+2020-03-29 16:11:50.124  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/rl/train],methods=[POST]}" onto public void com.qanairy.api.ReinforcementLearningController.train(java.lang.String,java.lang.String) throws org.json.JSONException,java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,java.io.IOException
+2020-03-29 16:11:50.125  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/vocabulary],methods=[GET]}" onto public com.deepthought.models.Vocabulary com.qanairy.api.VocabularyController.getVocabulary(java.lang.String)
+2020-03-29 16:11:50.126  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/vocabulary],methods=[POST]}" onto public com.deepthought.models.Vocabulary com.qanairy.api.VocabularyController.createVocabulary(java.lang.String)
+2020-03-29 16:11:50.126  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/vocabulary/feature],methods=[POST]}" onto public com.deepthought.models.Vocabulary com.qanairy.api.VocabularyController.addFeature(java.lang.String,java.lang.String)
+2020-03-29 16:11:50.128  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2020-03-29 16:11:50.129  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2020-03-29 16:11:50.145  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/v3/api-docs],methods=[GET],produces=[application/json]}" onto public java.lang.String org.springdoc.api.OpenApiResource.openapiJson(javax.servlet.http.HttpServletRequest,java.lang.String) throws com.fasterxml.jackson.core.JsonProcessingException
+2020-03-29 16:11:50.146  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/v3/api-docs.yaml],methods=[GET],produces=[application/vnd.oai.openapi]}" onto public java.lang.String org.springdoc.api.OpenApiResource.openapiYaml(javax.servlet.http.HttpServletRequest,java.lang.String) throws com.fasterxml.jackson.core.JsonProcessingException
+2020-03-29 16:11:50.149  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/v3/api-docs/swagger-config],methods=[GET],produces=[application/json]}" onto public java.util.Map<java.lang.String, java.lang.Object> org.springdoc.ui.SwaggerWelcome.openapiYaml(javax.servlet.http.HttpServletRequest)
+2020-03-29 16:11:50.150  INFO 38944 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/swagger-ui.html],methods=[GET]}" onto public java.lang.String org.springdoc.ui.SwaggerWelcome.redirectToUi(javax.servlet.http.HttpServletRequest)
+2020-03-29 16:11:50.387  INFO 38944 --- [main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/swagger-ui/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2020-03-29 16:11:50.674  INFO 38944 --- [main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2020-03-29 16:11:50.713  INFO 38944 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 16:11:50.715  INFO 38944 --- [main] com.qanairy.deepthought.App              : Started App in 3.191 seconds (JVM running for 4.012)
+2020-03-29 16:11:52.472  INFO 38944 --- [RMI TCP Connection(2)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 16:11:52.472  INFO 38944 --- [RMI TCP Connection(2)-127.0.0.1] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@29647f75: startup date [Sun Mar 29 16:11:47 EDT 2020]; root of context hierarchy
+2020-03-29 16:11:52.473  INFO 38944 --- [RMI TCP Connection(2)-127.0.0.1] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2020-03-29 16:15:52.926  INFO 35772 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 35772 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 16:15:52.928  INFO 35772 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 16:15:52.970  INFO 35772 --- [main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@1f97cf0d: startup date [Sun Mar 29 16:15:52 EDT 2020]; root of context hierarchy
+2020-03-29 16:15:53.838  INFO 35772 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.boot.context.properties.ConversionServiceDeducer$Factory' of type [org.springframework.boot.context.properties.ConversionServiceDeducer$Factory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:15:53.844  INFO 35772 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$1da0bc31] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:15:53.888  INFO 35772 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'spring.data.neo4j-org.springframework.boot.autoconfigure.data.neo4j.Neo4jProperties' of type [org.springframework.boot.autoconfigure.data.neo4j.Neo4jProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:15:53.893  INFO 35772 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'neo4jConfiguration' of type [com.qanairy.config.Neo4jConfiguration$$EnhancerBySpringCGLIB$$8de0e3dc] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:15:53.915  INFO 35772 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'configuration' of type [org.neo4j.ogm.config.Configuration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:15:54.010  INFO 35772 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 16:15:54.010  INFO 35772 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building annotation class map
+2020-03-29 16:15:54.010  INFO 35772 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 16:15:54.014  INFO 35772 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 16:15:54.035  INFO 35772 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'sessionFactory' of type [org.neo4j.ogm.session.SessionFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-03-29 16:15:54.298  INFO 35772 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 16:15:54.327  INFO 35772 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 16:15:54.328  INFO 35772 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.31
+2020-03-29 16:15:54.341  INFO 35772 --- [localhost-startStop-1] o.a.catalina.core.AprLifecycleListener   : The APR based Apache Tomcat Native library which allows optimal performance in production environments was not found on the java.library.path: [C:\Program Files\Java\jdk1.8.0_221\jre\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;C:/Program Files/Java/jre1.8.0_231/bin/server;C:/Program Files/Java/jre1.8.0_231/bin;C:/Program Files/Java/jre1.8.0_231/lib/amd64;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NGX;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\PuTTY\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Users\brand\Dev\apache-maven-3.6.2-bin\apache-maven-3.6.2/bin;C:\Program Files\Java\jdk1.8.0_221\bin;C:\Gradle\gradle-6.0.1\bin;C:\RailsInstaller\Git\cmd;C:\RailsInstaller\Ruby2.3.3\bin;C:\Users\brand\AppData\Local\Microsoft\WindowsApps;C:\Users\brand\AppData\Local\GitHubDesktop\bin;C:\Users\brand\AppData\Local\atom\bin;C:\Users\brand\AppData\Roaming\npm;C:\Users\brand\eclipse\java-2019-062\eclipse;;.]
+2020-03-29 16:15:54.479  INFO 35772 --- [localhost-startStop-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 16:15:54.479  INFO 35772 --- [localhost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1509 ms
+2020-03-29 16:15:54.644  INFO 35772 --- [localhost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Servlet dispatcherServlet mapped to [/]
+2020-03-29 16:15:54.648  INFO 35772 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2020-03-29 16:15:54.648  INFO 35772 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2020-03-29 16:15:54.648  INFO 35772 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'httpPutFormContentFilter' to: [/*]
+2020-03-29 16:15:54.648  INFO 35772 --- [localhost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'requestContextFilter' to: [/*]
+2020-03-29 16:15:54.782  WARN 35772 --- [main] o.s.d.n.mapping.Neo4jPersistentProperty  : No identity field found for class of type: com.deepthought.models.serializers.MemoryRecordSerializer when creating persistent property for : protected final java.lang.Class com.fasterxml.jackson.databind.ser.std.StdSerializer._handledType
+2020-03-29 16:15:54.787  WARN 35772 --- [main] o.s.d.n.mapping.Neo4jPersistentProperty  : No identity field found for class of type: com.deepthought.models.services.FeatureService when creating persistent property for : private com.deepthought.models.repository.FeatureRepository com.deepthought.models.services.FeatureService.featureRepository
+2020-03-29 16:15:54.789  INFO 35772 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 16:15:54.926  WARN 35772 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 16:15:55.013  INFO 35772 --- [main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2020-03-29 16:15:55.256  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@1f97cf0d: startup date [Sun Mar 29 16:15:52 EDT 2020]; root of context hierarchy
+2020-03-29 16:15:55.314  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/data],methods=[POST]}" onto public java.util.List<com.deepthought.models.Feature> com.qanairy.api.DataController.decompose(org.json.JSONObject) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,org.json.JSONException
+2020-03-29 16:15:55.316  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/rl/train],methods=[POST]}" onto public void com.qanairy.api.ReinforcementLearningController.train(java.lang.String,java.lang.String) throws org.json.JSONException,java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,java.io.IOException
+2020-03-29 16:15:55.316  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/rl/learn],methods=[POST]}" onto public void com.qanairy.api.ReinforcementLearningController.learn(long,java.lang.String) throws org.json.JSONException,java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,java.io.IOException
+2020-03-29 16:15:55.317  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/rl/predict],methods=[POST]}" onto public com.deepthought.models.MemoryRecord com.qanairy.api.ReinforcementLearningController.predict(java.lang.String,java.lang.String,java.lang.String,java.lang.String[]) throws java.lang.IllegalArgumentException,java.lang.IllegalAccessException,java.lang.NullPointerException,org.json.JSONException
+2020-03-29 16:15:55.318  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/vocabulary],methods=[POST]}" onto public com.deepthought.models.Vocabulary com.qanairy.api.VocabularyController.createVocabulary(java.lang.String)
+2020-03-29 16:15:55.318  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/vocabulary],methods=[GET]}" onto public com.deepthought.models.Vocabulary com.qanairy.api.VocabularyController.getVocabulary(java.lang.String)
+2020-03-29 16:15:55.319  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/vocabulary/feature],methods=[POST]}" onto public com.deepthought.models.Vocabulary com.qanairy.api.VocabularyController.addFeature(java.lang.String,java.lang.String)
+2020-03-29 16:15:55.322  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2020-03-29 16:15:55.322  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2020-03-29 16:15:55.345  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/v3/api-docs],methods=[GET],produces=[application/json]}" onto public java.lang.String org.springdoc.api.OpenApiResource.openapiJson(javax.servlet.http.HttpServletRequest,java.lang.String) throws com.fasterxml.jackson.core.JsonProcessingException
+2020-03-29 16:15:55.346  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/v3/api-docs.yaml],methods=[GET],produces=[application/vnd.oai.openapi]}" onto public java.lang.String org.springdoc.api.OpenApiResource.openapiYaml(javax.servlet.http.HttpServletRequest,java.lang.String) throws com.fasterxml.jackson.core.JsonProcessingException
+2020-03-29 16:15:55.351  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/v3/api-docs/swagger-config],methods=[GET],produces=[application/json]}" onto public java.util.Map<java.lang.String, java.lang.Object> org.springdoc.ui.SwaggerWelcome.openapiYaml(javax.servlet.http.HttpServletRequest)
+2020-03-29 16:15:55.352  INFO 35772 --- [main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/swagger-ui.html],methods=[GET]}" onto public java.lang.String org.springdoc.ui.SwaggerWelcome.redirectToUi(javax.servlet.http.HttpServletRequest)
+2020-03-29 16:15:55.647  INFO 35772 --- [main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/swagger-ui/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2020-03-29 16:15:55.988  INFO 35772 --- [main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2020-03-29 16:15:56.023  INFO 35772 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 16:15:56.026  INFO 35772 --- [main] com.qanairy.deepthought.App              : Started App in 3.358 seconds (JVM running for 4.169)
+2020-03-29 16:15:56.758  INFO 35772 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 16:15:56.759  INFO 35772 --- [RMI TCP Connection(4)-127.0.0.1] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@1f97cf0d: startup date [Sun Mar 29 16:15:52 EDT 2020]; root of context hierarchy
+2020-03-29 16:15:56.761  INFO 35772 --- [RMI TCP Connection(4)-127.0.0.1] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2020-03-29 21:10:39.707  INFO 21952 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 21952 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 21:10:39.709  INFO 21952 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 21:10:40.107  INFO 21952 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 21:10:40.162  INFO 21952 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 47ms. Found 5 Neo4j repository interfaces.
+2020-03-29 21:10:40.787  INFO 21952 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 21:10:40.796  INFO 21952 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 21:10:40.796  INFO 21952 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 21:10:40.959  INFO 21952 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 21:10:40.960  INFO 21952 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1204 ms
+2020-03-29 21:10:41.229  INFO 21952 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 21:10:41.229  INFO 21952 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 21:10:41.229  INFO 21952 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 21:10:41.238  INFO 21952 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 21:10:41.330  INFO 21952 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 21:10:41.463  INFO 21952 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 21:10:41.686  INFO 21952 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:10:42.108  INFO 21952 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 21:10:42.109  INFO 21952 --- [main] com.qanairy.deepthought.App              : Started App in 2.665 seconds (JVM running for 3.443)
+2020-03-29 21:10:42.670  INFO 21952 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 21:10:42.673  INFO 21952 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:12:23.833  INFO 4948 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 4948 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 21:12:23.836  INFO 4948 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 21:12:24.213  INFO 4948 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 21:12:24.269  INFO 4948 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 48ms. Found 5 Neo4j repository interfaces.
+2020-03-29 21:12:24.868  INFO 4948 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 21:12:24.910  INFO 4948 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 21:12:24.911  INFO 4948 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 21:12:24.987  INFO 4948 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 21:12:24.987  INFO 4948 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1089 ms
+2020-03-29 21:12:25.368  INFO 4948 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 21:12:25.368  INFO 4948 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 21:12:25.369  INFO 4948 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 21:12:25.379  INFO 4948 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 21:12:25.492  INFO 4948 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 21:12:25.626  INFO 4948 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 21:12:25.789  INFO 4948 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:12:26.193  INFO 4948 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 21:12:26.195  INFO 4948 --- [main] com.qanairy.deepthought.App              : Started App in 2.669 seconds (JVM running for 3.442)
+2020-03-29 21:12:26.623  INFO 4948 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 21:12:26.625  INFO 4948 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:15:35.602  INFO 36896 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 36896 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 21:15:35.605  INFO 36896 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 21:15:35.959  INFO 36896 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 21:15:36.006  INFO 36896 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 40ms. Found 5 Neo4j repository interfaces.
+2020-03-29 21:15:36.551  INFO 36896 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 21:15:36.559  INFO 36896 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 21:15:36.560  INFO 36896 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 21:15:36.703  INFO 36896 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 21:15:36.703  INFO 36896 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1036 ms
+2020-03-29 21:15:37.037  INFO 36896 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 21:15:37.037  INFO 36896 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 21:15:37.038  INFO 36896 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 21:15:37.046  INFO 36896 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 21:15:37.137  INFO 36896 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 21:15:37.253  INFO 36896 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 21:15:37.403  INFO 36896 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:15:37.716  INFO 36896 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 21:15:37.718  INFO 36896 --- [main] com.qanairy.deepthought.App              : Started App in 2.403 seconds (JVM running for 3.148)
+2020-03-29 21:15:38.439  INFO 36896 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 21:15:38.441  INFO 36896 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:54:52.162  INFO 28092 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 28092 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 21:54:52.165  INFO 28092 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 21:54:52.539  INFO 28092 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 21:54:52.617  INFO 28092 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 69ms. Found 5 Neo4j repository interfaces.
+2020-03-29 21:54:53.229  INFO 28092 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 21:54:53.268  INFO 28092 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 21:54:53.268  INFO 28092 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 21:54:53.346  INFO 28092 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 21:54:53.346  INFO 28092 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1116 ms
+2020-03-29 21:54:53.647  INFO 28092 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 21:54:53.647  INFO 28092 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 21:54:53.648  INFO 28092 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 21:54:53.659  INFO 28092 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 21:54:53.796  INFO 28092 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 21:54:53.948  INFO 28092 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 21:54:54.101  INFO 28092 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 21:54:54.398  INFO 28092 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 21:54:54.399  INFO 28092 --- [main] com.qanairy.deepthought.App              : Started App in 2.514 seconds (JVM running for 3.294)
+2020-03-29 21:54:54.991  INFO 28092 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 21:54:54.992  INFO 28092 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:14:22.227  INFO 5380 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 5380 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 22:14:22.229  INFO 5380 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 22:14:22.566  INFO 5380 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 22:14:22.615  INFO 5380 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42ms. Found 5 Neo4j repository interfaces.
+2020-03-29 22:14:23.276  INFO 5380 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 22:14:23.315  INFO 5380 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 22:14:23.315  INFO 5380 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 22:14:23.393  INFO 5380 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 22:14:23.394  INFO 5380 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1108 ms
+2020-03-29 22:14:23.683  INFO 5380 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 22:14:23.683  INFO 5380 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 22:14:23.684  INFO 5380 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 22:14:23.693  INFO 5380 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 22:14:23.800  INFO 5380 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 22:14:23.932  INFO 5380 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 22:14:24.084  INFO 5380 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:14:24.463  INFO 5380 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 22:14:24.465  INFO 5380 --- [main] com.qanairy.deepthought.App              : Started App in 2.573 seconds (JVM running for 3.298)
+2020-03-29 22:14:25.055  INFO 5380 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 22:14:25.057  INFO 5380 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:19:00.472  INFO 38352 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 38352 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 22:19:00.475  INFO 38352 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 22:19:00.827  INFO 38352 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 22:19:00.880  INFO 38352 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 46ms. Found 5 Neo4j repository interfaces.
+2020-03-29 22:19:01.516  INFO 38352 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 22:19:01.557  INFO 38352 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 22:19:01.557  INFO 38352 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 22:19:01.633  INFO 38352 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 22:19:01.633  INFO 38352 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1101 ms
+2020-03-29 22:19:01.913  INFO 38352 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 22:19:01.913  INFO 38352 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 22:19:01.914  INFO 38352 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 22:19:01.922  INFO 38352 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 22:19:02.031  INFO 38352 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 22:19:02.146  INFO 38352 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 22:19:02.370  INFO 38352 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:19:02.666  INFO 38352 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 22:19:02.667  INFO 38352 --- [main] com.qanairy.deepthought.App              : Started App in 2.446 seconds (JVM running for 3.222)
+2020-03-29 22:19:03.337  INFO 38352 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 22:19:03.338  INFO 38352 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:28:26.425  INFO 21480 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 21480 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 22:28:26.427  INFO 21480 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 22:28:26.776  INFO 21480 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 22:28:26.829  INFO 21480 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 45ms. Found 5 Neo4j repository interfaces.
+2020-03-29 22:28:27.455  INFO 21480 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 22:28:27.500  INFO 21480 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 22:28:27.501  INFO 21480 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 22:28:27.582  INFO 21480 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 22:28:27.583  INFO 21480 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1094 ms
+2020-03-29 22:28:27.868  INFO 21480 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 22:28:27.868  INFO 21480 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 22:28:27.868  INFO 21480 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 22:28:27.877  INFO 21480 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 22:28:27.981  INFO 21480 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 22:28:28.098  INFO 21480 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 22:28:28.246  INFO 21480 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:28:28.529  INFO 21480 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 22:28:28.530  INFO 21480 --- [main] com.qanairy.deepthought.App              : Started App in 2.36 seconds (JVM running for 3.128)
+2020-03-29 22:28:29.221  INFO 21480 --- [RMI TCP Connection(2)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 22:28:29.222  INFO 21480 --- [RMI TCP Connection(2)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:38:53.058  INFO 21148 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 21148 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 22:38:53.061  INFO 21148 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 22:38:53.396  INFO 21148 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 22:38:53.469  INFO 21148 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 63ms. Found 5 Neo4j repository interfaces.
+2020-03-29 22:38:54.069  INFO 21148 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 22:38:54.108  INFO 21148 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 22:38:54.108  INFO 21148 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 22:38:54.181  INFO 21148 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 22:38:54.182  INFO 21148 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1057 ms
+2020-03-29 22:38:54.487  INFO 21148 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 22:38:54.487  INFO 21148 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 22:38:54.488  INFO 21148 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 14 classes
+2020-03-29 22:38:54.499  INFO 21148 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 22:38:54.646  INFO 21148 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 22:38:54.777  INFO 21148 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 22:38:54.925  INFO 21148 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:38:55.201  INFO 21148 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 22:38:55.203  INFO 21148 --- [main] com.qanairy.deepthought.App              : Started App in 2.408 seconds (JVM running for 3.18)
+2020-03-29 22:38:55.903  INFO 21148 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 22:38:55.905  INFO 21148 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:53:00.233  INFO 25664 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 25664 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 22:53:00.237  INFO 25664 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 22:53:00.638  INFO 25664 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 22:53:00.690  INFO 25664 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44ms. Found 5 Neo4j repository interfaces.
+2020-03-29 22:53:01.252  INFO 25664 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 22:53:01.293  INFO 25664 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 22:53:01.293  INFO 25664 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 22:53:01.394  INFO 25664 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 22:53:01.395  INFO 25664 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1076 ms
+2020-03-29 22:53:01.712  INFO 25664 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 22:53:01.713  INFO 25664 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 22:53:01.713  INFO 25664 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 12 classes
+2020-03-29 22:53:01.722  INFO 25664 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 22:53:01.808  INFO 25664 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 22:53:01.933  INFO 25664 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 22:53:02.079  INFO 25664 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 22:53:02.408  INFO 25664 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 22:53:02.410  INFO 25664 --- [main] com.qanairy.deepthought.App              : Started App in 2.466 seconds (JVM running for 3.159)
+2020-03-29 22:53:03.081  INFO 25664 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 22:53:03.083  INFO 25664 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:00:37.772  INFO 26604 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 26604 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 23:00:37.775  INFO 26604 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 23:00:38.119  INFO 26604 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 23:00:38.170  INFO 26604 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44ms. Found 5 Neo4j repository interfaces.
+2020-03-29 23:00:38.798  INFO 26604 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 23:00:38.837  INFO 26604 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 23:00:38.837  INFO 26604 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 23:00:38.910  INFO 26604 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 23:00:38.910  INFO 26604 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1077 ms
+2020-03-29 23:00:39.180  INFO 26604 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 23:00:39.180  INFO 26604 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 23:00:39.181  INFO 26604 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 12 classes
+2020-03-29 23:00:39.189  INFO 26604 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 23:00:39.268  INFO 26604 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 23:00:39.389  INFO 26604 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 23:00:39.558  INFO 26604 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:00:39.868  INFO 26604 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 23:00:39.870  INFO 26604 --- [main] com.qanairy.deepthought.App              : Started App in 2.362 seconds (JVM running for 3.172)
+2020-03-29 23:00:40.594  INFO 26604 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 23:00:40.596  INFO 26604 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:07:13.635  INFO 28040 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 28040 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 23:07:13.637  INFO 28040 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 23:07:13.983  INFO 28040 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 23:07:14.038  INFO 28040 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 49ms. Found 5 Neo4j repository interfaces.
+2020-03-29 23:07:14.674  INFO 28040 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 23:07:14.712  INFO 28040 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 23:07:14.713  INFO 28040 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 23:07:14.791  INFO 28040 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 23:07:14.792  INFO 28040 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1099 ms
+2020-03-29 23:07:15.063  INFO 28040 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 23:07:15.063  INFO 28040 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 23:07:15.064  INFO 28040 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 12 classes
+2020-03-29 23:07:15.072  INFO 28040 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 23:07:15.151  INFO 28040 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 23:07:15.266  INFO 28040 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 23:07:15.425  INFO 28040 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:07:15.717  INFO 28040 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 23:07:15.718  INFO 28040 --- [main] com.qanairy.deepthought.App              : Started App in 2.352 seconds (JVM running for 3.146)
+2020-03-29 23:07:16.508  INFO 28040 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 23:07:16.509  INFO 28040 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:26:53.446  INFO 25412 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 25412 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 23:26:53.450  INFO 25412 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 23:26:53.865  INFO 25412 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 23:26:53.918  INFO 25412 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 45ms. Found 5 Neo4j repository interfaces.
+2020-03-29 23:26:54.470  INFO 25412 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 23:26:54.517  INFO 25412 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 23:26:54.517  INFO 25412 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 23:26:54.627  INFO 25412 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 23:26:54.628  INFO 25412 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1094 ms
+2020-03-29 23:26:54.957  INFO 25412 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 23:26:54.958  INFO 25412 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 23:26:54.959  INFO 25412 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 12 classes
+2020-03-29 23:26:54.969  INFO 25412 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 23:26:55.068  INFO 25412 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 23:26:55.212  INFO 25412 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 23:26:55.374  INFO 25412 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:26:55.674  INFO 25412 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 23:26:55.676  INFO 25412 --- [main] com.qanairy.deepthought.App              : Started App in 2.512 seconds (JVM running for 3.211)
+2020-03-29 23:26:56.296  INFO 25412 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 23:26:56.298  INFO 25412 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:30:55.318  INFO 9184 --- [main] com.qanairy.deepthought.App              : Starting App on DESKTOP-GO9ITH9 with PID 9184 (C:\Users\brand\OneDrive\Documents\GitHub\Deepthought\target\classes started by brand in C:\Users\brand\OneDrive\Documents\GitHub\Deepthought)
+2020-03-29 23:30:55.320  INFO 9184 --- [main] com.qanairy.deepthought.App              : No active profile set, falling back to default profiles: default
+2020-03-29 23:30:55.769  INFO 9184 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2020-03-29 23:30:55.825  INFO 9184 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 48ms. Found 5 Neo4j repository interfaces.
+2020-03-29 23:30:56.373  INFO 9184 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9080 (http)
+2020-03-29 23:30:56.413  INFO 9184 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-03-29 23:30:56.413  INFO 9184 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.33]
+2020-03-29 23:30:56.511  INFO 9184 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-03-29 23:30:56.511  INFO 9184 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1125 ms
+2020-03-29 23:30:56.870  INFO 9184 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-03-29 23:30:56.870  INFO 9184 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building byLabel lookup maps
+2020-03-29 23:30:56.870  INFO 9184 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 12 classes
+2020-03-29 23:30:56.879  INFO 9184 --- [main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-03-29 23:30:56.970  INFO 9184 --- [main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-03-29 23:30:57.157  INFO 9184 --- [main] f.a.AutowiredAnnotationBeanPostProcessor : Autowired annotation is not supported on static fields: private static com.deepthought.models.repository.FeatureRepository com.qanairy.brain.FeatureVector.obj_def_repo
+2020-03-29 23:30:57.397  INFO 9184 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-03-29 23:30:57.913  INFO 9184 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9080 (http) with context path ''
+2020-03-29 23:30:57.915  INFO 9184 --- [main] com.qanairy.deepthought.App              : Started App in 2.858 seconds (JVM running for 3.581)
+2020-03-29 23:30:58.486  INFO 9184 --- [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2020-03-29 23:30:58.488  INFO 9184 --- [RMI TCP Connection(4)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
