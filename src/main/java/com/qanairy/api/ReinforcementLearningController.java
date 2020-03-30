@@ -175,7 +175,9 @@ public class ReinforcementLearningController {
      * @throws NullPointerException
      * @throws IOException
      */
+	@Operation(summary = "Applies learning to provided feature for a given memory", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.ACCEPTED, reason = "Successfully learned from feedback")
     public  @ResponseBody void learn(@RequestParam long memory_id, 
     								 @RequestParam String feature_value) 
 					 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
@@ -193,6 +195,7 @@ public class ReinforcementLearningController {
 	    brain.learn(memory.getID(), feature); //feature_list, predicted, feature, isRewarded);
     }
     
+	@Operation(summary = "Performs training iteration using label and given object data", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/train", method = RequestMethod.POST)
     public  @ResponseBody void train(@RequestParam(value="json_object", required=true) String json_object, 
     								 @RequestParam String label) 
