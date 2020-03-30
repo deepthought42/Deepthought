@@ -89,20 +89,7 @@ public class Brain {
 		final double discount_factor = .1;
 
 		//set estimated reward using prediction from memory.
-		// if actual feature is the most likely feature then set to 1
-		int pred_idx = 0;
-		double largest_pred = 0.0;
-		String most_likely_feature_value = "";
-		for(String prediction_feature_value: memory.getOutputFeatureKeys()){
-			if(prediction_feature_value.equals(actual_feature.getValue())){
-				if(largest_pred < memory.getPrediction()[pred_idx]){
-					largest_pred = memory.getPrediction()[pred_idx];
-					most_likely_feature_value = prediction_feature_value;
-				}
-			}
-			pred_idx++;
-		}
-		
+
 		//replace with steps to estimate reward for an output feature independent of actual desired output feature
 		double estimated_reward = 1.0;
 		

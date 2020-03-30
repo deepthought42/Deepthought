@@ -1,8 +1,5 @@
 package com.deepthought.models.edges;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -31,9 +28,6 @@ public class FeatureWeight {
 	@EndNode   
 	private Feature end_feature;
 
-	@Property
-	private List<String> labels = new ArrayList<String>();
-    
 	public long getId(){
 		return this.id;
 	}
@@ -60,9 +54,5 @@ public class FeatureWeight {
 	
 	public Feature getFeature() {
 		return this.feature;
-	}
-
-	public List<String> getLabels() {
-		return this.labels;
 	}
 }
