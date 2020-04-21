@@ -56,14 +56,13 @@ public class ReinforcementLearningController {
 	
     /**
      * Generates a prediction based on stringified JSON object, input and output {@link Vocabulary} 
-     * 	labels and any new output features the system should predict for 
+     * 	labels and any new output features the system should predict for. If input passed is not a JSON Object
+     *  this endpoint assumes the object is a unstructured {@link String} 
      * 
      * @param json_obj stringified JSON object containing data that user would like used for prediction
-     * @param input_vocab_label name of the vocabulary that should be used 
-     * @param output_vocab_label
      * @param new_output_features
      * 
-     * @return
+     * @return 
      * 
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
@@ -72,23 +71,31 @@ public class ReinforcementLearningController {
      */
 	@Operation(summary = "Make a prediction and return a MemoryRecord", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
-    public @ResponseBody MemoryRecord predict(@Schema(description = "JSON representation of data", example = "{'field_1':{'field_2':'hello'}}", required = true) @RequestParam(value="json_object", required=true) String json_obj,
-    										  @Schema(description = "List of output labels to be predicted", example = "['label_1', 'label_2','label_n']", required = true) @RequestParam(value="output_features", required=true) String[] output_labels) 
-    												  throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
-    	//Break down object into list of features
-    	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(json_obj));
-    	List<Feature> output_features = new ArrayList<Feature>();
-    	if(output_labels != null && !ArrayUtils.isEmpty(output_labels)){
-			for(String value : output_labels){
-				Feature feature_record = feature_repo.findByValue(value);
-				if(feature_record==null){
-					value = value.replace("[", "");
-		        	value = value.replace("]", "");
-					Feature new_feature = new Feature(value);
-					output_features.add(new_feature);
-				}
-			}
+    public @ResponseBody MemoryRecord predict(@Schema(description = "JSON representation of data", example = "{'field_1':{'field_2':'hello'}}", required = true) @RequestParam(value="input", required=true) String input,
+    										  @Schema(description = "List of output labels to be predicted", example = "label_1,label_2,label_n", required = true) @RequestParam(value="output_features", required=true) String[] output_labels) 
+    												  throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Feature> input_features; 
+		try {
+    		//Break down object into list of features
+        	input_features = DataDecomposer.decompose(new JSONObject(input));
     	}
+    	catch(JSONException e) {
+    		input_features = DataDecomposer.decompose(input);
+    	}
+		
+    	List<Feature> output_features = new ArrayList<Feature>();
+		for(String value : output_labels){
+			Feature feature_record = feature_repo.findByValue(value);
+			if(feature_record==null){
+				value = value.replace("[", "");
+	        	value = value.replace("]", "");
+				Feature new_feature = new Feature(value);
+				output_features.add(new_feature);
+			}
+			else {
+				output_features.add(feature_record);
+			}
+		}
     	
     	log.debug("loading vocabulary");
     	//Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
@@ -140,6 +147,7 @@ public class ReinforcementLearningController {
     	for(int idx = 0; idx<prediction.length; idx++){
     		if(prediction[idx] > max_pred){
     			max_idx = idx;
+    			max_pred = prediction[idx];
     		}
     	}
     	
@@ -178,12 +186,11 @@ public class ReinforcementLearningController {
 	@Operation(summary = "Applies learning to provided feature for a given memory", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.ACCEPTED, reason = "Successfully learned from feedback")
-    public  @ResponseBody void learn(@RequestParam long memory_id, 
-    								 @RequestParam String feature_value) 
+    public  @ResponseBody void learn(@Schema(description = "unique identifier for specific memory", example = "12345", required = true) @RequestParam(value="memory_id", required=true) long memory_id, 
+    								 @Schema(description = "value of feature that you want to label memory with and learn from", example = "VERB", required = true) @RequestParam(value="feature_value", required=true) String feature_value) 
 					 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
     {
     	Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
-    	MemoryRecord memory = optional_memory.get();
     	
     	//log.info("object definition list size :: "+feature_list.size());
     	Feature feature = new Feature(feature_value);
@@ -192,7 +199,7 @@ public class ReinforcementLearningController {
     		feature = feature_record;
     	}
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
-	    brain.learn(memory.getID(), feature); //feature_list, predicted, feature, isRewarded);
+	    brain.learn(memory_id, feature); //feature_list, predicted, feature, isRewarded);
     }
     
 	@Operation(summary = "Performs training iteration using label and given object data", description = "", tags = { "Reinforcement Learning" })
