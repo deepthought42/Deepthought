@@ -1,5 +1,6 @@
 package com.deepthought.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,16 +10,16 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.models.serializers.MemoryRecordSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.deepthought.models.edges.Prediction;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * 
+ * Stores all data for making predictions and learning from feedback. This node
+ *  also connects to {@link Feature}s through a {@link Prediction} relationship/edge
+ *  that contains the predicted weight for the feature that this memory stores.
  */
 @NodeEntity
-@JsonSerialize(using = MemoryRecordSerializer.class)
 public class MemoryRecord {
 
 	@Id 
@@ -28,43 +29,32 @@ public class MemoryRecord {
 	@Property
 	private Date date;
 
-	@Relationship(type = "HAS_VOCABULARY")
-	private Vocabulary input_vocabulary;
-	
-	@Relationship(type = "HAS_VOCABULARY")
-	private Vocabulary output_vocabulary;
-	
 	@Relationship(type = "DESIRED_FEATURE")
 	private Feature desired_feature;
 	
 	@Relationship(type = "PREDICTED")
 	private Feature predicted_feature;
 	
+	@Relationship(type = "PREDICTION", direction = Relationship.OUTGOING)
+	private List<Prediction> predictions;
+	
 	private List<String> input_feature_values;
 	private String[] output_feature_values;
 	
 	private String policy_matrix_json;
-	private double[] prediction;
 	
 	public MemoryRecord(){
 		setDate(new Date());
 		policy_matrix_json = "";
+		setPredictions( new ArrayList<>() );
 	}
 	
-	public Vocabulary getInputVocabulary(){
-		return this.input_vocabulary;
+	public void setPredictions(List<Prediction> prediction_edges) {
+		this.predictions = prediction_edges;
 	}
 	
-	public void setInputVocabulary(Vocabulary vocab){
-		this.input_vocabulary = vocab;
-	}
-	
-	public Vocabulary getOutputVocabulary(){
-		return this.output_vocabulary;
-	}
-	
-	public void setOutputVocabulary(Vocabulary vocab){
-		this.output_vocabulary = vocab;
+	public List<Prediction> getPredictions(){
+		return this.predictions;
 	}
 	
 	public Long getID() {
@@ -77,14 +67,6 @@ public class MemoryRecord {
 
 	public void setDate(Date date) {
 		this.date = date;
-	}
-
-	public double[] getPrediction() {
-		return prediction;
-	}
-
-	public void setPrediction(double[] prediction) {
-		this.prediction = prediction;
 	}
 	
 	public Feature getPredictedFeature() {

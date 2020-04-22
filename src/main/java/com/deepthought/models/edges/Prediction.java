@@ -1,8 +1,5 @@
 package com.deepthought.models.edges;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -30,15 +27,18 @@ public class Prediction {
     
 	@EndNode   
 	private Feature result_feature;
-
-	@Property
-	private List<String> labels = new ArrayList<String>();
     
-    public Feature getEndFeature(){
+    public Prediction(MemoryRecord memory, Feature feature, double weight) {
+		setMemoryRecord(memory);
+		setFeature(feature);
+		setWeight(weight);
+	}
+
+	public Feature getFeature(){
     	return this.result_feature;
     }
     
-    public void setEndFeature(Feature result_feature){
+    public void setFeature(Feature result_feature){
     	this.result_feature = result_feature;
     }
     
@@ -52,9 +52,5 @@ public class Prediction {
 
 	public void setMemoryRecord(MemoryRecord memory) {
 		this.memory = memory;
-	}
-
-	public List<String> getLabels() {
-		return this.labels;
 	}
 }

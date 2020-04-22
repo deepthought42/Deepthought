@@ -10,16 +10,47 @@ import com.deepthought.models.Feature;
 import com.deepthought.models.edges.FeatureWeight;
 
 /**
- * 
+ * Spring Data Repository pattern to perform CRUD operations and other various queries
+ *  on {@link Feature} 
  */
 public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 
 	public Feature findByValue(@Param("value") String value);
 	
+	/**
+	 * Retrieves {@link Set} of {@link FeatureWeight}s for a {@link Feature} with a given value
+	 * 
+	 * @param value value of the desired feature for which to retrieve weights
+	 * 
+	 * @return {@link Set} of {@link FeatureWeights}
+	 */
 	@Query("MATCH (:Feature{value:{value}})-[fw:HAS_RELATED_FEATURE]->(:Feature) RETURN fw")
 	public Set<FeatureWeight> getFeatureWeights(@Param("value") String value);
 	
+	/**
+	 * Retrieves all {@link FeatureWeight} connections between {@link Feature} nodes with the provided values.
+	 *  
+	 * @param input_value value of desired input feature 
+	 * @param output_value value of desired output feature
+	 * 
+	 * @return {@link List} of {@link Feature}s
+	 */
 	@Query("MATCH p=(f1:Feature{value:{input_value}})-[fw:HAS_RELATED_FEATURE]->(f2:Feature{value:{output_value}}) RETURN f1,fw,f2")
 	public List<Feature> getConnectedFeatures(@Param("input_value") String input_value,
-										     @Param("output_value") String output_value);	
+										      @Param("output_value") String output_value);
+
+	/**
+	 * Creates a {@linkplain FeatureWeight weighted} connection between two features 
+	 * 
+	 * @param input_value
+	 * @param output_value
+	 * @param weight
+	 */
+	@Query("MATCH (f_in:Feature),(f_out:Feature)" + 
+			"WHERE f_in.value = {input_value} AND f_out.value = {output_value}" + 
+			"CREATE (f_in)-[r:HAS_RELATED_FEATURE{ weight: {weight}}]->(f_out)" + 
+			"RETURN r ")
+	public FeatureWeight createWeightedConnection(@Param("input_value") String input_value,
+											      @Param("output_value") String output_value, 
+											      @Param("weight") double weight);	
 }

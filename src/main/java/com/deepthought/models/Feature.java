@@ -3,13 +3,17 @@ package com.deepthought.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotBlank;
+
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
 import com.deepthought.models.edges.FeatureWeight;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Defines objects that are available to the system for learning against
@@ -17,10 +21,13 @@ import com.deepthought.models.edges.FeatureWeight;
 @NodeEntity
 public class Feature {
 
+	@Schema(description = "Unique identifier of the Feature.", example = "1", required = true)
 	@Id 
 	@GeneratedValue 
 	private Long id;
     
+	@Schema(description = "Feature label", example = "form", required = true)
+    @NotBlank
 	private String value;
 	
 	@Relationship(type = "HAS_RELATED_FEATURE")
@@ -72,6 +79,7 @@ public class Feature {
 	 * Gets list of probabilities associated with features for this object definition
 	 * @return
 	 */
+	@JsonIgnore
 	public List<FeatureWeight> getFeatureWeights(){
 		return this.feature_weights;
 	}

@@ -22,75 +22,83 @@ import org.springframework.web.bind.annotation.RestController;
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
 import com.deepthought.models.Vocabulary;
+import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
-import com.deepthought.models.repository.VocabularyRepository;
+import com.deepthought.models.repository.PredictionRepository;
 import com.qanairy.brain.Brain;
 import com.qanairy.db.DataDecomposer;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 
 /**
  *	API endpoints for learning and making predictions. This set of endpoints allows interacting with the knowledge graph
- *	 to generate, update and retrieve weight matices(models) for any given input feature set and output set
+ *	 to generate, update and retrieve weight matrices(models) for any given input feature set and output set
  */
 @RestController
 @RequestMapping("/rl")
 public class ReinforcementLearningController {
-	
-	@SuppressWarnings("unused")
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
 	private FeatureRepository feature_repo;
 	
 	@Autowired
-	private VocabularyRepository vocabulary_repo;
+	private MemoryRecordRepository memory_repo;
 	
 	@Autowired
-	private MemoryRecordRepository memory_repo;
+	private PredictionRepository prediction_repo;
 	
 	@Autowired
 	private Brain brain;
 	
     /**
+     * Generates a prediction based on stringified JSON object, input and output {@link Vocabulary} 
+     * 	labels and any new output features the system should predict for. If input passed is not a JSON Object
+     *  this endpoint assumes the object is a unstructured {@link String} 
      * 
-     * @param obj
-     * @param input_vocab_label
-     * @param output_vocab_label
+     * @param json_obj stringified JSON object containing data that user would like used for prediction
      * @param new_output_features
      * 
-     * @return
+     * @return 
      * 
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      * @throws NullPointerException
      * @throws JSONException
      */
+	@Operation(summary = "Make a prediction and return a MemoryRecord", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
-    public @ResponseBody MemoryRecord predict(@RequestParam(value="json_object", required=true) String obj,
-			  								  @RequestParam(value="input_vocab_label", required=true) String input_vocab_label,
-    										  @RequestParam(value="output_vocab_label", required=true) String output_vocab_label,
-    										  @RequestParam(value="new_output_features", required=false) String[] new_output_features) 
-    												  throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
-    	//Break down object into list of features
-    	List<Feature> input_features = DataDecomposer.decompose(new JSONObject(obj));
-    	List<Feature> new_features = new ArrayList<Feature>();
-    	if(new_output_features != null && !ArrayUtils.isEmpty(new_output_features)){
-			for(String value : new_output_features){
-				Feature feature_record = feature_repo.findByValue(value);
-				if(feature_record==null){
-					value = value.replace("[", "");
-		        	value = value.replace("]", "");
-					Feature new_feature = new Feature(value);
-					new_features.add(new_feature);
-				}
-				
-			}
+    public @ResponseBody MemoryRecord predict(@Schema(description = "JSON representation of data", example = "{'field_1':{'field_2':'hello'}}", required = true) @RequestParam(value="input", required=true) String input,
+    										  @Schema(description = "List of output labels to be predicted", example = "label_1,label_2,label_n", required = true) @RequestParam(value="output_features", required=true) String[] output_labels) 
+    												  throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Feature> input_features; 
+		try {
+    		//Break down object into list of features
+        	input_features = DataDecomposer.decompose(new JSONObject(input));
     	}
+    	catch(JSONException e) {
+    		input_features = DataDecomposer.decompose(input);
+    	}
+		
+    	List<Feature> output_features = new ArrayList<Feature>();
+		for(String value : output_labels){
+			Feature feature_record = feature_repo.findByValue(value);
+			if(feature_record==null){
+				value = value.replace("[", "");
+	        	value = value.replace("]", "");
+				Feature new_feature = new Feature(value);
+				output_features.add(new_feature);
+			}
+			else {
+				output_features.add(feature_record);
+			}
+		}
     	
     	log.debug("loading vocabulary");
-    	//LOAD VOCABULARIES FOR INPUT AND OUTPUT
-    	Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
+    	//Vocabulary input_vocab = vocabulary_repo.findByLabel(input_vocab_label);
     	//for each feature, check if feature is in input_vocab
     	List<String> input_feature_keys = new ArrayList<String>();
     	
@@ -98,7 +106,7 @@ public class ReinforcementLearningController {
     	List<String> seen_features = new ArrayList<String>();
 		for(Feature input_feature : input_features){
 			boolean input_equals_output = false;
-	    	for(Feature output_feature : new_features){
+	    	for(Feature output_feature : output_features){
     			if(output_feature.getValue().equalsIgnoreCase(input_feature.getValue())){
     				input_equals_output = true;
     			}
@@ -113,102 +121,54 @@ public class ReinforcementLearningController {
     	}
     	
     	for(Feature feature : scrubbed_input_features){
-    		Feature feature_record = vocabulary_repo.findFeatureByKey(input_vocab_label, feature.getValue());
-    		//   if feature is not present in input_vocab then add feature to input_vocab
-    		if(feature_record == null){
-    			feature_record = feature_repo.findByValue(feature.getValue());
-    			if(feature_record == null){
-    				feature = feature_repo.save(feature);
-    			}
-    			else{
-    				feature = feature_record;
-    			}
-    			
-    			boolean feature_already_linked = false;
-    			for(Feature out_feature : input_vocab.getFeatures()){
-    				if(out_feature.equals(feature)){
-    					feature_already_linked = true;
-    					break;
-    				}
-    			}
-    			
-    			if(!feature_already_linked){
-	    			input_vocab.getFeatures().add(feature);
-	    			input_vocab = vocabulary_repo.save(input_vocab);
-    			}
-    		}
     		input_feature_keys.add(feature.getValue());
+    	}
 
-    	}
-    	
-		
-    	
-    	Vocabulary output_vocab = vocabulary_repo.findByLabel(output_vocab_label);
-    	if(output_vocab == null){
-    		if(new_output_features == null || ArrayUtils.isEmpty(new_output_features)){
-    			throw new EmptyVocabularyException();
-    		}
-    		
-    		output_vocab = new Vocabulary(new_features, output_vocab_label);
-    		vocabulary_repo.save(output_vocab);
-    	}
-    	else{
-    		for(Feature feature : new_features){
-    			boolean feature_already_exists = false;
-    			for(Feature existing_feature : output_vocab.getFeatures()){
-    				if(existing_feature.getValue().equals(feature.getValue())){
-    					feature_already_exists = true;
-    					break;
-    				}
-    			}
-    			
-    			if(feature_already_exists){
-    				continue;
-    			}
-    			
-    			output_vocab.appendToVocabulary(feature);
-    		}
-    	}
-    	
-    	List<Feature> output_features = output_vocab.getFeatures();
+    	//List<Feature> output_feature = new_features;
     	String[] output_feature_keys = new String[output_features.size()];
-    	for(int i=0; i< output_features.size(); i++){
-    		output_feature_keys[i] = output_features.get(i).getValue();
-    	}
     	
     	//load feature vector for output_vocab
     	log.debug("loading output feature set");
     	
     	//generate policy for input vocab feature vector and output vocab feature vector
-		//double[][] vocab_policy = FeatureVector.loadPolicy(features, output_vocab.getFeatures(), vocabulary_record, output_vocab);
     	double[][] policy = brain.generatePolicy(scrubbed_input_features, output_features);
 
     	//generate prediction
     	log.debug("Predicting...  "+policy);
     	double[] prediction = brain.predict(policy);
+
+    	//create prediction edges
+    	for(int i=0; i< output_features.size(); i++){
+    		output_feature_keys[i] = output_features.get(i).getValue();
+      	}
     	
     	double max_pred = 0.0;
     	int max_idx = 0;
     	for(int idx = 0; idx<prediction.length; idx++){
     		if(prediction[idx] > max_pred){
     			max_idx = idx;
+    			max_pred = prediction[idx];
     		}
     	}
     	
     	//create memory and save vocabularies, policy matrix and prediction vector
     	MemoryRecord memory = new MemoryRecord();
-    	memory.setInputVocabulary(input_vocab);
-    	memory.setOutputVocabulary(output_vocab);
     	memory.setPolicyMatrix(policy);
     	memory.setInputFeatureValues(input_feature_keys);
     	memory.setOutputFeatureKeys(output_feature_keys);
-    	memory.setPrediction(prediction);
+    	//memory.setPrediction(prediction);
     	memory.setPredictedFeature(output_features.get(max_idx));
 		memory = memory_repo.save(memory);
 		
-    	
-    	//return memory
-    	return memory;
+		//iterate over features to create prediction edges for the memory
+		List<Prediction> prediction_edges = new ArrayList<>();
+		for(int i=0; i< output_features.size(); i++) {
+    		Prediction prediction_edge = new Prediction(memory, output_features.get(i), prediction[i]);
+    		prediction_edges.add(prediction_repo.save(prediction_edge));
+		}
+		
+		memory.setPredictions(prediction_edges);
+       	return memory;
 	}
     
     /**
@@ -223,14 +183,14 @@ public class ReinforcementLearningController {
      * @throws NullPointerException
      * @throws IOException
      */
+	@Operation(summary = "Applies learning to provided feature for a given memory", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
-    public  @ResponseBody void learn(@RequestParam long memory_id, 
-    								 @RequestParam String feature_value) throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException{
-    	//JSONObject json_obj = new JSONObject(json_object);
-    	//List<Feature> feature_list = DataDecomposer.decompose(json_obj);
-    	
+    @ResponseStatus(value = HttpStatus.ACCEPTED, reason = "Successfully learned from feedback")
+    public  @ResponseBody void learn(@Schema(description = "unique identifier for specific memory", example = "12345", required = true) @RequestParam(value="memory_id", required=true) long memory_id, 
+    								 @Schema(description = "value of feature that you want to label memory with and learn from", example = "VERB", required = true) @RequestParam(value="feature_value", required=true) String feature_value) 
+					 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
+    {
     	Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
-    	MemoryRecord memory = optional_memory.get();
     	
     	//log.info("object definition list size :: "+feature_list.size());
     	Feature feature = new Feature(feature_value);
@@ -239,13 +199,15 @@ public class ReinforcementLearningController {
     		feature = feature_record;
     	}
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
-	    brain.learn(memory.getID(), feature); //feature_list, predicted, feature, isRewarded);
+	    brain.learn(memory_id, feature); //feature_list, predicted, feature, isRewarded);
     }
     
+	@Operation(summary = "Performs training iteration using label and given object data", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/train", method = RequestMethod.POST)
     public  @ResponseBody void train(@RequestParam(value="json_object", required=true) String json_object, 
     								 @RequestParam String label) 
-    										 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException{
+						 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
+    {
     
     	JSONObject json_obj = new JSONObject(json_object);
     	List<Feature> feature_list = DataDecomposer.decompose(json_obj);

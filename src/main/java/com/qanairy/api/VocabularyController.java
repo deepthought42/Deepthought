@@ -67,7 +67,7 @@ public class VocabularyController {
     										   @RequestParam(name="feature_value", required=true) String feature_value){
 		Feature feature = feature_repo.findByValue(feature_value);
 		if(feature == null){
-			feature = new Feature(feature_value);
+			feature = new Feature(feature_value.toLowerCase());
 			feature = feature_repo.save(feature);
 		}
 		Vocabulary vocab = vocab_repo.findByLabel(label);
