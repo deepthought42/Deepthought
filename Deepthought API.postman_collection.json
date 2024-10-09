@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "2d68b29a-e76c-42da-b35a-ff12d6adc6ef",
+		"name": "Deepthought API",
+		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API? \n\nAuthenticaton is not currently required\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?\n\nNo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Prediction using JSON input",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "json_object",
+							"value": "{\"test_field\": \"test-field\", \"test_value\":\"100001\", \"test_array\": [\"1\",\"2\",\"3\"], \"name\":\"firstname\"}",
+							"type": "text"
+						},
+						{
+							"key": "input_vocab_label",
+							"value": "html",
+							"type": "text"
+						},
+						{
+							"key": "output_vocab_label",
+							"value": "actions",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://206.189.234.126:9080/rl/predict?",
+					"protocol": "http",
+					"host": [
+						"206",
+						"189",
+						"234",
+						"126"
+					],
+					"port": "9080",
+					"path": [
+						"rl",
+						"predict"
+					],
+					"query": [
+						{
+							"key": "json_object",
+							"value": "\"[{\\\"test_field\\\": \\\"name\\\"}]\"",
+							"disabled": true
+						},
+						{
+							"key": "prediction_list",
+							"value": "\"login\"",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "learn",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "json_object",
+							"value": "{name:\"input\", type: \"text\"}",
+							"type": "text"
+						},
+						{
+							"key": "prediction_key",
+							"value": "adfhasjkfhasdhf;ashfa",
+							"type": "text"
+						},
+						{
+							"key": "action",
+							"value": "click",
+							"type": "text"
+						},
+						{
+							"key": "isRewarded",
+							"value": "true",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:9080/rl/learn",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"rl",
+						"learn"
+					]
+				},
+				"description": "Learn from simple object, meaning an object with only primitive parameters"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Prediction using raw string input",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "json_object",
+							"value": "{\"test_field\": \"test-field\", \"test_value\":\"100001\", \"test_array\": [\"1\",\"2\",\"3\"], \"name\":\"firstname\"}",
+							"type": "text"
+						},
+						{
+							"key": "input_vocab_label",
+							"value": "html",
+							"type": "text"
+						},
+						{
+							"key": "output_vocab_label",
+							"value": "actions",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:9080/rl/predict?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9080",
+					"path": [
+						"rl",
+						"predict"
+					],
+					"query": [
+						{
+							"key": "json_object",
+							"value": "\"[{\\\"test_field\\\": \\\"name\\\"}]\"",
+							"disabled": true
+						},
+						{
+							"key": "prediction_list",
+							"value": "\"login\"",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

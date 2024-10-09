@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
-import com.deepthought.models.Vocabulary;
 import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
@@ -173,10 +171,8 @@ public class ReinforcementLearningController {
     
     /**
      * 
-     * @param json_string
-     * @param predicted
-     * @param action
-     * @param isRewarded
+     * @param memory_id
+     * @param feature_value
      * @throws JSONException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
@@ -202,6 +198,16 @@ public class ReinforcementLearningController {
 	    brain.learn(memory_id, feature); //feature_list, predicted, feature, isRewarded);
     }
     
+	/**
+	 * 
+	 * @param json_object
+	 * @param label
+	 * @throws JSONException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws NullPointerException
+	 * @throws IOException
+	 */
 	@Operation(summary = "Performs training iteration using label and given object data", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/train", method = RequestMethod.POST)
     public  @ResponseBody void train(@RequestParam(value="json_object", required=true) String json_object, 
