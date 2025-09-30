@@ -2,3 +2,8 @@
 /test-output/
 *.log
 LOG_FILE_IS_UNDEFINED
+
+# Eclipse IDE files
+.project
+.classpath
+.settings/
