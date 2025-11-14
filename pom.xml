@@ -22,8 +22,21 @@
 		        <groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-surefire-plugin</artifactId>
 		        <version>3.2.5</version>
-		        <!-- Tests run automatically during mvn install -->
-		        <!-- To run specific test groups, use: mvn test -Dgroups=Regression -->
+		        <configuration>
+		          <!-- Tests run automatically during mvn install -->
+		          <!-- To run specific test groups, use: mvn test -Dgroups=Regression -->
+		          <includes>
+		            <include>**/*Test*.java</include>
+		            <include>**/*Tests.java</include>
+		          </includes>
+		        </configuration>
+		        <dependencies>
+		          <dependency>
+		            <groupId>org.apache.maven.surefire</groupId>
+		            <artifactId>surefire-testng</artifactId>
+		            <version>3.2.5</version>
+		          </dependency>
+		        </dependencies>
 		    </plugin>
 	      
 	  	 	<plugin>
