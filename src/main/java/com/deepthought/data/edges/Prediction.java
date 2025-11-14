@@ -1,4 +1,4 @@
-package com.deepthought.edges;
+package com.deepthought.data.edges;
 
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -7,8 +7,8 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Feature;
-import com.deepthought.models.MemoryRecord;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.MemoryRecord;
 
 /**
  * Encapsulates data for a predicted weight for a result feature in connection with a {@link MemoryRecord}

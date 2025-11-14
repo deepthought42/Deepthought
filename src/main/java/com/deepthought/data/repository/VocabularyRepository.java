@@ -1,4 +1,4 @@
-package com.deepthought.models.repository;
+package com.deepthought.data.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.deepthought.models.Vocabulary;
+import com.deepthought.data.models.Vocabulary;
 
 /**
  * Repository interface for Vocabulary entities in Neo4j

@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deepthought.edges.FeatureWeight;
-import com.deepthought.models.Feature;
-import com.deepthought.models.MemoryRecord;
-import com.deepthought.models.Vocabulary;
-import com.deepthought.models.repository.FeatureRepository;
-import com.deepthought.models.repository.FeatureWeightRepository;
-import com.deepthought.models.repository.MemoryRecordRepository;
+import com.deepthought.data.edges.FeatureWeight;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.MemoryRecord;
+import com.deepthought.data.models.Vocabulary;
+import com.deepthought.data.repository.FeatureRepository;
+import com.deepthought.data.repository.FeatureWeightRepository;
+import com.deepthought.data.repository.MemoryRecordRepository;
 
 import edu.stanford.nlp.util.ArrayUtils;
 

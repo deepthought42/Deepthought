@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.deepthought.api.v2.dto.ChatMessage;
-import com.deepthought.db.DataDecomposer;
-import com.deepthought.models.Feature;
-import com.deepthought.models.repository.ConversationSessionRepository;
+import com.deepthought.data.db.DataDecomposer;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.repository.ConversationSessionRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

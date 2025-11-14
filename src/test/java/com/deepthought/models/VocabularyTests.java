@@ -9,6 +9,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.Vocabulary;
+
 /**
  * Unit tests for the Vocabulary class
  */

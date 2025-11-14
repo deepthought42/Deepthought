@@ -1,4 +1,4 @@
-package com.deepthought.models;
+package com.deepthought.data.models;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.edges.Prediction;
+import com.deepthought.data.edges.Prediction;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

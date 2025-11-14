@@ -25,12 +25,12 @@ import com.deepthought.api.v2.dto.ReasoningResponse;
 import com.deepthought.brain.ExplanationGenerator;
 import com.deepthought.brain.GraphReasoningEngine;
 import com.deepthought.brain.TextGenerator;
+import com.deepthought.brain.knowledge.KnowledgeIntegrator;
 import com.deepthought.conversation.ConversationManager;
-import com.deepthought.db.DataDecomposer;
-import com.deepthought.knowledge.KnowledgeIntegrator;
-import com.deepthought.models.Feature;
-import com.deepthought.models.ReasoningPath;
-import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.data.db.DataDecomposer;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.ReasoningPath;
+import com.deepthought.data.repository.FeatureRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,4 +1,4 @@
-package com.deepthought.models.repository;
+package com.deepthought.data.repository;
 
 import java.util.Optional;
 

@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.deepthought.models.Feature;
-import com.deepthought.models.ReasoningPath;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.ReasoningPath;
 
 /**
  * Produces human-readable explanations from reasoning paths

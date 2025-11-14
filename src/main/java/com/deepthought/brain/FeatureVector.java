@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deepthought.models.Feature;
-import com.deepthought.models.Vocabulary;
-import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.Vocabulary;
+import com.deepthought.data.repository.FeatureRepository;
 
 @Component
 public class FeatureVector {

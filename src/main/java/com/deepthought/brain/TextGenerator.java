@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.deepthought.api.v2.dto.GenerationConfig;
-import com.deepthought.models.Feature;
+import com.deepthought.data.models.Feature;
 
 /**
  * Converts feature sequences into coherent natural language text

@@ -1,4 +1,4 @@
-package com.deepthought.models.repository;
+package com.deepthought.data.repository;
 
 import java.util.List;
 import java.util.Set;
@@ -7,8 +7,8 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.deepthought.edges.FeatureWeight;
-import com.deepthought.models.Feature;
+import com.deepthought.data.edges.FeatureWeight;
+import com.deepthought.data.models.Feature;
 
 /**
  * Spring Data Repository pattern to perform CRUD operations and other various queries

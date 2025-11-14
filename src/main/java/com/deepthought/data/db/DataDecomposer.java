@@ -1,4 +1,4 @@
-package com.deepthought.db;
+package com.deepthought.data.db;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.deepthought.models.Feature;
+import com.deepthought.data.models.Feature;
 
 /**
  * Defines static methods to handle the decomposition of it's data into their constituent pieces.

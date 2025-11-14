@@ -2,7 +2,7 @@ package com.deepthought.brain;
 
 import java.util.List;
 
-import com.deepthought.models.Feature;
+import com.deepthought.data.models.Feature;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.deepthought.edges;
+package com.deepthought.data.edges;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Feature;
-import com.deepthought.models.MemoryRecord;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.MemoryRecord;
 
 /**
  * 

@@ -1,4 +1,4 @@
-package com.deepthought.models;
+package com.deepthought.data.models;
 
 import java.util.ArrayList;
 import java.util.HashMap;

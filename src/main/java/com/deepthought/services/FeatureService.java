@@ -1,11 +1,11 @@
-package com.deepthought.models.services;
+package com.deepthought.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.deepthought.models.Feature;
-import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.repository.FeatureRepository;
 
 @Service
 public class FeatureService {

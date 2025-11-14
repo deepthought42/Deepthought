@@ -1,4 +1,4 @@
-package com.deepthought.models;
+package com.deepthought.data.models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.edges.FeatureWeight;
+import com.deepthought.data.edges.FeatureWeight;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;

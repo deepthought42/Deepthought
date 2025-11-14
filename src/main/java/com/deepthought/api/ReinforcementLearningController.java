@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.deepthought.brain.Brain;
-import com.deepthought.db.DataDecomposer;
-import com.deepthought.edges.Prediction;
-import com.deepthought.models.Feature;
-import com.deepthought.models.MemoryRecord;
-import com.deepthought.models.repository.FeatureRepository;
-import com.deepthought.models.repository.MemoryRecordRepository;
-import com.deepthought.models.repository.PredictionRepository;
+import com.deepthought.data.db.DataDecomposer;
+import com.deepthought.data.edges.Prediction;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.MemoryRecord;
+import com.deepthought.data.repository.FeatureRepository;
+import com.deepthought.data.repository.MemoryRecordRepository;
+import com.deepthought.data.repository.PredictionRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;

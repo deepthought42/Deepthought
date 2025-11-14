@@ -1,8 +1,8 @@
-package com.deepthought.models.repository;
+package com.deepthought.data.repository;
 
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
-import com.deepthought.edges.FeatureWeight;
+import com.deepthought.data.edges.FeatureWeight;
 
 /**
  * Spring Data Repository pattern to perform CRUD operations and other various queries

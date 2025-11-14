@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deepthought.edges.FeatureWeight;
-import com.deepthought.models.Feature;
-import com.deepthought.models.ReasoningPath;
-import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.data.edges.FeatureWeight;
+import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.ReasoningPath;
+import com.deepthought.data.repository.FeatureRepository;
 
 /**
  * Performs multi-hop graph traversal to gather relevant features
