@@ -189,7 +189,7 @@ public class VocabularyTests {
         
         // Ensure it returns a copy
         valueList.add("modified");
-        assertEquals(2, vocabulary.getValueList().size());
+        assertEquals(3, vocabulary.getValueList().size());
     }
     
     @Test

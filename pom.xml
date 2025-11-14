@@ -22,9 +22,8 @@
 		        <groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-surefire-plugin</artifactId>
 		        <version>3.2.5</version>
-		        <configuration>
-		          <groups>Regression</groups>
-		        </configuration>
+		        <!-- Tests run automatically during mvn install -->
+		        <!-- To run specific test groups, use: mvn test -Dgroups=Regression -->
 		    </plugin>
 	      
 	  	 	<plugin>

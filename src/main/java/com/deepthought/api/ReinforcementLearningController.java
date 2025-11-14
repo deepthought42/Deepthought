@@ -23,6 +23,7 @@ import com.deepthought.data.db.DataDecomposer;
 import com.deepthought.data.edges.Prediction;
 import com.deepthought.data.models.Feature;
 import com.deepthought.data.models.MemoryRecord;
+import com.deepthought.data.models.Vocabulary;
 import com.deepthought.data.repository.FeatureRepository;
 import com.deepthought.data.repository.MemoryRecordRepository;
 import com.deepthought.data.repository.PredictionRepository;
@@ -58,7 +59,7 @@ public class ReinforcementLearningController {
      *  this endpoint assumes the object is a unstructured {@link String} 
      * 
      * @param json_obj stringified JSON object containing data that user would like used for prediction
-     * @param new_output_features
+     * @param output_labels list of output labels to be predicted for
      * 
      * @return 
      * 
@@ -170,9 +171,11 @@ public class ReinforcementLearningController {
 	}
     
     /**
+     * Applies learning to provided feature for a given memory
      * 
-     * @param memory_id
-     * @param feature_value
+     * @param memory_id unique identifier for specific memory
+     * @param feature_value value of feature that you want to label memory with and learn from
+	 * 
      * @throws JSONException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
@@ -199,6 +202,7 @@ public class ReinforcementLearningController {
     }
     
 	/**
+	 * Performs training iteration using label and given object data
 	 * 
 	 * @param json_object
 	 * @param label
@@ -210,8 +214,8 @@ public class ReinforcementLearningController {
 	 */
 	@Operation(summary = "Performs training iteration using label and given object data", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/train", method = RequestMethod.POST)
-    public  @ResponseBody void train(@RequestParam(value="json_object", required=true) String json_object, 
-    								 @RequestParam String label) 
+    public  @ResponseBody void train(@RequestParam(value="json_object", required=true) String json_object,
+    								 @RequestParam String label)
 						 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
     {
     
