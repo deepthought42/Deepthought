@@ -8,8 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
+import com.deepthought.db.DataDecomposer;
 import com.deepthought.models.Feature;
-import com.qanairy.db.DataDecomposer;
 
 public class DataDecomposerTests {
 

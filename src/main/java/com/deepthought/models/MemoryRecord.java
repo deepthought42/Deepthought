@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.models.edges.Prediction;
+import com.deepthought.edges.Prediction;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
