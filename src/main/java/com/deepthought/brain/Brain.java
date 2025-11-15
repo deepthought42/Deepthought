@@ -18,6 +18,7 @@ import com.deepthought.data.models.Vocabulary;
 import com.deepthought.data.repository.FeatureRepository;
 import com.deepthought.data.repository.FeatureWeightRepository;
 import com.deepthought.data.repository.MemoryRecordRepository;
+import com.deepthought.services.VocabularyService;
 
 import edu.stanford.nlp.util.ArrayUtils;
 
@@ -37,6 +38,12 @@ public class Brain {
 	
 	@Autowired
 	private MemoryRecordRepository memory_repo;
+
+	@Autowired
+	private VocabularyService vocab_service;
+	
+	@Autowired
+	private VocabularyPrediction vocabulary_prediction;
 	
 	public Brain(){}
 	
@@ -74,8 +81,8 @@ public class Brain {
 	 */
 	public void learn(long memory_id,
 					  Feature actual_feature)
-						  throws IllegalArgumentException, IllegalAccessException, 
-							  NullPointerException, IOException{		
+						  throws IllegalArgumentException, IllegalAccessException,
+							  NullPointerException, IOException{
 		//Load memory from database
 		Optional<MemoryRecord> memory_record = memory_repo.findById(memory_id);
 		
@@ -145,40 +152,57 @@ public class Brain {
 				log.debug("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
 				feature_weight_repo.save(feature_weight);
 			}
-		}		
+		}
 	}
 	
 	/**
+	 * Generate a prediction for which vocabulary is being used based on the object list
 	 * 
-	 * @param object_list
-	 * @return
+	 * @param object_list List of features that are being used to generate the prediction
+	 * @return Vocabulary that is being used to generate the prediction
 	 */
 	private Vocabulary predictVocabulary(List<Feature> object_list){
-		return null;
+		//1. Predict the vocabulary using the object list
+		Vocabulary vocabulary = vocabulary_prediction.predict(object_list);
+		//2. Load the vocabulary from the database
+		vocabulary = vocab_service.load(vocabulary.getLabel());
+		//3. Return the vocabulary
+		return vocabulary;
 	}
 	
 	/**
+	 * Generate a record for the vocabulary based on the object list
 	 * 
-	 * @param object_list
-	 * @param vocabulary
-	 * @return
+	 * @param object_list List of features that are being used to generate the record
+	 * @param vocabulary Vocabulary that is being used to generate the record
+	 * @return Record for the vocabulary
 	 */
-	private List<Feature> generateVocabRecord(List<Feature> object_list, Vocabulary vocabulary){
-		return object_list;
+	private Vocabulary generateVocabRecord(List<Feature> object_list, Vocabulary input_vocabulary, Vocabulary output_vocabulary){
+		//TODO: Implement this method
+		//1. Generate a Vocabulary using the object list and the output vocabulary
+		Vocabulary vocabulary = new Vocabulary();
+		for(Feature feature : object_list){
+			vocabulary.appendToVocabulary(feature);
+		}
+		//2. Save Vocabulary to the database
+		vocab_service.save(vocabulary);
+		//3. Return the Vocabulary
+		
+		return vocabulary;
 	}
 	
 	/**
-	 * Retrieves all {@linkplain Vocabulary vocabularies} that are required by the agent 
+	 * Retrieves all {@linkplain Vocabulary vocabularies} that are required by the agent
 	 * 
 	 * @param vocabLabels
 	 * @return
 	 */
 	public ArrayList<Vocabulary> loadVocabularies(String[] vocabLabels){
 		ArrayList<Vocabulary> vocabularies = new ArrayList<Vocabulary>();
-		for(String label : vocabLabels){			
-			//vocabularies.add(Vocabulary.load(label));
+		for(String label : vocabLabels){
+			vocabularies.add(vocab_service.load(label));
 		}
-		return vocabularies;		
+		return vocabularies;
 	}
 	
 	/**

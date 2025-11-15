@@ -12,13 +12,14 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
+import org.neo4j.ogm.annotation.Relationship;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A Vocabulary is a list of words or tokens that are essentially labels for each index 
+ * A Vocabulary is a list of words or tokens that are essentially labels for each index
  * in a weight vector that is used in machine learning. It maintains a consistent mapping
  * between words/tokens and their indices for use in feature vectors and weight matrices.
  * 
@@ -32,8 +33,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class Vocabulary {
 
     @Schema(description = "Unique identifier of the Vocabulary.", example = "1", required = true)
-    @Id 
-    @GeneratedValue 
+    @Id
+    @GeneratedValue
     private Long id;
     
     @Schema(description = "Vocabulary name/label", example = "web_elements", required = true)
@@ -53,6 +54,10 @@ public class Vocabulary {
     @Property
     private int size;
     
+    @Schema(description = "Nested vocabularies contained within this vocabulary")
+    @Relationship(type = "CONTAINS_VOCABULARY", direction = Relationship.OUTGOING)
+    private List<Vocabulary> nestedVocabularies;
+    
     @Schema(description = "Thread-safe counter for generating new indices")
     @JsonIgnore
     private transient AtomicInteger nextIndex;
@@ -65,6 +70,7 @@ public class Vocabulary {
         this.wordToIndexMap = new HashMap<>();
         this.nextIndex = new AtomicInteger(0);
         this.size = 0;
+        this.nestedVocabularies = new ArrayList<>();
     }
     
     /**
@@ -270,7 +276,93 @@ public class Vocabulary {
         if (nextIndex != null) {
             nextIndex.set(0);
         }
+        if (nestedVocabularies != null) {
+            nestedVocabularies.clear();
+        }
         size = 0;
+    }
+    
+    /**
+     * Adds a nested vocabulary to this vocabulary.
+     * Each vocabulary can contain other vocabularies as its own nodes in Neo4j.
+     * 
+     * @param vocabulary The vocabulary to add as a nested vocabulary
+     * @return true if added successfully, false if already present
+     */
+    public boolean addNestedVocabulary(Vocabulary vocabulary) {
+        if (vocabulary == null) {
+            throw new IllegalArgumentException("Vocabulary cannot be null");
+        }
+        
+        if (nestedVocabularies == null) {
+            nestedVocabularies = new ArrayList<>();
+        }
+        
+        // Check if already present (by label)
+        for (Vocabulary nested : nestedVocabularies) {
+            if (nested != null && nested.getLabel() != null && 
+                nested.getLabel().equals(vocabulary.getLabel())) {
+                return false;
+            }
+        }
+        
+        nestedVocabularies.add(vocabulary);
+        return true;
+    }
+    
+    /**
+     * Removes a nested vocabulary from this vocabulary.
+     * 
+     * @param vocabulary The vocabulary to remove
+     * @return true if removed, false if not found
+     */
+    public boolean removeNestedVocabulary(Vocabulary vocabulary) {
+        if (vocabulary == null || nestedVocabularies == null) {
+            return false;
+        }
+        return nestedVocabularies.remove(vocabulary);
+    }
+    
+    /**
+     * Gets all nested vocabularies contained in this vocabulary.
+     * 
+     * @return List of nested vocabularies
+     */
+    public List<Vocabulary> getNestedVocabularies() {
+        if (nestedVocabularies == null) {
+            nestedVocabularies = new ArrayList<>();
+        }
+        return new ArrayList<>(nestedVocabularies);
+    }
+    
+    /**
+     * Sets the nested vocabularies for this vocabulary.
+     * 
+     * @param nestedVocabularies List of vocabularies to nest
+     */
+    public void setNestedVocabularies(List<Vocabulary> nestedVocabularies) {
+        this.nestedVocabularies = nestedVocabularies != null ? 
+            new ArrayList<>(nestedVocabularies) : new ArrayList<>();
+    }
+    
+    /**
+     * Checks if this vocabulary contains a nested vocabulary with the given label.
+     * 
+     * @param label The label to search for
+     * @return true if a nested vocabulary with this label exists
+     */
+    public boolean hasNestedVocabulary(String label) {
+        if (label == null || nestedVocabularies == null) {
+            return false;
+        }
+        
+        for (Vocabulary nested : nestedVocabularies) {
+            if (nested != null && nested.getLabel() != null && 
+                nested.getLabel().equals(label)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     // Getters and Setters for Neo4j persistence
