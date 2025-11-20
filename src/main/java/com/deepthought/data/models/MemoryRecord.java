@@ -29,8 +29,8 @@ public class MemoryRecord {
 	@Property
 	private Date date;
 
-	@Relationship(type = "DESIRED_FEATURE")
-	private Feature desired_feature;
+	@Relationship(type = "OBSERVED")
+	private Feature observed_feature;
 	
 	@Relationship(type = "PREDICTED")
 	private Feature predicted_feature;
@@ -105,11 +105,11 @@ public class MemoryRecord {
 		this.policy_matrix_json = gson.toJson(policy_matrix);
 	}
 
-	public Feature getDesiredFeature() {
-		return desired_feature;
+	public Feature getObservedFeature() {
+		return observed_feature;
 	}
 
-	public void setDesiredFeature(Feature feature) {
-		desired_feature = feature;
+	public void setObservedFeature(Feature feature) {
+		observed_feature = feature;
 	}
 }

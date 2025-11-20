@@ -90,7 +90,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("submit"));  // Match
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - Check mappings
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -124,7 +124,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("submit"));
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - All should be marked as 0
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -157,7 +157,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("submit"));  // Extra
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - All should be marked as 1
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -187,7 +187,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("input"));
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - Result should be empty
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -213,7 +213,7 @@ public class FeatureVectorTests {
 		List<Feature> outputFeatures = new ArrayList<>();
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - All should be marked as 0
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -246,7 +246,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("button"));  // Match
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - Each unique feature should appear once
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -279,7 +279,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(outputFeature1);
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - Features should match by value
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -491,7 +491,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("button"));  // Match
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - Single entry should be present
 		Assert.assertNotNull(result, "load should return a non-null HashMap");
@@ -520,7 +520,7 @@ public class FeatureVectorTests {
 		outputFeatures.add(new Feature("button"));  // Lowercase match
 		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.load(inputFeatures, outputFeatures);
+		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
 		
 		// Step 3: Verify - Case-sensitive matching
 		Assert.assertNotNull(result, "load should return a non-null HashMap");

@@ -27,7 +27,10 @@ public class FeatureWeight {
 	private Long id;
     
 	@Property
-    private Map<String, Double> weights;
+    private Map<String, Double> vocabularyWeights;
+
+	@Property
+	private double weight;
     
 	@StartNode
 	private Feature input_feature;
@@ -36,7 +39,7 @@ public class FeatureWeight {
 	private Feature result_feature;
 
 	public FeatureWeight() {
-		this.weights = new HashMap<>();
+		this.vocabularyWeights = new HashMap<>();
 	}
 
 	public long getId(){
@@ -65,11 +68,11 @@ public class FeatureWeight {
      * @param vocabularyLabel The label of the vocabulary
      * @return The weight for the vocabulary, or 0.0 if not found
      */
-    public double getWeight(String vocabularyLabel){
-		if (weights == null) {
-			weights = new HashMap<>();
+    public double getVocabularyWeight(String vocabularyLabel){
+		if (vocabularyWeights == null) {
+			vocabularyWeights = new HashMap<>();
 		}
-		return weights.getOrDefault(vocabularyLabel, 0.0);
+		return vocabularyWeights.getOrDefault(vocabularyLabel, 0.0);
     }
     
     /**
@@ -78,11 +81,11 @@ public class FeatureWeight {
      * @param vocabularyLabel The label of the vocabulary
      * @param weight The weight value to set
      */
-    public void setWeight(String vocabularyLabel, double weight){
-		if (weights == null) {
-			weights = new HashMap<>();
+    public void setVocabularyWeight(String vocabularyLabel, double weight){
+		if (vocabularyWeights == null) {
+			vocabularyWeights = new HashMap<>();
 		}
-		weights.put(vocabularyLabel, weight);
+		vocabularyWeights.put(vocabularyLabel, weight);
     }
     
     /**
@@ -90,11 +93,11 @@ public class FeatureWeight {
      * 
      * @return A map where keys are vocabulary labels and values are weights
      */
-    public Map<String, Double> getWeights(){
-		if (weights == null) {
-			weights = new HashMap<>();
+    public Map<String, Double> getVocabularyWeights(){
+		if (vocabularyWeights == null) {
+			vocabularyWeights = new HashMap<>();
 		}
-		return weights;
+		return vocabularyWeights;
     }
     
     /**
@@ -102,7 +105,15 @@ public class FeatureWeight {
      * 
      * @param weights A map where keys are vocabulary labels and values are weights
      */
-    public void setWeights(Map<String, Double> weights){
-		this.weights = weights != null ? weights : new HashMap<>();
+    public void setVocabularyWeights(Map<String, Double> vocabularyWeights){
+		this.vocabularyWeights = vocabularyWeights != null ? vocabularyWeights : new HashMap<>();
     }
+
+	public double getWeight(){
+		return this.weight;
+	}
+
+	public void setWeight(double weight){
+		this.weight = weight;
+	}
 }

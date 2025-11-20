@@ -108,7 +108,7 @@ public class FeatureVector {
 				.filter(fw -> vocab.getValueList().indexOf(fw.getResultFeature().getValue()) >= 0)
 				.forEach(fw -> {
 					int action_idx = vocab.getValueList().indexOf(fw.getResultFeature().getValue());
-					feature_weights_array[action_idx] = fw.getWeights().get(vocab.getLabel());
+					feature_weights_array[action_idx] = fw.getVocabularyWeights().get(vocab.getLabel());
 				});
 			vocab_policy[k] = feature_weights_array;
 		}
@@ -122,12 +122,12 @@ public class FeatureVector {
 	 * <p>This method constructs a HashMap where each key represents an input feature and the value
 	 * represents whether the feature is present (1) or absent (0) in the vocabulary. The HashMap
 	 * is populated by iterating through the input features and checking if they match any of the
-	 * output features in the vocabulary.
+	 * vocabulary features.
 	 *
 	 * @param input_features List of input features representing the current state/observations.
 	 *                       Each feature will be saved to the repository and its outgoing
 	 *                       FeatureWeight relationships will be queried.
-	 * @param output_features List of output features representing possible actions/outcomes.
+	 * @param vocab_features List of {@link Vocabulary} features representing possible actions/outcomes.
 	 *                        Used to determine the column dimension of the returned HashMap.
 	 *                        Note: actual weights are filtered by vocabulary membership.
 	 * @return A HashMap where each key represents an {@link Vocabulary} and the value
@@ -137,14 +137,14 @@ public class FeatureVector {
 	 * @throws NullPointerException if any of the required parameters are null
 	 * @throws IllegalStateException if {@code obj_def_repo} is not properly initialized
 	 */
-	public static HashMap<String, Integer> load(List<Feature> input_features, List<Feature> output_features){
+	public static HashMap<String, Integer> loadVocabularyFeatures(List<Feature> input_features, List<Feature> vocabulary_features){
 		HashMap<String, Integer> vocabulary_record = new HashMap<String, Integer>();
 		
     	for(Feature input_feature : input_features){
     		boolean has_match = false;
-    		for(Feature output_feature : output_features){
-    			if(output_feature.equals(input_feature)){
-    				vocabulary_record.put(output_feature.getValue(), 1);
+    		for(Feature vocabulary_feature : vocabulary_features){
+    			if(vocabulary_feature.equals(input_feature)){
+    				vocabulary_record.put(vocabulary_feature.getValue(), 1);
     				has_match = true;
     				break;
     			}

@@ -9,6 +9,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deepthought.data.edges.FeatureWeight;
@@ -29,6 +30,12 @@ import edu.stanford.nlp.util.ArrayUtils;
 @Component
 public class Brain {
 	private static Logger log = LoggerFactory.getLogger(Brain.class);
+
+	@Value("${learning.rate}")
+	private double learning_rate;
+
+	@Value("${discount.factor}")
+	private double discount_factor;
 
 	@Autowired
 	private FeatureRepository feature_repo;
@@ -89,10 +96,7 @@ public class Brain {
 		// 2a. load known action policies/probabilities for each object definition in the definition list
 		MemoryRecord memory = memory_record.get();
 		
-		// 3. determine reward/regret score based on productivity status
-		//Q-LEARNING VARIABLES
-		final double learning_rate = .1;
-		final double discount_factor = .1;
+		
 
 		//set estimated reward using prediction from memory.
 
@@ -100,38 +104,82 @@ public class Brain {
 		double estimated_reward = 1.0;
 		
 		// 3. determine reward/regret score based on productivity status
-		double actual_reward = 0.0;		
-		QLearn q_learn = new QLearn(learning_rate, discount_factor);
+		double actual_reward = 0.0;
 		for(String output_key : memory.getOutputFeatureKeys()){
 			
-			//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
-			if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
-				log.debug("REWARD   ::    2");
-				actual_reward = 2.0;
-			}
-			else if(output_key.equals(actual_feature.getValue())){
-				log.debug("REWARD   ::   1");
-				actual_reward = 1.0;
-			}
-			//if output isn't equal to the actual feature or the predicted feature, don't affect weights
-			else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
-				log.debug("REWARD   ::     -2");
-				actual_reward = -1.0;
-			}
-			else if(!output_key.equals(actual_feature.getValue())) {
-				log.debug("REWARD   ::     -1");
-				actual_reward = -2.0;
-			}
-			else {
-				log.debug("REWARD   ::    0");
-				//nothing changed so there was no reward for that combination. We want to remember this in the future
-				// so we set it to a negative value to simulate regret
-				actual_reward = 0.0;
-			}
+			actual_reward = calculateReward(memory,
+											output_key,
+											actual_feature);
 			
-			List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
+			performQLearning(memory,
+							output_key,
+							actual_feature,
+							actual_reward,
+							estimated_reward);
+			
+		}
+	}
+
+	/**
+	 * Calculates the reward for the given output key and actual feature
+	 * 
+	 * @param memory {@link MemoryRecord} object containing the memory record
+	 * @param output_key {@link String} object containing the output key
+	 * @param actual_feature {@link Feature} object containing the actual feature
+	 * @return {@link double} object containing the reward
+	 */
+	public double calculateReward(MemoryRecord memory,
+									String output_key,
+									Feature actual_feature){
+		double reward = 0.0;
+		//if predicted feature is equal to output feature and actual feature is equal to predicted feature  OR output key equals actual feature key
+		if(output_key.equals(actual_feature.getValue()) && actual_feature.getValue().equals(memory.getPredictedFeature().getValue())){
+			log.debug("REWARD   ::    2");
+			reward = 2.0;
+		}
+		else if(output_key.equals(actual_feature.getValue())){
+			log.debug("REWARD   ::   1");
+			reward = 1.0;
+		}
+		//if output isn't equal to the actual feature or the predicted feature, don't affect weights
+		else if(output_key.equals(memory.getPredictedFeature().getValue()) && !output_key.equals(actual_feature.getValue())){
+			log.debug("REWARD   ::     -2");
+			reward = -1.0;
+		}
+		else if(!output_key.equals(actual_feature.getValue())) {
+			log.debug("REWARD   ::     -1");
+			reward = -2.0;
+		}
+		else {
+			log.debug("REWARD   ::    0");
+			//nothing changed so there was no reward for that combination. We want to remember this in the future
+			// so we set it to a negative value to simulate regret
+			reward = 0.0;
+		}
+
+		return reward;
+	}
+
+	/**
+	 * Performs Q-learning to update the feature weights based on the observed feature and the
+	 * contents of the memory record
+	 *
+	 * @param memory {@link MemoryRecord} object containing the memory record
+	 * @param output_key {@link String} object containing the output key
+	 * @param observed_feature {@link Feature} object containing the observed feature
+	 * @param actual_reward {@link double} object containing the actual reward
+	 * @param estimated_reward {@link double} object containing the estimated reward
+	 * @return {@link List} of {@link FeatureWeight} objects containing the updated feature weights
+	 */
+	public List<FeatureWeight> performQLearning(MemoryRecord memory,
+												String output_key,
+												Feature observed_feature,
+												double actual_reward,
+												double estimated_reward){
+		QLearn q_learn = new QLearn(learning_rate, discount_factor);
+		List<FeatureWeight> features_weights = new ArrayList<FeatureWeight>();
 			for(String input_key : memory.getInputFeatureValues()){
-				memory.setDesiredFeature(actual_feature);
+				memory.setObservedFeature(observed_feature);
 				log.info("input key :: "+input_key);
 				log.info("output key :: " + output_key);
 				List<Feature> features = feature_repo.getConnectedFeatures(input_key, output_key);
@@ -139,20 +187,23 @@ public class Brain {
 				if(features.isEmpty()) {
 					Random random = new Random();
 					double weight = random.nextDouble();
-					
 					feature_weight = feature_repo.createWeightedConnection(input_key, output_key, weight);
+					features_weights.add(feature_weight);
 				}
 				else {
-					feature_weight = features.get(0).getFeatureWeights().get(0);
+					for(Feature feature : features){
+						for(FeatureWeight feature_weight_temp: feature.getFeatureWeights()){
+							double q_learn_val = Math.abs(q_learn.calculate(feature_weight_temp.getWeight(), actual_reward, estimated_reward ));
+							//updated feature weight with q_learn_val
+							feature_weight_temp.setWeight(q_learn_val);
+							features_weights.add(feature_weight_temp);
+							log.debug("feature ::    " + feature_weight_temp.getInputFeature().getValue() + "  :::   " + feature_weight_temp.getWeight());
+							feature_weight_repo.save(feature_weight_temp);
+						}
+					}
 				}
-				double q_learn_val = Math.abs(q_learn.calculate(feature_weight.getWeight(), actual_reward, estimated_reward ));
-				//updated feature weight with q_learn_val
-				feature_weight.setWeight(q_learn_val);
-				features_weights.add(feature_weight);
-				log.debug("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
-				feature_weight_repo.save(feature_weight);
 			}
-		}
+		return features_weights;
 	}
 	
 	/**
@@ -238,24 +289,25 @@ public class Brain {
 		log.info("input features size :: "+input_features.size());
 		log.info("output features size :: "+output_features.size());
 		
-		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){			
+		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){
 			for(int out_idx = 0; out_idx < output_features.size(); out_idx++){
-				List<Feature> features = feature_repo.getConnectedFeatures(input_features.get(in_idx).getValue(), output_features.get(out_idx).getValue());	
+				List<Feature> features = feature_repo.getConnectedFeatures(input_features.get(in_idx).getValue(), output_features.get(out_idx).getValue());
 				double weight = -1.0;
 
 				if(!features.isEmpty()){
 					for(FeatureWeight feature_weight : features.get(0).getFeatureWeights()){	
-						if(feature_weight.getEndFeature().equals(output_features.get(out_idx))){
-							weight = feature_weight.getWeight();
+						if(feature_weight.getResultFeature().equals(output_features.get(out_idx))){
+							weight = feature_weight.getVocabularyWeights().get(vocabulary.getLabel());
 						}
 					}
 				}
 				else{
 					weight = random.nextDouble();
 					FeatureWeight feature_weight = new FeatureWeight();
-					feature_weight.setEndFeature(output_features.get(out_idx));
+					feature_weight.setResultFeature(output_features.get(out_idx));
 					feature_weight.setWeight(weight);
-					feature_weight.setFeature(input_features.get(in_idx));
+					feature_weight.setVocabularyWeights(vocabulary.getLabel(), weight);
+					feature_weight.setInputFeature(input_features.get(in_idx));
 					Feature input_feature = input_features.get(in_idx);
 					Feature input_feature_record = feature_repo.findByValue(input_feature.getValue());
 					if(input_feature_record != null){
@@ -368,8 +420,8 @@ public class Brain {
 		if(feature_record != null) {
 			// Get directly connected features
 			for(FeatureWeight weight : feature_record.getFeatureWeights()) {
-				if(!connected.contains(weight.getEndFeature())) {
-					connected.add(weight.getEndFeature());
+				if(!connected.contains(weight.getResultFeature())) {
+					connected.add(weight.getResultFeature());
 				}
 			}
 			
