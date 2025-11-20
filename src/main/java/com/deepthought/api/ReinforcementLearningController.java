@@ -130,7 +130,7 @@ public class ReinforcementLearningController {
     	log.debug("loading output feature set");
     	
     	//generate policy for input vocab feature vector and output vocab feature vector
-    	double[][] policy = brain.generatePolicy(scrubbed_input_features, output_features);
+    	double[][] policy = brain.generateRawPolicy(scrubbed_input_features, output_features);
 
     	//generate prediction
     	log.debug("Predicting...  "+policy);

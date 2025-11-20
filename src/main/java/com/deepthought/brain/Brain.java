@@ -281,7 +281,14 @@ public class Brain {
 		
 	}
 	
-	public double[][] generatePolicy(List<Feature> input_features, List<Feature> output_features){
+	/**
+	 * Generates a raw policy matrix. This is a policy matrix that is not specific to a vocabulary.
+	 * 
+	 * @param input_features {@link List} of {@link Feature} objects containing the input features
+	 * @param output_features {@link List} of {@link Feature} objects containing the output features
+	 * @return {@link double[][]} policy matrix
+	 */
+	public double[][] generateRawPolicy(List<Feature> input_features, List<Feature> output_features){
 		// 1. Create a memory record for prediction
 		Random random = new Random();
 		double[][] policy = new double[input_features.size()][output_features.size()];
@@ -297,18 +304,72 @@ public class Brain {
 				if(!features.isEmpty()){
 					for(FeatureWeight feature_weight : features.get(0).getFeatureWeights()){	
 						if(feature_weight.getResultFeature().equals(output_features.get(out_idx))){
-							weight = feature_weight.getVocabularyWeights().get(vocabulary.getLabel());
+							weight = feature_weight.getWeight();
 						}
 					}
 				}
 				else{
 					weight = random.nextDouble();
 					FeatureWeight feature_weight = new FeatureWeight();
+					feature_weight.setInputFeature(input_features.get(in_idx));
 					feature_weight.setResultFeature(output_features.get(out_idx));
 					feature_weight.setWeight(weight);
-					feature_weight.setVocabularyWeights(vocabulary.getLabel(), weight);
-					feature_weight.setInputFeature(input_features.get(in_idx));
 					Feature input_feature = input_features.get(in_idx);
+					Feature input_feature_record = feature_repo.findByValue(input_feature.getValue());
+					if(input_feature_record != null){
+						input_feature = input_feature_record;
+					}
+					
+					input_feature.getFeatureWeights().add(feature_weight);
+					feature_repo.save(input_feature);
+				}
+				
+				policy[in_idx][out_idx] = weight;
+			}
+		}
+		log.info("###################################################################");
+
+		
+		return policy;
+	}
+
+	/**
+	 * Generates a policy matrix for a given vocabulary
+	 * 
+	 * @param input_features {@link List} of {@link Feature} objects containing the input features
+	 * @param output_features {@link List} of {@link Feature} objects containing the output features
+	 * @param vocabulary {@link Vocabulary} object containing the vocabulary
+	 * @return {@link double[][]} policy matrix
+	 */
+	public double[][] generateVocabularyPolicy(List<Feature> input_features, List<Feature> output_features, String vocabulary_label){
+		// 1. Create a memory record for prediction
+		Random random = new Random();
+		double[][] policy = new double[input_features.size()][output_features.size()];
+		log.info("###################################################################");
+		log.info("input features size :: "+input_features.size());
+		log.info("output features size :: "+output_features.size());
+		
+		for(int in_idx = 0; in_idx < input_features.size(); in_idx++){
+			Feature input_feature = input_features.get(in_idx);
+			for(int out_idx = 0; out_idx < output_features.size(); out_idx++){
+				Feature output_feature = output_features.get(out_idx);
+				List<Feature> features = feature_repo.getConnectedFeatures(input_feature.getValue(), output_feature.getValue());
+				double weight = -1.0;
+
+				if(!features.isEmpty()){
+					for(FeatureWeight feature_weight : features.get(0).getFeatureWeights()){	
+						if(feature_weight.getResultFeature().equals(output_features.get(out_idx))){
+							weight = feature_weight.getVocabularyWeights().get(vocabulary_label);
+						}
+					}
+				}
+				else{
+					weight = random.nextDouble();
+					FeatureWeight feature_weight = new FeatureWeight();
+					feature_weight.setResultFeature(output_feature);
+					feature_weight.setWeight(weight);
+					feature_weight.setVocabularyWeight(vocabulary_label, weight);
+					feature_weight.setInputFeature(input_feature);
 					Feature input_feature_record = feature_repo.findByValue(input_feature.getValue());
 					if(input_feature_record != null){
 						input_feature = input_feature_record;
@@ -370,7 +431,7 @@ public class Brain {
 			return null;
 		}
 		
-		double[][] policy = generatePolicy(context_features, candidate_features);
+		double[][] policy = generateRawPolicy(context_features, candidate_features);
 		double[] prediction = predict(policy);
 		
 		// Find feature with highest probability
@@ -398,7 +459,7 @@ public class Brain {
 			return new double[0];
 		}
 		
-		double[][] policy = generatePolicy(context_features, candidate_features);
+		double[][] policy = generateRawPolicy(context_features, candidate_features);
 		return predict(policy);
 	}
 	
