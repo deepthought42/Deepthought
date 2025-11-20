@@ -105,18 +105,18 @@ public class FeatureVector {
 			Set<FeatureWeight> feature_weights = obj_def_repo.getFeatureWeights(def.getValue());
 			double[] feature_weights_array = new double[feature_weights.size()];
 			feature_weights.stream()
-				.filter(fw -> vocab.getValueList().indexOf(fw.getEndFeature().getValue()) >= 0)
+				.filter(fw -> vocab.getValueList().indexOf(fw.getResultFeature().getValue()) >= 0)
 				.forEach(fw -> {
-					int action_idx = vocab.getValueList().indexOf(fw.getEndFeature().getValue());
-					feature_weights_array[action_idx] = fw.getWeight();
+					int action_idx = vocab.getValueList().indexOf(fw.getResultFeature().getValue());
+					feature_weights_array[action_idx] = fw.getWeights().get(vocab.getLabel());
 				});
 			vocab_policy[k] = feature_weights_array;
 		}
 		return vocab_policy;
 	}
 	
-	/**
-	 * Loads a vocabulary record that maps input features to their presence/absence in a vocabulary
+		/**
+	 * Merges two lists of {@link Feature}s that maps input features to their presence/absence in a vocabulary
 	 * based on feature weights stored in the knowledge graph.
 	 *
 	 * <p>This method constructs a HashMap where each key represents an input feature and the value
@@ -130,32 +130,31 @@ public class FeatureVector {
 	 * @param output_features List of output features representing possible actions/outcomes.
 	 *                        Used to determine the column dimension of the returned HashMap.
 	 *                        Note: actual weights are filtered by vocabulary membership.
-	 * @param vocab Vocabulary object containing the ordered list of feature values that
-	 *              determine valid action indices. Only FeatureWeight edges whose end
-	 *              features are present in this vocabulary will be included in the record.
-	 * @return A HashMap where each key represents an input feature and the value represents
-	 *         whether the feature is present (1) or absent (0) in the vocabulary.
+	 * @return A HashMap where each key represents an {@link Vocabulary} and the value
+	 * represents the HashMap of {@link Feature} weights for the Vocabulary where the key is the
+	 * feature label and the value is the weight of the feature for the vocabulary.
+	 *
 	 * @throws NullPointerException if any of the required parameters are null
-	 * @return HashMap<String, Integer> where the key is the input feature value and the value is 1 if the feature is present in the vocabulary, 0 otherwise
+	 * @throws IllegalStateException if {@code obj_def_repo} is not properly initialized
 	 */
 	public static HashMap<String, Integer> load(List<Feature> input_features, List<Feature> output_features){
 		HashMap<String, Integer> vocabulary_record = new HashMap<String, Integer>();
 		
-    	for(Feature definition : input_features){
+    	for(Feature input_feature : input_features){
     		boolean has_match = false;
-    		for(Feature record_definition : output_features){
-    			if(record_definition.equals(definition)){
-    				vocabulary_record.put(record_definition.getValue(), 1);
+    		for(Feature output_feature : output_features){
+    			if(output_feature.equals(input_feature)){
+    				vocabulary_record.put(output_feature.getValue(), 1);
     				has_match = true;
     				break;
     			}
     		}
     		
     		if(!has_match){
-    			vocabulary_record.put(definition.getValue(), 0);
+    			vocabulary_record.put(input_feature.getValue(), 0);
     		}
-       	}
-    	
-    	return vocabulary_record;
+		}
+
+		return vocabulary_record;
 	}
 }

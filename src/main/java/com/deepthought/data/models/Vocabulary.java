@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A Vocabulary is a list of words or tokens that are essentially labels for each index
+ * A Vocabulary is a list of words or tokens that are labels for indices
  * in a weight vector that is used in machine learning. It maintains a consistent mapping
  * between words/tokens and their indices for use in feature vectors and weight matrices.
  * 
@@ -56,7 +56,7 @@ public class Vocabulary {
     
     @Schema(description = "Nested vocabularies contained within this vocabulary")
     @Relationship(type = "CONTAINS_VOCABULARY", direction = Relationship.OUTGOING)
-    private List<Vocabulary> nestedVocabularies;
+    private List<Vocabulary> vocabularies;
     
     @Schema(description = "Thread-safe counter for generating new indices")
     @JsonIgnore
@@ -70,7 +70,7 @@ public class Vocabulary {
         this.wordToIndexMap = new HashMap<>();
         this.nextIndex = new AtomicInteger(0);
         this.size = 0;
-        this.nestedVocabularies = new ArrayList<>();
+        this.vocabularies = new ArrayList<>();
     }
     
     /**
@@ -276,8 +276,8 @@ public class Vocabulary {
         if (nextIndex != null) {
             nextIndex.set(0);
         }
-        if (nestedVocabularies != null) {
-            nestedVocabularies.clear();
+        if (vocabularies != null) {
+            vocabularies.clear();
         }
         size = 0;
     }
@@ -294,19 +294,19 @@ public class Vocabulary {
             throw new IllegalArgumentException("Vocabulary cannot be null");
         }
         
-        if (nestedVocabularies == null) {
-            nestedVocabularies = new ArrayList<>();
+        if (vocabularies == null) {
+            vocabularies = new ArrayList<>();
         }
         
         // Check if already present (by label)
-        for (Vocabulary nested : nestedVocabularies) {
+        for (Vocabulary nested : vocabularies) {
             if (nested != null && nested.getLabel() != null && 
                 nested.getLabel().equals(vocabulary.getLabel())) {
                 return false;
             }
         }
         
-        nestedVocabularies.add(vocabulary);
+        vocabularies.add(vocabulary);
         return true;
     }
     
@@ -317,10 +317,10 @@ public class Vocabulary {
      * @return true if removed, false if not found
      */
     public boolean removeNestedVocabulary(Vocabulary vocabulary) {
-        if (vocabulary == null || nestedVocabularies == null) {
+        if (vocabulary == null || vocabularies == null) {
             return false;
         }
-        return nestedVocabularies.remove(vocabulary);
+        return vocabularies.remove(vocabulary);
     }
     
     /**
@@ -328,11 +328,11 @@ public class Vocabulary {
      * 
      * @return List of nested vocabularies
      */
-    public List<Vocabulary> getNestedVocabularies() {
-        if (nestedVocabularies == null) {
-            nestedVocabularies = new ArrayList<>();
+    public List<Vocabulary> getVocabularies() {
+        if (vocabularies == null) {
+            vocabularies = new ArrayList<>();
         }
-        return new ArrayList<>(nestedVocabularies);
+        return new ArrayList<>(vocabularies);
     }
     
     /**
@@ -340,8 +340,8 @@ public class Vocabulary {
      * 
      * @param nestedVocabularies List of vocabularies to nest
      */
-    public void setNestedVocabularies(List<Vocabulary> nestedVocabularies) {
-        this.nestedVocabularies = nestedVocabularies != null ? 
+    public void setVocabularies(List<Vocabulary> nestedVocabularies) {
+        this.vocabularies = nestedVocabularies != null ? 
             new ArrayList<>(nestedVocabularies) : new ArrayList<>();
     }
     
@@ -352,11 +352,11 @@ public class Vocabulary {
      * @return true if a nested vocabulary with this label exists
      */
     public boolean hasNestedVocabulary(String label) {
-        if (label == null || nestedVocabularies == null) {
+        if (label == null || vocabularies == null) {
             return false;
         }
         
-        for (Vocabulary nested : nestedVocabularies) {
+        for (Vocabulary nested : vocabularies) {
             if (nested != null && nested.getLabel() != null && 
                 nested.getLabel().equals(label)) {
                 return true;
@@ -365,8 +365,9 @@ public class Vocabulary {
         return false;
     }
     
+    ///////////////////////////////////////////////////////////////////////////
     // Getters and Setters for Neo4j persistence
-    
+    ///////////////////////////////////////////////////////////////////////////
     public Long getId() {
         return id;
     }
@@ -402,8 +403,8 @@ public class Vocabulary {
     
     @Override
     public String toString() {
-        return String.format("Vocabulary{label='%s', size=%d, words=%s}", 
-                           label, size, valueList);
+        return String.format("Vocabulary{label='%s', size=%d, words=%s, vocabularies=%s}",
+                                label, size, valueList, vocabularies);
     }
     
     @Override
