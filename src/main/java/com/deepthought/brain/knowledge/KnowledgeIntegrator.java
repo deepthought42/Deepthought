@@ -97,15 +97,16 @@ public class KnowledgeIntegrator {
 	/**
 	 * Handles conflicting knowledge
 	 */
-	private boolean handleConflict(Feature sourceFeature, Feature targetFeature, double newWeight,
-								   List<Feature> existingConnections, ConflictResolution strategy) {
+	private boolean handleConflict(Feature sourceFeature,
+									Feature targetFeature, double newWeight,
+									List<Feature> existingConnections, ConflictResolution strategy) {
 		
 		Feature existingFeature = existingConnections.get(0);
 		FeatureWeight existingWeight = null;
 		
 		// Find the existing weight edge
 		for(FeatureWeight fw : existingFeature.getFeatureWeights()) {
-			if(fw.getEndFeature().getValue().equals(targetFeature.getValue())) {
+			if(fw.getResultFeature().getValue().equals(targetFeature.getValue())) {
 				existingWeight = fw;
 				break;
 			}
@@ -194,7 +195,7 @@ public class KnowledgeIntegrator {
 		List<FeatureWeight> weightsToRemove = new ArrayList<>();
 		
 		for(FeatureWeight fw : feature.getFeatureWeights()) {
-			if(fw.getEndFeature().getValue().equals(targetFeature)) {
+			if(fw.getResultFeature().getValue().equals(targetFeature)) {
 				weightsToRemove.add(fw);
 			}
 		}
@@ -229,7 +230,7 @@ public class KnowledgeIntegrator {
 		Feature feature = connections.get(0);
 		
 		for(FeatureWeight fw : feature.getFeatureWeights()) {
-			if(fw.getEndFeature().getValue().equals(targetFeature)) {
+			if(fw.getResultFeature().getValue().equals(targetFeature)) {
 				fw.setWeight(newWeight);
 				featureWeightRepository.save(fw);
 				log.info("Updated weight: {} -> {} = {}", sourceFeature, targetFeature, newWeight);

@@ -88,7 +88,7 @@ public class GraphReasoningEngine {
 		// Follow edges above confidence threshold
 		for(FeatureWeight weight : weights) {
 			if(weight.getWeight() >= minConfidence) {
-				Feature nextFeature = weight.getEndFeature();
+				Feature nextFeature = weight.getResultFeature();
 				if(nextFeature != null && !visited.contains(nextFeature.getValue())) {
 					String step = String.format("Connected to '%s' (weight: %.3f)", 
 						nextFeature.getValue(), weight.getWeight());
@@ -141,7 +141,7 @@ public class GraphReasoningEngine {
 					if(!connected.isEmpty()) {
 						Feature connectedFeature = connected.get(0);
 						for(FeatureWeight weight : connectedFeature.getFeatureWeights()) {
-							if(weight.getEndFeature().getValue().equals(candidate.getValue())) {
+							if(weight.getResultFeature().getValue().equals(candidate.getValue())) {
 								maxScore = Math.max(maxScore, weight.getWeight());
 							}
 						}
@@ -191,7 +191,7 @@ public class GraphReasoningEngine {
 		List<FeatureWeight> weights = feature.getFeatureWeights();
 		if(weights != null && remainingHops > 1) {
 			for(FeatureWeight weight : weights) {
-				Feature next = weight.getEndFeature();
+				Feature next = weight.getResultFeature();
 				if(next != null && !seen.contains(next.getValue())) {
 					gatherFeaturesRecursive(next, remainingHops - 1, seen, result);
 				}
