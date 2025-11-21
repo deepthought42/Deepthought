@@ -714,7 +714,7 @@ public class Brain {
 				double weight = -1.0;
 
 				if(!features.isEmpty()){
-					for(FeatureWeight feature_weight : features.get(0).getFeatureWeights()){	
+					for(FeatureWeight feature_weight : features.get(0).getFeatureWeights()){
 						if(feature_weight.getResultFeature().equals(output_features.get(out_idx))){
 							weight = feature_weight.getVocabularyWeights().get(vocabulary_label);
 						}
