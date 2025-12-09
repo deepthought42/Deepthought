@@ -175,11 +175,11 @@ public class GraphReasoningEngineTests {
 		Feature connected2 = new Feature("connected2");
 		
 		FeatureWeight weight1 = new FeatureWeight();
-		weight1.setEndFeature(connected1);
+		weight1.setResultFeature(connected1);
 		weight1.setWeight(0.8);
 		
 		FeatureWeight weight2 = new FeatureWeight();
-		weight2.setEndFeature(connected2);
+		weight2.setResultFeature(connected2);
 		weight2.setWeight(0.6);
 		
 		Feature startFeature = new Feature("start");
@@ -224,11 +224,11 @@ public class GraphReasoningEngineTests {
 		Feature lowWeight = new Feature("low");
 		
 		FeatureWeight weightHigh = new FeatureWeight();
-		weightHigh.setEndFeature(highWeight);
+		weightHigh.setResultFeature(highWeight);
 		weightHigh.setWeight(0.8); // Above threshold
 		
 		FeatureWeight weightLow = new FeatureWeight();
-		weightLow.setEndFeature(lowWeight);
+		weightLow.setResultFeature(lowWeight);
 		weightLow.setWeight(0.3); // Below threshold
 		
 		Feature startFeature = new Feature("start");
@@ -277,11 +277,11 @@ public class GraphReasoningEngineTests {
 		Feature level2 = new Feature("level2");
 		
 		FeatureWeight weightToLevel1 = new FeatureWeight();
-		weightToLevel1.setEndFeature(level1);
+		weightToLevel1.setResultFeature(level1);
 		weightToLevel1.setWeight(0.8);
 		
 		FeatureWeight weightToLevel2 = new FeatureWeight();
-		weightToLevel2.setEndFeature(level2);
+		weightToLevel2.setResultFeature(level2);
 		weightToLevel2.setWeight(0.7);
 		
 		Feature startFeature = new Feature("start");
@@ -325,11 +325,11 @@ public class GraphReasoningEngineTests {
 		Feature featureB = new Feature("B");
 		
 		FeatureWeight weightAtoB = new FeatureWeight();
-		weightAtoB.setEndFeature(featureB);
+		weightAtoB.setResultFeature(featureB);
 		weightAtoB.setWeight(0.8);
 		
 		FeatureWeight weightBtoA = new FeatureWeight();
-		weightBtoA.setEndFeature(featureA);
+		weightBtoA.setResultFeature(featureA);
 		weightBtoA.setWeight(0.7);
 		
 		featureA.getFeatureWeights().add(weightAtoB);
@@ -487,7 +487,7 @@ public class GraphReasoningEngineTests {
 		Feature candidateFeature = new Feature("candidate");
 		
 		FeatureWeight weight = new FeatureWeight();
-		weight.setEndFeature(candidateFeature);
+		weight.setResultFeature(candidateFeature);
 		weight.setWeight(0.75);
 		
 		Feature connectedFeature = new Feature("query");
@@ -535,11 +535,11 @@ public class GraphReasoningEngineTests {
 		Feature candidateFeature = new Feature("candidate");
 		
 		FeatureWeight weight1 = new FeatureWeight();
-		weight1.setEndFeature(candidateFeature);
+		weight1.setResultFeature(candidateFeature);
 		weight1.setWeight(0.5);
 		
 		FeatureWeight weight2 = new FeatureWeight();
-		weight2.setEndFeature(candidateFeature);
+		weight2.setResultFeature(candidateFeature);
 		weight2.setWeight(0.9); // Higher weight
 		
 		Feature connected1 = new Feature("query1");
@@ -678,11 +678,11 @@ public class GraphReasoningEngineTests {
 		Feature connected2 = new Feature("connected2");
 		
 		FeatureWeight weight1 = new FeatureWeight();
-		weight1.setEndFeature(connected1);
+		weight1.setResultFeature(connected1);
 		weight1.setWeight(0.8);
 		
 		FeatureWeight weight2 = new FeatureWeight();
-		weight2.setEndFeature(connected2);
+		weight2.setResultFeature(connected2);
 		weight2.setWeight(0.6);
 		
 		Feature startFeature = new Feature("start");
@@ -723,11 +723,11 @@ public class GraphReasoningEngineTests {
 		Feature level2 = new Feature("level2");
 		
 		FeatureWeight weightToLevel1 = new FeatureWeight();
-		weightToLevel1.setEndFeature(level1);
+		weightToLevel1.setResultFeature(level1);
 		weightToLevel1.setWeight(0.8);
 		
 		FeatureWeight weightToLevel2 = new FeatureWeight();
-		weightToLevel2.setEndFeature(level2);
+		weightToLevel2.setResultFeature(level2);
 		weightToLevel2.setWeight(0.7);
 		
 		Feature startFeature = new Feature("start");
@@ -795,11 +795,11 @@ public class GraphReasoningEngineTests {
 		Feature featureB = new Feature("B");
 		
 		FeatureWeight weightAtoB = new FeatureWeight();
-		weightAtoB.setEndFeature(featureB);
+		weightAtoB.setResultFeature(featureB);
 		weightAtoB.setWeight(0.8);
 		
 		FeatureWeight weightBtoA = new FeatureWeight();
-		weightBtoA.setEndFeature(featureA);
+		weightBtoA.setResultFeature(featureA);
 		weightBtoA.setWeight(0.7);
 		
 		featureA.getFeatureWeights().add(weightAtoB);

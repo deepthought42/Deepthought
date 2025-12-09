@@ -921,7 +921,7 @@ logging.level.org.neo4j=WARN
 ## Prerequisites
 
 ### Required Software
-- **Java**: JDK 8 or higher
+- **Java**: JDK 21 or higher
 - **Maven**: 3.6+ (or use included `mvnw`)
 - **Neo4j**: 4.0+ (Community or Enterprise)
 - **Git**: For version control
@@ -1265,7 +1265,7 @@ Error: Failed to resolve dependencies
 - Check internet connection
 - Clear Maven cache: `./mvnw dependency:purge-local-repository`
 - Update Maven: `./mvnw -U clean install`
-- Check Java version: `java -version` (should be 8+)
+- Check Java version: `java -version` (should be 21+)
 
 #### Out of Memory Error
 ```
