@@ -3,10 +3,22 @@ package com.deepthought.api.v2.dto;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Generic request for processing signals (text, images, audio, and other metadata).
+ * Request object for processing multimodal signals such as text, images, audio and other metadata.
+ * 
+ * Preconditions:
+ * - The instance may be constructed with any combination of non-null or null fields.
+ * - Callers must respect the semantics of each field (for example, imageReferences refers to images only).
+ * 
+ * Postconditions:
+ * - After construction, fields reflect the values provided by the caller via setters or deserialization.
+ * - The object contains no derived or lazily computed state; all state is explicit in its fields.
  */
+@Getter
+@Setter
 public class SignalRequest {
 
     @Schema(description = "Primary text content of the request", example = "Summarize the latest events.")
@@ -23,44 +35,4 @@ public class SignalRequest {
 
     @Schema(description = "Session identifier for continuity across requests", example = "session-123")
     private String sessionId;
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public List<String> getImageReferences() {
-        return imageReferences;
-    }
-
-    public void setImageReferences(List<String> imageReferences) {
-        this.imageReferences = imageReferences;
-    }
-
-    public List<String> getAudioReferences() {
-        return audioReferences;
-    }
-
-    public void setAudioReferences(List<String> audioReferences) {
-        this.audioReferences = audioReferences;
-    }
-
-    public List<String> getOtherSignals() {
-        return otherSignals;
-    }
-
-    public void setOtherSignals(List<String> otherSignals) {
-        this.otherSignals = otherSignals;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
 }

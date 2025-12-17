@@ -17,7 +17,15 @@ import com.deepthought.data.models.MemoryRecord;
 import com.deepthought.data.repository.MemoryRecordRepository;
 
 /**
- * Encapsulates memory retrieval logic used by the SignalsController.
+ * Service that encapsulates memory retrieval logic used by the SignalsController.
+ * 
+ * Preconditions:
+ * - A {@link MemoryRecordRepository} bean must be available and injected.
+ * - Callers provide non-null service instances managed by the Spring container.
+ * 
+ * Postconditions:
+ * - The service does not mutate persistent state beyond reading {@link MemoryRecord} entities.
+ * - Returned responses clearly indicate success or validation errors through the {@code success} flag and message.
  */
 @Service
 public class MemoryRetrievalService {
@@ -27,6 +35,22 @@ public class MemoryRetrievalService {
     @Autowired
     private MemoryRecordRepository memoryRecordRepository;
 
+    /**
+     * Retrieves memories that fall within the supplied time range and optionally match a prompt.
+     * 
+     * Preconditions:
+     * - The request parameter is non-null.
+     * - request.getFrom() and request.getTo() represent inclusive time bounds when both are non-null.
+     * 
+     * Postconditions:
+     * - If from or to is null, the returned response has success set to false and an explanatory message.
+     * - If from is after to, the returned response has success set to false and an explanatory message.
+     * - On success, the returned response contains a list of memory items limited by the request limit or a default of 50.
+     * - No new {@link MemoryRecord} entities are created or modified by this method.
+     * 
+     * @param request memory retrieval parameters, including prompt, time range and optional result limit
+     * @return a {@link MemoryRetrievalResponse} describing either an error or the retrieved memory items
+     */
     public MemoryRetrievalResponse retrieveMemories(MemoryRetrievalRequest request) {
         Date from = request.getFrom();
         Date to = request.getTo();

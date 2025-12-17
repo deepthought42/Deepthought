@@ -21,7 +21,6 @@ import com.deepthought.data.db.DataDecomposer;
 import com.deepthought.data.edges.Prediction;
 import com.deepthought.data.models.Feature;
 import com.deepthought.data.models.MemoryRecord;
-import com.deepthought.data.models.Vocabulary;
 import com.deepthought.data.repository.FeatureRepository;
 import com.deepthought.data.repository.MemoryRecordRepository;
 import com.deepthought.data.repository.PredictionRepository;
@@ -33,9 +32,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Legacy controller for prediction and learning operations.
  * 
- * This class is no longer part of the public HTTP API surface.
- * External clients should instead use the high-level signal and memory
- * endpoints which do not expose specific learning mechanisms.
+ * Preconditions:
+ * - Intended for internal use only and not exposed as part of the public HTTP API surface.
+ * - Required repository and {@link Brain} dependencies must be available and injected.
+ * 
+ * Postconditions:
+ * - Maintains backward-compatible behavior for internal callers that still depend on these operations.
+ * - No guarantees are made about future availability or stability of this controller.
  */
 public class ReinforcementLearningController {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -53,19 +56,24 @@ public class ReinforcementLearningController {
 	private Brain brain;
 	
     /**
-     * Generates a prediction based on stringified JSON object, input and output {@link Vocabulary} 
-     * 	labels and any new output features the system should predict for. If input passed is not a JSON Object
-     *  this endpoint assumes the object is a unstructured {@link String} 
+     * Generates a prediction and persists a corresponding {@link MemoryRecord}.
      * 
-     * @param json_obj stringified JSON object containing data that user would like used for prediction
-     * @param output_labels list of output labels to be predicted for
+     * Preconditions:
+     * - input is non-null and represents either a JSON object string or an unstructured string.
+     * - output_labels is non-null and contains at least one value describing desired output features.
+     * - The underlying repositories and {@link Brain} instance are available and operational.
      * 
-     * @return 
+     * Postconditions:
+     * - Returns a non-null {@link MemoryRecord} that has been saved through {@link MemoryRecordRepository}.
+     * - The returned memory record is associated with prediction edges representing scores for each output feature.
      * 
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws NullPointerException
-     * @throws JSONException
+     * @param input stringified data used for prediction, either JSON or unstructured text
+     * @param output_labels list of output feature labels for which predictions are generated
+     * @return a persisted {@link MemoryRecord} containing prediction metadata
+     * @throws IllegalArgumentException if provided arguments violate expected constraints
+     * @throws IllegalAccessException if underlying reflection-based access fails
+     * @throws NullPointerException if required dependencies are unexpectedly null
+     * @throws JSONException if the input cannot be parsed as JSON when expected
      */
 	@Operation(summary = "Make a prediction and return a MemoryRecord", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/predict", method = RequestMethod.POST)
@@ -170,16 +178,23 @@ public class ReinforcementLearningController {
 	}
     
     /**
-     * Applies learning to provided feature for a given memory
+     * Applies learning to the provided feature for a given memory.
      * 
-     * @param memory_id unique identifier for specific memory
-     * @param feature_value value of feature that you want to label memory with and learn from
-	 * 
-     * @throws JSONException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws NullPointerException
-     * @throws IOException
+     * Preconditions:
+     * - memory_id refers to an existing {@link MemoryRecord} managed by the system.
+     * - feature_value is non-null and non-empty and represents the label to learn from.
+     * 
+     * Postconditions:
+     * - The underlying {@link Brain#learn(long, Feature)} method is invoked with the resolved feature.
+     * - Learning state is updated within the brain implementation; no {@link MemoryRecord} is directly returned.
+     * 
+     * @param memory_id unique identifier for the target memory
+     * @param feature_value feature value used to label and learn from the memory
+     * @throws JSONException if any JSON processing error occurs in downstream logic
+     * @throws IllegalArgumentException if provided arguments are invalid for learning
+     * @throws IllegalAccessException if underlying reflection-based access fails
+     * @throws NullPointerException if required dependencies are unexpectedly null
+     * @throws IOException if I/O errors occur during learning
      */
 	@Operation(summary = "Applies learning to provided feature for a given memory", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
@@ -198,15 +213,23 @@ public class ReinforcementLearningController {
     }
     
 	/**
-	 * Performs training iteration using label and given object data
+	 * Performs a training iteration using a label and the supplied object data.
 	 * 
-	 * @param json_object
-	 * @param label
-	 * @throws JSONException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws NullPointerException
-	 * @throws IOException
+	 * Preconditions:
+	 * - json_object is non-null and represents a JSON object string.
+	 * - label is non-null and non-empty and describes the target concept.
+	 * 
+	 * Postconditions:
+	 * - The underlying {@link Brain#train(List, String)} method is invoked with features decomposed from the JSON.
+	 * - No value is returned; any learning effects are applied within the brain implementation.
+	 * 
+	 * @param json_object JSON object string containing training data
+	 * @param label target label for training
+	 * @throws JSONException if the json_object cannot be parsed as JSON
+	 * @throws IllegalArgumentException if arguments violate training constraints
+	 * @throws IllegalAccessException if underlying reflection-based access fails
+	 * @throws NullPointerException if required dependencies are unexpectedly null
+	 * @throws IOException if I/O errors occur during training
 	 */
 	@Operation(summary = "Performs training iteration using label and given object data", description = "", tags = { "Reinforcement Learning" })
     @RequestMapping(value ="/train", method = RequestMethod.POST)
@@ -224,7 +247,13 @@ public class ReinforcementLearningController {
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 class EmptyVocabularyException extends RuntimeException {
 	/**
+	 * Exception indicating that an expected vocabulary of output features was empty or null.
 	 * 
+	 * Preconditions:
+	 * - Thrown only in contexts where a non-empty vocabulary is required.
+	 * 
+	 * Postconditions:
+	 * - Signals an internal server error to the caller via the associated HTTP status.
 	 */
 	private static final long serialVersionUID = 7200878662560716216L;
 

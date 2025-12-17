@@ -21,7 +21,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * High-level API v2 controller providing generic signal processing and memory retrieval.
+ * High-level API v2 controller that exposes endpoints for generic signal processing and memory retrieval.
+ * 
+ * Preconditions:
+ * - {@link SignalProcessingService} and {@link MemoryRetrievalService} beans must be available and injected.
+ * - This controller is registered in the Spring context and mapped under the {@code /api/v2} path.
+ * 
+ * Postconditions:
+ * - For successfully handled requests, responses follow the contract of the corresponding DTOs.
+ * - In case of unexpected failures, an HTTP 5xx status code is returned without exposing internal details.
  */
 @RestController
 @RequestMapping("/api/v2")
@@ -37,7 +45,18 @@ public class SignalsController {
 	private MemoryRetrievalService memoryRetrievalService;
 	
 	/**
-	 * Process generic signals (text, images, audio, and other metadata) and produce a response.
+	 * Processes generic signals (text, images, audio, and other metadata) and produces a response.
+	 * 
+	 * Preconditions:
+	 * - The request body is deserializable into a {@link SignalRequest} instance.
+	 * - The underlying {@link SignalProcessingService} is available and operational.
+	 * 
+	 * Postconditions:
+	 * - On success, returns HTTP 200 with a non-null {@link SignalResponse} in the body.
+	 * - On internal error, returns HTTP 500 without leaking implementation details in the body.
+	 * 
+	 * @param request the incoming signal request containing text and optional signal references
+	 * @return a response entity wrapping the {@link SignalResponse} or an error status
 	 */
 	@Operation(
 		summary = "Process signals",
@@ -56,7 +75,18 @@ public class SignalsController {
 	}
 	
 	/**
-	 * Retrieve stored memories for a given prompt and time range.
+	 * Retrieves stored memories for a given prompt and time range.
+	 * 
+	 * Preconditions:
+	 * - The request body is deserializable into a {@link MemoryRetrievalRequest} instance.
+	 * - The underlying {@link MemoryRetrievalService} is available and operational.
+	 * 
+	 * Postconditions:
+	 * - Always returns HTTP 200 for validation outcomes, with success or failure encoded in the response body.
+	 * - On unexpected internal errors, returns HTTP 500.
+	 * 
+	 * @param request the retrieval request containing time bounds, optional prompt and limit
+	 * @return a response entity wrapping a {@link MemoryRetrievalResponse} that describes the result
 	 */
 	@Operation(
 		summary = "Retrieve memories",

@@ -3,10 +3,20 @@ package com.deepthought.api.v2.dto;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Generic response for processed signals.
+ * Response object for processed signals returned by the signals API.
+ * 
+ * Preconditions:
+ * - Instances are created and populated by server-side components, not clients.
+ * 
+ * Postconditions:
+ * - Fields describe the outcome of processing a corresponding {@code SignalRequest}, including text, session and confidence.
  */
+@Getter
+@Setter
 public class SignalResponse {
 
     @Schema(description = "Generated response text")
@@ -20,36 +30,4 @@ public class SignalResponse {
 
     @Schema(description = "Optional list of source descriptors relevant to the response")
     private List<String> sources;
-
-    public String getOutputText() {
-        return outputText;
-    }
-
-    public void setOutputText(String outputText) {
-        this.outputText = outputText;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public Double getConfidence() {
-        return confidence;
-    }
-
-    public void setConfidence(Double confidence) {
-        this.confidence = confidence;
-    }
-
-    public List<String> getSources() {
-        return sources;
-    }
-
-    public void setSources(List<String> sources) {
-        this.sources = sources;
-    }
 }
