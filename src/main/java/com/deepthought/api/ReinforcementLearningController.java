@@ -3,7 +3,6 @@ package com.deepthought.api;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.deepthought.brain.Brain;
 import com.deepthought.data.db.DataDecomposer;
@@ -33,11 +31,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 
 /**
- *	API endpoints for learning and making predictions. This set of endpoints allows interacting with the knowledge graph
- *	 to generate, update and retrieve weight matrices(models) for any given input feature set and output set
+ * Legacy controller for prediction and learning operations.
+ * 
+ * This class is no longer part of the public HTTP API surface.
+ * External clients should instead use the high-level signal and memory
+ * endpoints which do not expose specific learning mechanisms.
  */
-@RestController
-@RequestMapping("/rl")
 public class ReinforcementLearningController {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
@@ -188,10 +187,7 @@ public class ReinforcementLearningController {
     public  @ResponseBody void learn(@Schema(description = "unique identifier for specific memory", example = "12345", required = true) @RequestParam(value="memory_id", required=true) long memory_id, 
     								 @Schema(description = "value of feature that you want to label memory with and learn from", example = "VERB", required = true) @RequestParam(value="feature_value", required=true) String feature_value) 
 					 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
-    {
-    	Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
-    	
-    	//log.info("object definition list size :: "+feature_list.size());
+    {    	
     	Feature feature = new Feature(feature_value);
     	Feature feature_record = feature_repo.findByValue(feature.getValue());
     	if(feature_record != null){
