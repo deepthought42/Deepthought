@@ -16,9 +16,6 @@ import com.deepthought.data.models.Feature;
 import com.deepthought.data.models.MemoryRecord;
 import com.deepthought.data.repository.MemoryRecordRepository;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * Service that encapsulates memory retrieval logic used by the SignalsController.
  * 
@@ -31,8 +28,6 @@ import lombok.Setter;
  * - Returned responses clearly indicate success or validation errors through the {@code success} flag and message.
  */
 @Service
-@Getter
-@Setter
 public class MemoryRetrievalService {
 
     private static final Logger log = LoggerFactory.getLogger(MemoryRetrievalService.class);
