@@ -21,10 +21,15 @@ import com.deepthought.data.models.Feature;
 import com.deepthought.data.models.ReasoningPath;
 import com.deepthought.data.repository.FeatureRepository;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Encapsulates signal processing logic used by the SignalsController.
  */
 @Service
+@Getter
+@Setter
 public class SignalProcessingService {
 
     private static final Logger log = LoggerFactory.getLogger(SignalProcessingService.class);
