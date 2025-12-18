@@ -1,5 +1,6 @@
 package com.deepthought.brain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.deepthought.data.edges.FeatureWeight;
 import com.deepthought.data.models.Feature;
-import com.deepthought.data.models.Vocabulary;
 import com.deepthought.data.repository.FeatureRepository;
 
 /**
@@ -27,132 +27,93 @@ public class FeatureVector {
 	private static FeatureRepository obj_def_repo;
 	
 	/**
-	 * Loads a policy matrix that maps input features to their learned action probabilities
+	 * Loads a policy matrix that maps input features to their connected features and weights
 	 * based on feature weights stored in the knowledge graph.
 	 * 
-	 * <p>This method constructs a 2D array where each row represents an input feature and
-	 * each column represents an output feature (action) from the vocabulary. The values
-	 * in the matrix represent learned weights/probabilities for transitioning from input
-	 * features to output features, as determined by FeatureWeight relationships in the
-	 * knowledge graph.
+	 * This method constructs a 2D array where each row represents an input feature and
+	 * each column represents a unique connected feature (result feature from FeatureWeight relationships).
+	 * The values in the matrix represent the weights from FeatureWeight edges connecting
+	 * input features to their connected features.
 	 * 
-	 * <p><b>Preconditions:</b>
-	 * <ul>
-	 *   <li>{@code input_features != null} - input feature list must not be null</li>
-	 *   <li>{@code output_features != null} - output feature list must not be null</li>
-	 *   <li>{@code vocab != null} - vocabulary must not be null</li>
-	 *   <li>{@code vocab.getValueList() != null} - vocabulary value list must be initialized</li>
-	 *   <li>{@code obj_def_repo != null} - feature repository must be autowired and initialized</li>
-	 *   <li>All features in {@code input_features} must have non-null {@code value} properties</li>
-	 * </ul>
+	 * Preconditions:
+	 * - input_features is non-null
+	 * - obj_def_repo is non-null and properly initialized
+	 * - All features in input_features have non-null value properties
+	 * - FeatureWeight result features have non-null value properties
 	 * 
-	 * <p><b>Postconditions:</b>
-	 * <ul>
-	 *   <li>Returns a 2D array with dimensions {@code [input_features.size()][output_features.size()]}</li>
-	 *   <li>Each row {@code k} corresponds to {@code input_features.get(k)}</li>
-	 *   <li>Each column {@code j} corresponds to {@code output_features.get(j)}</li>
-	 *   <li>{@code result[k][j]} contains the weight for transitioning from input feature {@code k}
-	 *       to output feature {@code j}, or 0.0 if no such relationship exists in the graph</li>
-	 *   <li>All input features have been persisted to the repository via {@code obj_def_repo.save()}</li>
-	 *   <li>Only FeatureWeight relationships whose end features exist in the vocabulary are included</li>
-	 * </ul>
-	 * 
-	 * <p><b>Side Effects:</b>
-	 * <ul>
-	 *   <li>Persists all input features to the database via {@code obj_def_repo.save()}</li>
-	 *   <li>Logs an informational message about concatenating action features</li>
-	 * </ul>
-	 * 
-	 * <p><b>Usage:</b>
-	 * <pre>{@code
-	 * List<Feature> inputs = Arrays.asList(new Feature("button"), new Feature("form"));
-	 * List<Feature> outputs = Arrays.asList(new Feature("click"), new Feature("submit"));
-	 * Vocabulary vocab = new Vocabulary("actions");
-	 * vocab.appendToVocabulary(new Feature("click"));
-	 * vocab.appendToVocabulary(new Feature("submit"));
-	 * 
-	 * double[][] policy = FeatureVector.loadPolicy(inputs, outputs, vocab);
-	 * // policy[0][0] = weight for button -> click
-	 * // policy[0][1] = weight for button -> submit
-	 * // policy[1][0] = weight for form -> click
-	 * // policy[1][1] = weight for form -> submit
-	 * }</pre>
+	 * Postconditions:
+	 * - Returns a 2D array with dimensions [input_features.size()][unique_connected_features.size()]
+	 * - Each row k corresponds to input_features.get(k)
+	 * - Each column j corresponds to a unique connected feature label, with column index determined
+	 *   by the order in which connected features were first encountered
+	 * - result[k][j] contains the weight from FeatureWeight.getWeight() for the connection between
+	 *   input feature k and the connected feature at column j, or 0.0 if no such relationship exists
+	 * - All unique connected features across all input features are represented in the column dimension
 	 * 
 	 * @param input_features List of input features representing the current state/observations.
-	 *                       Each feature will be saved to the repository and its outgoing
-	 *                       FeatureWeight relationships will be queried.
-	 * @param output_features List of output features representing possible actions/outcomes.
-	 *                        Used to determine the column dimension of the returned matrix.
-	 *                        Note: actual weights are filtered by vocabulary membership.
-	 * @param vocab Vocabulary object containing the ordered list of feature values that
-	 *              determine valid action indices. Only FeatureWeight edges whose end
-	 *              features are present in this vocabulary will be included in the policy.
-	 * @return A 2D array of doubles where {@code result[k][j]} represents the learned weight
-	 *         for transitioning from input feature {@code k} to the output feature at
-	 *         vocabulary index {@code j}. Unmapped positions contain 0.0.
-	 * @throws NullPointerException if any of the required parameters are null
-	 * @throws IllegalStateException if {@code obj_def_repo} is not properly initialized
+	 *                       Each feature's outgoing FeatureWeight relationships will be queried
+	 *                       to determine connected features and their weights.
+	 * @return A 2D array of doubles where result[k][j] represents the weight connecting input feature
+	 *         k to the connected feature at column j. Unmapped positions contain 0.0.
+	 * @throws NullPointerException if input_features is null or obj_def_repo is not initialized
 	 */
-	public static double[][] loadPolicy(List<Feature> input_features, List<Feature> output_features, Vocabulary vocab){
-		double[][] vocab_policy = new double[input_features.size()][output_features.size()];
+	public static double[][] loadPolicy(List<Feature> input_features){
+		log.info("concatenating features into 2d array");
 
-		log.info("concatenating action features into 2d array for vocabulary");
-		//set output_features for object definition to action probabilities
-		for(int k = 0; k < input_features.size(); k++){
-			Feature def = input_features.get(k);
-			obj_def_repo.save(def);
-			//load action policy for object definition
-			Set<FeatureWeight> feature_weights = obj_def_repo.getFeatureWeights(def.getValue());
-			double[] feature_weights_array = new double[feature_weights.size()];
-			feature_weights.stream()
-				.filter(fw -> vocab.getValueList().indexOf(fw.getResultFeature().getValue()) >= 0)
-				.forEach(fw -> {
-					int action_idx = vocab.getValueList().indexOf(fw.getResultFeature().getValue());
-					feature_weights_array[action_idx] = fw.getVocabularyWeights().get(vocab.getLabel());
-				});
-			vocab_policy[k] = feature_weights_array;
+		// 1. Load Set of feature weight vectors for each input feature. Capture each connected feature label in a HashMap where each key is the connected feature label and the value is an index value. When a key is added to the HashMap, the value should be set to the size of the set of values in the hashmap before the key is added. 
+		HashMap<String, Integer> connected_feature_labels = new HashMap<String, Integer>();
+		List<Set<FeatureWeight>> feature_weight_vectors = new ArrayList<>();
+		for(Feature input_feature : input_features){
+			Set<FeatureWeight> feature_weights = obj_def_repo.getFeatureWeights(input_feature.getValue());
+			for(FeatureWeight feature_weight : feature_weights){
+				if(!connected_feature_labels.containsKey(feature_weight.getResultFeature().getValue())){
+					connected_feature_labels.put(feature_weight.getResultFeature().getValue(), connected_feature_labels.size());
+				}
+			}
+			feature_weight_vectors.add(feature_weights);
 		}
-		return vocab_policy;
+
+		// 2. Create 2D array with x-axis = input_features.size(), y-axis = connected feature.size()
+		double[][] feature_weight_matrix = new double[input_features.size()][connected_feature_labels.size()];
+
+		// 3. Populate the 2D array with the weights from the feature weight vectors.
+		for(int i = 0; i < input_features.size(); i++){
+			Set<FeatureWeight> feature_weight_set = feature_weight_vectors.get(i);
+			
+			for(FeatureWeight feature_weight : feature_weight_set){
+				int connected_feature_label_idx = connected_feature_labels.put(feature_weight.getResultFeature().getValue(), connected_feature_labels.size());
+				feature_weight_matrix[i][connected_feature_label_idx] = feature_weight.getWeight();
+			}
+		}
+
+		// 4. Return the 2D array
+		return feature_weight_matrix;
 	}
-	
-		/**
-	 * Merges two lists of {@link Feature}s that maps input features to their presence/absence in a vocabulary
-	 * based on feature weights stored in the knowledge graph.
-	 *
-	 * <p>This method constructs a HashMap where each key represents an input feature and the value
-	 * represents whether the feature is present (1) or absent (0) in the vocabulary. The HashMap
-	 * is populated by iterating through the input features and checking if they match any of the
-	 * vocabulary features.
-	 *
-	 * @param input_features List of input features representing the current state/observations.
-	 *                       Each feature will be saved to the repository and its outgoing
-	 *                       FeatureWeight relationships will be queried.
-	 * @param vocab_features List of {@link Vocabulary} features representing possible actions/outcomes.
-	 *                        Used to determine the column dimension of the returned HashMap.
-	 *                        Note: actual weights are filtered by vocabulary membership.
-	 * @return A HashMap where each key represents an {@link Vocabulary} and the value
-	 * represents the HashMap of {@link Feature} weights for the Vocabulary where the key is the
-	 * feature label and the value is the weight of the feature for the vocabulary.
-	 *
-	 * @throws NullPointerException if any of the required parameters are null
-	 * @throws IllegalStateException if {@code obj_def_repo} is not properly initialized
+
+	/**
+	 * Creates a mapping of vocabulary features to their presence indicator.
+	 * 
+	 * This method constructs a HashMap where each key represents a vocabulary feature value
+	 * and the value is set to 1, indicating the presence of that feature in the vocabulary.
+	 * 
+	 * Preconditions:
+	 * - vocabulary_features is non-null
+	 * - All features in vocabulary_features have non-null value properties
+	 * 
+	 * Postconditions:
+	 * - Returns a non-null HashMap where each key is a vocabulary feature value and each value is 1
+	 * - The size of the returned map equals the size of vocabulary_features
+	 * - All vocabulary features are represented in the returned map
+	 * 
+	 * @param vocabulary_features List of vocabulary features to map
+	 * @return A HashMap where each key is a vocabulary feature value and each value is 1
+	 * @throws NullPointerException if vocabulary_features is null
 	 */
-	public static HashMap<String, Integer> loadVocabularyFeatures(List<Feature> input_features, List<Feature> vocabulary_features){
+	public static HashMap<String, Integer> loadVocabularyFeatures(List<Feature> vocabulary_features){
 		HashMap<String, Integer> vocabulary_record = new HashMap<String, Integer>();
 		
-    	for(Feature input_feature : input_features){
-    		boolean has_match = false;
-    		for(Feature vocabulary_feature : vocabulary_features){
-    			if(vocabulary_feature.equals(input_feature)){
-    				vocabulary_record.put(vocabulary_feature.getValue(), 1);
-    				has_match = true;
-    				break;
-    			}
-    		}
-    		
-    		if(!has_match){
-    			vocabulary_record.put(input_feature.getValue(), 0);
-    		}
+		for(Feature vocabulary_feature : vocabulary_features){
+			vocabulary_record.put(vocabulary_feature.getValue(), 1);
 		}
 
 		return vocabulary_record;
