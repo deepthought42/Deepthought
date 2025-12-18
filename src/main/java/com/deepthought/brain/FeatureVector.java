@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,12 +85,79 @@ public class FeatureVector {
 			Set<FeatureWeight> feature_weight_set = feature_weight_vectors.get(i);
 			
 			for(FeatureWeight feature_weight : feature_weight_set){
-				int connected_feature_label_idx = connected_feature_labels.put(feature_weight.getResultFeature().getValue(), connected_feature_labels.size());
+				int connected_feature_label_idx = connected_feature_labels.get(feature_weight.getResultFeature().getValue());
 				feature_weight_matrix[i][connected_feature_label_idx] = feature_weight.getWeight();
 			}
 		}
 
 		// 4. Return the 2D array
+		return feature_weight_matrix;
+	}
+
+	public static double[][] loadPolicy_AI_Generated(List<Feature> input_features){
+		log.info("concatenating features into 2d array");
+	
+		// Thread-safe HashMap for memoizing feature labels and their assigned indices
+		ConcurrentHashMap<String, Integer> connected_feature_labels = new ConcurrentHashMap<>();
+		
+		// Atomic counter to assign indices atomically when new labels are encountered
+		AtomicInteger indexCounter = new AtomicInteger(0);
+		
+		// 1. Retrieve feature weights for all input features in parallel
+		// Each repository call is independent and can be executed concurrently
+
+		// Fix: Make sure the generic type matches by using Set<? extends FeatureWeight>
+		List<CompletableFuture<Set<FeatureWeight>>> featureWeightFutures =
+			input_features.stream()
+			.map(input_feature -> CompletableFuture.supplyAsync(() -> {
+				Set<FeatureWeight> weights = obj_def_repo.getFeatureWeights(input_feature.getValue());
+				if (weights == null) {
+					// Always return non-null set to ensure downstream code works
+					weights = new java.util.HashSet<>();
+				}
+				// Memoize connected feature labels in a threadsafe way
+				for (FeatureWeight feature_weight : weights) {
+					if (feature_weight != null && feature_weight.getResultFeature() != null) {
+						String label = feature_weight.getResultFeature().getValue();
+						if (label != null) {
+							connected_feature_labels.computeIfAbsent(label, k -> indexCounter.getAndIncrement());
+						}
+					}
+				}
+				return weights;
+			}))
+			.collect(Collectors.toList());
+
+		// Wait for all parallel retrievals to complete
+		CompletableFuture.allOf(featureWeightFutures.toArray(new CompletableFuture[0])).join();
+		// Extract results maintaining the order of input_features
+		List<Set<FeatureWeight>> feature_weight_vectors = featureWeightFutures.stream()
+			.map(CompletableFuture::join)
+			.collect(Collectors.toList());
+	
+		// 2. Create 2D array with x-axis = input_features.size(), y-axis = connected feature.size()
+		double[][] feature_weight_matrix = new double[input_features.size()][connected_feature_labels.size()];
+	
+		// 3. Populate the 2D array using memoized indices for constant-time lookups
+		for(int i = 0; i < input_features.size(); i++){
+			Set<FeatureWeight> feature_weight_set = feature_weight_vectors.get(i);
+			
+			if(feature_weight_set != null) {
+				for(FeatureWeight feature_weight : feature_weight_set){
+					if(feature_weight != null && feature_weight.getResultFeature() != null) {
+						String label = feature_weight.getResultFeature().getValue();
+						if(label != null) {
+							Integer idx = connected_feature_labels.get(label);
+							if(idx != null && idx >= 0 && idx < feature_weight_matrix[i].length) {
+								// Targeted update: only update the specific cell using memoized index
+								feature_weight_matrix[i][idx] = feature_weight.getWeight();
+							}
+						}
+					}
+				}
+			}
+		}
+	
 		return feature_weight_matrix;
 	}
 
