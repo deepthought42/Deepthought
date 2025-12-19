@@ -2,7 +2,6 @@ package com.deepthought.brain;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.mockito.Mock;
@@ -14,7 +13,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.deepthought.data.models.Feature;
-import com.deepthought.data.models.Vocabulary;
 import com.deepthought.data.repository.FeatureRepository;
 
 /**
@@ -71,69 +69,54 @@ public class FeatureVectorTests {
 	 * Purpose: Test load method with matching features
 	 * 
 	 * Steps:
-	 * 1. Create input and output feature lists with some matching features
-	 * 2. Call load method
+	 * 1. Create input feature list with some matching features
+	 * 2. Call load policy method
 	 * 3. Verify vocabulary record contains correct mappings (1 for matches, 0 for non-matches)
 	 * 4. Verify all input features are present in the result
 	 */
 	@Test
 	public void testLoadWithMatchingFeatures() {
-		// Step 1: Setup - Create input and output feature lists
+		// Step 1: Setup - Create input feature list with some matches
 		List<Feature> inputFeatures = new ArrayList<>();
 		inputFeatures.add(new Feature("button"));
 		inputFeatures.add(new Feature("input"));
 		inputFeatures.add(new Feature("submit"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("button"));  // Match
-		outputFeatures.add(new Feature("click"));   // No match
-		outputFeatures.add(new Feature("submit"));  // Match
-		
-		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
+		// Step 2: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - Check mappings
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.size(), inputFeatures.size(), 
-			"Result should contain all input features");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(1), 
-			"button should be marked as 1 (match found)");
-		Assert.assertEquals(result.get("input"), Integer.valueOf(0), 
-			"input should be marked as 0 (no match)");
-		Assert.assertEquals(result.get("submit"), Integer.valueOf(1), 
-			"submit should be marked as 1 (match found)");
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 3,
+			"Matrix columns should be 3 when input features has all matches");
 	}
 
 	/**
-	 * Purpose: Test load method with no matching features
+	 * Purpose: Test load policy method with no matching features
 	 * 
 	 * Steps:
-	 * 1. Create input and output feature lists with no matching features
-	 * 2. Call load method
+	 * 1. Create input feature list with no matching features
+	 * 2. Call load policy method
 	 * 3. Verify all input features are marked as 0 (no matches)
 	 */
 	@Test
-	public void testLoadWithNoMatchingFeatures() {
-		// Step 1: Setup - Create input and output feature lists with no matches
+	public void testLoadPolicyWithNoMatchingFeatures() {
+		// Step 1: Setup - Create input feature list with no matches
 		List<Feature> inputFeatures = new ArrayList<>();
 		inputFeatures.add(new Feature("button"));
 		inputFeatures.add(new Feature("input"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("click"));
-		outputFeatures.add(new Feature("submit"));
-		
-		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
+		// Step 2: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - All should be marked as 0
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.size(), inputFeatures.size(), 
-			"Result should contain all input features");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(0), 
-			"button should be marked as 0 (no match)");
-		Assert.assertEquals(result.get("input"), Integer.valueOf(0), 
-			"input should be marked as 0 (no match)");
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 0,
+			"Matrix columns should be 0 when input features has no matches");
 	}
 
 	/**
@@ -146,27 +129,21 @@ public class FeatureVectorTests {
 	 */
 	@Test
 	public void testLoadWithAllMatchingFeatures() {
-		// Step 1: Setup - Create input and output feature lists with all matches
+		// Step 1: Setup - Create input feature list with all matches
 		List<Feature> inputFeatures = new ArrayList<>();
 		inputFeatures.add(new Feature("button"));
-		inputFeatures.add(new Feature("input"));
-		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("button"));  // Match
-		outputFeatures.add(new Feature("input"));   // Match
-		outputFeatures.add(new Feature("submit"));  // Extra
-		
+		inputFeatures.add(new Feature("button"));
+		inputFeatures.add(new Feature("button"));
+		inputFeatures.add(new Feature("button"));
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - All should be marked as 1
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.size(), inputFeatures.size(), 
-			"Result should contain all input features");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(1), 
-			"button should be marked as 1 (match found)");
-		Assert.assertEquals(result.get("input"), Integer.valueOf(1), 
-			"input should be marked as 1 (match found)");
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 3,
+			"Matrix columns should be 3 when input features has all matches");
 	}
 
 	/**
@@ -181,48 +158,14 @@ public class FeatureVectorTests {
 	public void testLoadWithEmptyInputFeatures() {
 		// Step 1: Setup - Create empty input features list
 		List<Feature> inputFeatures = new ArrayList<>();
-		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("button"));
-		outputFeatures.add(new Feature("input"));
-		
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
-		
-		// Step 3: Verify - Result should be empty
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertTrue(result.isEmpty(), 
-			"Result should be empty when input features list is empty");
-	}
-
-	/**
-	 * Purpose: Test load method with empty output features list
-	 * 
-	 * Steps:
-	 * 1. Create non-empty input features list and empty output features list
-	 * 2. Call load method
-	 * 3. Verify all input features are marked as 0 (no matches possible)
-	 */
-	@Test
-	public void testLoadWithEmptyOutputFeatures() {
-		// Step 1: Setup - Create non-empty input features and empty output features
-		List<Feature> inputFeatures = new ArrayList<>();
-		inputFeatures.add(new Feature("button"));
-		inputFeatures.add(new Feature("input"));
-		
-		List<Feature> outputFeatures = new ArrayList<>();
-		
-		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
-		
-		// Step 3: Verify - All should be marked as 0
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.size(), inputFeatures.size(), 
-			"Result should contain all input features");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(0), 
-			"button should be marked as 0 (no matches in empty output)");
-		Assert.assertEquals(result.get("input"), Integer.valueOf(0), 
-			"input should be marked as 0 (no matches in empty output)");
+		// Step 3: Verify - Result should contain all vocabulary features
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result.length, 0,
+			"Matrix rows should be 0 when input features is empty");
 	}
 
 	/**
@@ -242,29 +185,21 @@ public class FeatureVectorTests {
 		inputFeatures.add(new Feature("button"));  // Duplicate
 		inputFeatures.add(new Feature("input"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("button"));  // Match
-		
 		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
-		
-		// Step 3: Verify - Each unique feature should appear once
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		// Note: HashMap will overwrite duplicates, so we expect unique keys only
-		Assert.assertTrue(result.size() <= inputFeatures.size(), 
-			"Result size should be at most the input size (duplicates overwritten)");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(1), 
-			"button should be marked as 1 (match found)");
-		Assert.assertEquals(result.get("input"), Integer.valueOf(0), 
-			"input should be marked as 0 (no match)");
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 2,
+			"Matrix columns should be 2 when input features has duplicates");
 	}
 
 	/**
 	 * Purpose: Test load method with features having same values but different instances
 	 * 
 	 * Steps:
-	 * 1. Create input and output features with same values (different instances)
-	 * 2. Call load method
+	 * 1. Create input feature list with same values (different instances)
+	 * 2. Call load policy method
 	 * 3. Verify features are matched by value (equals method)
 	 */
 	@Test
@@ -274,55 +209,42 @@ public class FeatureVectorTests {
 		Feature inputFeature1 = new Feature("button");
 		inputFeatures.add(inputFeature1);
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		Feature outputFeature1 = new Feature("button");  // Same value, different instance
-		outputFeatures.add(outputFeature1);
-		
-		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
+		// Step 2: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - Features should match by value
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(1), 
-			"Features with same value should match even if different instances");
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 1,
+			"Matrix columns should be 1 when input features has same value but different instances");
 	}
 
 	/**
-	 * Purpose: Test loadPolicy method returns correct matrix dimensions
+	 * Purpose: Test load policy method returns correct matrix dimensions
 	 * 
 	 * Steps:
-	 * 1. Create input and output feature lists
+	 * 1. Create input feature list
 	 * 2. Create a vocabulary
-	 * 3. Call loadPolicy method
-	 * 4. Verify matrix dimensions match input and output feature sizes
+	 * 3. Call load policy method
+	 * 4. Verify matrix dimensions match input feature size
 	 * 5. Verify repository save is called for each input feature
 	 */
 	@Test
 	public void testLoadPolicyReturnsCorrectDimensions() {
-		// Step 1: Setup - Create input and output feature lists
+		// Step 1: Setup - Create input feature list
 		List<Feature> inputFeatures = new ArrayList<>();
 		inputFeatures.add(new Feature("button"));
 		inputFeatures.add(new Feature("input"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("click"));
-		outputFeatures.add(new Feature("submit"));
-		outputFeatures.add(new Feature("reset"));
-		
-		// Step 2: Setup - Create vocabulary
-		Vocabulary vocab = new Vocabulary("test_vocab");
-		vocab.appendToVocabulary(new Feature("click"));
-		vocab.appendToVocabulary(new Feature("submit"));
-		vocab.appendToVocabulary(new Feature("reset"));
-		
-		// Step 3: Execute - Call loadPolicy method
-		double[][] result = FeatureVector.loadPolicy(inputFeatures, outputFeatures, vocab);
+		// Step 3: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 4: Verify - Matrix dimensions should match
 		Assert.assertNotNull(result, "loadPolicy should return a non-null matrix");
 		Assert.assertEquals(result.length, inputFeatures.size(), 
 			"Matrix rows should match input features size");
-		Assert.assertEquals(result[0].length, outputFeatures.size(), 
+		Assert.assertEquals(result[0].length, inputFeatures.size(), 
 			"Matrix columns should match output features size");
 		
 		// Step 5: Verify - Repository save should be called for each input feature
@@ -343,18 +265,12 @@ public class FeatureVectorTests {
 		// Step 1: Setup - Create empty input features
 		List<Feature> inputFeatures = new ArrayList<>();
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("click"));
-		
-		Vocabulary vocab = new Vocabulary("test_vocab");
-		vocab.appendToVocabulary(new Feature("click"));
-		
 		// Step 2: Execute - Call loadPolicy method
-		double[][] result = FeatureVector.loadPolicy(inputFeatures, outputFeatures, vocab);
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - Matrix should have 0 rows
-		Assert.assertNotNull(result, "loadPolicy should return a non-null matrix");
-		Assert.assertEquals(result.length, 0, 
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, 0,
 			"Matrix should have 0 rows when input features is empty");
 		
 		// Step 4: Verify - Repository should not be called
@@ -362,12 +278,11 @@ public class FeatureVectorTests {
 	}
 
 	/**
-	 * Purpose: Test loadPolicy method with empty output features
+	 * Purpose: Test load policy method with empty output features
 	 * 
 	 * Steps:
-	 * 1. Create input features and empty output features
-	 * 2. Create vocabulary
-	 * 3. Call loadPolicy method
+	 * 1. Create input feature list and empty output feature list
+	 * 2. Call load policy method
 	 * 4. Verify matrix has correct rows but 0 columns
 	 */
 	@Test
@@ -377,12 +292,8 @@ public class FeatureVectorTests {
 		inputFeatures.add(new Feature("button"));
 		inputFeatures.add(new Feature("input"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		
-		Vocabulary vocab = new Vocabulary("test_vocab");
-		
-		// Step 2: Execute - Call loadPolicy method
-		double[][] result = FeatureVector.loadPolicy(inputFeatures, outputFeatures, vocab);
+		// Step 2: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - Matrix should have correct rows but 0 columns
 		Assert.assertNotNull(result, "loadPolicy should return a non-null matrix");
@@ -420,14 +331,8 @@ public class FeatureVectorTests {
 		inputFeatures.add(feature2);
 		inputFeatures.add(feature3);
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("click"));
-		
-		Vocabulary vocab = new Vocabulary("test_vocab");
-		vocab.appendToVocabulary(new Feature("click"));
-		
 		// Step 2: Execute - Call loadPolicy method
-		FeatureVector.loadPolicy(inputFeatures, outputFeatures, vocab);
+		FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3 & 4: Verify - Repository save should be called for each input feature
 		Mockito.verify(featureRepository, Mockito.times(3)).save(Mockito.any(Feature.class));
@@ -452,22 +357,14 @@ public class FeatureVectorTests {
 		inputFeatures.add(new Feature("button"));
 		inputFeatures.add(new Feature("input"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("click"));
-		outputFeatures.add(new Feature("submit"));
-		
-		Vocabulary vocab = new Vocabulary("test_vocab");
-		vocab.appendToVocabulary(new Feature("click"));
-		vocab.appendToVocabulary(new Feature("submit"));
-		
 		// Step 2: Execute - Call loadPolicy method
-		double[][] result = FeatureVector.loadPolicy(inputFeatures, outputFeatures, vocab);
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - All values should be 0.0 (default for double array)
 		Assert.assertNotNull(result, "loadPolicy should return a non-null matrix");
 		for (int i = 0; i < result.length; i++) {
 			for (int j = 0; j < result[i].length; j++) {
-				Assert.assertEquals(result[i][j], 0.0, 
+				Assert.assertEquals(result[i][j], 0.0,
 					"Matrix should be initialized with zeros at [" + i + "][" + j + "]");
 			}
 		}
@@ -487,26 +384,23 @@ public class FeatureVectorTests {
 		List<Feature> inputFeatures = new ArrayList<>();
 		inputFeatures.add(new Feature("button"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("button"));  // Match
-		
-		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
+		// Step 2: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - Single entry should be present
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.size(), 1, 
-			"Result should contain exactly one entry");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(1), 
-			"button should be marked as 1 (match found)");
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 1,
+			"Matrix columns should be 1 when input features has single feature");
 	}
 
 	/**
-	 * Purpose: Test load method handles case sensitivity in feature values
+	 * Purpose: Test load policy method handles case sensitivity in feature values
 	 * 
 	 * Steps:
-	 * 1. Create input and output features with different cases
-	 * 2. Call load method
+	 * 1. Create input feature list with different cases
+	 * 2. Call load policy method
 	 * 3. Verify features are matched by exact value (case-sensitive)
 	 */
 	@Test
@@ -516,18 +410,15 @@ public class FeatureVectorTests {
 		inputFeatures.add(new Feature("button"));
 		inputFeatures.add(new Feature("BUTTON"));
 		
-		List<Feature> outputFeatures = new ArrayList<>();
-		outputFeatures.add(new Feature("button"));  // Lowercase match
-		
-		// Step 2: Execute - Call load method
-		HashMap<String, Integer> result = FeatureVector.loadVocabularyFeatures(inputFeatures, outputFeatures);
+		// Step 2: Execute - Call load policy method
+		double[][] result = FeatureVector.loadPolicy_AI_Generated(inputFeatures);
 		
 		// Step 3: Verify - Case-sensitive matching
-		Assert.assertNotNull(result, "load should return a non-null HashMap");
-		Assert.assertEquals(result.get("button"), Integer.valueOf(1), 
-			"Lowercase button should match");
-		Assert.assertEquals(result.get("BUTTON"), Integer.valueOf(0), 
-			"Uppercase BUTTON should not match lowercase button");
+		Assert.assertNotNull(result, "loadPolicy_AI_Generated should return a non-null matrix");
+		Assert.assertEquals(result.length, inputFeatures.size(),
+			"Matrix rows should match input features size");
+		Assert.assertEquals(result[0].length, 2,
+			"Matrix columns should be 2 when input features has different cases");
 	}
 }
 

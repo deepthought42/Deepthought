@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.deepthought.data.edges.FeatureWeight;
 import com.deepthought.data.models.Feature;
+import com.deepthought.data.models.Vocabulary;
 import com.deepthought.data.repository.FeatureRepository;
+import com.deepthought.data.repository.VocabularyRepository;
 
 /**
  * Utility class for creating feature vectors from input features and output features
@@ -29,6 +32,9 @@ public class FeatureVector {
 
 	@Autowired
 	private static FeatureRepository obj_def_repo;
+	
+	@Autowired
+	private static VocabularyRepository vocabulary_repo;
 	
 	/**
 	 * Loads a policy matrix that maps input features to their connected features and weights
@@ -139,11 +145,14 @@ public class FeatureVector {
 		double[][] feature_weight_matrix = new double[input_features.size()][connected_feature_labels.size()];
 	
 		// 3. Populate the 2D array using memoized indices for constant-time lookups
-		for(int i = 0; i < input_features.size(); i++){
+		// Each row can be processed in parallel since they write to different row indices
+		IntStream.range(0, input_features.size()).parallel().forEach(i -> {
 			Set<FeatureWeight> feature_weight_set = feature_weight_vectors.get(i);
 			
 			if(feature_weight_set != null) {
-				for(FeatureWeight feature_weight : feature_weight_set){
+				// Process each feature weight in parallel within the row
+				// Each iteration writes to a different column index, so no contention
+				feature_weight_set.parallelStream().forEach(feature_weight -> {
 					if(feature_weight != null && feature_weight.getResultFeature() != null) {
 						String label = feature_weight.getResultFeature().getValue();
 						if(label != null) {
@@ -154,39 +163,198 @@ public class FeatureVector {
 							}
 						}
 					}
-				}
+				});
 			}
-		}
+		});
 	
 		return feature_weight_matrix;
 	}
 
 	/**
-	 * Creates a mapping of vocabulary features to their presence indicator.
+	 * Loads a multi-dimensional array of weights for features connected to a Vocabulary node.
 	 * 
-	 * This method constructs a HashMap where each key represents a vocabulary feature value
-	 * and the value is set to 1, indicating the presence of that feature in the vocabulary.
+	 * This method:
+	 * 1. Finds the Vocabulary node by label
+	 * 2. Loads all Feature nodes whose values are in the vocabulary's valueList (1-hop)
+	 * 3. Loads all Feature nodes connected to those features via FeatureWeight edges (2-hop)
+	 * 4. Constructs a 3D array where:
+	 *    - First dimension: Features from vocabulary (1-hop)
+	 *    - Second dimension: Features directly connected to vocabulary features (1-hop connections)
+	 *    - Third dimension: Features connected to those features (2-hop connections)
+	 *    - Values: Edge weights from FeatureWeight relationships, using vocabulary-specific weights when available
 	 * 
 	 * Preconditions:
-	 * - vocabulary_features is non-null
-	 * - All features in vocabulary_features have non-null value properties
+	 * - vocabulary_label is non-null and not empty
+	 * - obj_def_repo is non-null and properly initialized
+	 * - vocabulary_repo is non-null and properly initialized
+	 * - Vocabulary with the given label exists in the database
 	 * 
 	 * Postconditions:
-	 * - Returns a non-null HashMap where each key is a vocabulary feature value and each value is 1
-	 * - The size of the returned map equals the size of vocabulary_features
-	 * - All vocabulary features are represented in the returned map
+	 * - Returns a 3D array with dimensions [vocab_features.size()][max_1hop_features][max_2hop_features]
+	 * - result[i][j][k] contains the weight from FeatureWeight for vocabulary feature i -> 1-hop feature j -> 2-hop feature k
+	 * - If no connection exists, the value is 0.0
+	 * - Vocabulary-specific weights (from FeatureWeight.getVocabularyWeight) are used when available,
+	 *   otherwise the general weight (FeatureWeight.getWeight) is used
 	 * 
-	 * @param vocabulary_features List of vocabulary features to map
-	 * @return A HashMap where each key is a vocabulary feature value and each value is 1
-	 * @throws NullPointerException if vocabulary_features is null
+	 * @param vocabulary_label The label of the Vocabulary node to load features from
+	 * @return A 3D array of doubles where result[i][j][k] represents the weight connecting
+	 *         vocabulary feature i to 1-hop feature j to 2-hop feature k. Unmapped positions contain 0.0.
+	 * @throws NullPointerException if vocabulary_label is null or repositories are not initialized
+	 * @throws IllegalArgumentException if vocabulary with the given label is not found
 	 */
-	public static HashMap<String, Integer> loadVocabularyFeatures(List<Feature> vocabulary_features){
-		HashMap<String, Integer> vocabulary_record = new HashMap<String, Integer>();
+	public static double[][][] loadVocabularyFeatures(String vocabulary_label){
+		log.info("Loading vocabulary features for label: {}", vocabulary_label);
 		
-		for(Feature vocabulary_feature : vocabulary_features){
-			vocabulary_record.put(vocabulary_feature.getValue(), 1);
+		if (vocabulary_label == null || vocabulary_label.trim().isEmpty()) {
+			throw new IllegalArgumentException("Vocabulary label cannot be null or empty");
 		}
-
-		return vocabulary_record;
+		
+		if (vocabulary_repo == null) {
+			throw new NullPointerException("VocabularyRepository is not initialized");
+		}
+		
+		if (obj_def_repo == null) {
+			throw new NullPointerException("FeatureRepository is not initialized");
+		}
+		
+		// 1. Find Vocabulary node by label
+		Vocabulary vocabulary = vocabulary_repo.findByLabel(vocabulary_label)
+			.orElseThrow(() -> new IllegalArgumentException("Vocabulary with label '" + vocabulary_label + "' not found"));
+		
+		// Initialize mappings if needed
+		if (vocabulary.getValueList() == null || vocabulary.getValueList().isEmpty()) {
+			log.warn("Vocabulary '{}' has no features in valueList", vocabulary_label);
+			return new double[0][0][0];
+		}
+		
+		vocabulary.initializeMappings();
+		
+		// 2. Get all features from vocabulary (1-hop features)
+		List<Feature> vocab_features = new ArrayList<>();
+		HashMap<String, Integer> vocab_feature_indices = new HashMap<>();
+		for (String feature_value : vocabulary.getValueList()) {
+			Feature feature = obj_def_repo.findByValue(feature_value);
+			if (feature != null) {
+				vocab_feature_indices.put(feature_value, vocab_features.size());
+				vocab_features.add(feature);
+			}
+		}
+		
+		if (vocab_features.isEmpty()) {
+			log.warn("No features found for vocabulary '{}'", vocabulary_label);
+			return new double[0][0][0];
+		}
+		
+		// 3. Get 1-hop connections: features connected to vocabulary features
+		HashMap<String, Integer> one_hop_indices = new HashMap<>();
+		List<List<Feature>> one_hop_features = new ArrayList<>();
+		
+		for (Feature vocab_feature : vocab_features) {
+			Set<FeatureWeight> feature_weights = obj_def_repo.getFeatureWeights(vocab_feature.getValue());
+			List<Feature> connected_features = new ArrayList<>();
+			
+			for (FeatureWeight fw : feature_weights) {
+				if (fw != null && fw.getResultFeature() != null) {
+					String connected_value = fw.getResultFeature().getValue();
+					if (connected_value != null && !one_hop_indices.containsKey(connected_value)) {
+						one_hop_indices.put(connected_value, one_hop_indices.size());
+					}
+					connected_features.add(fw.getResultFeature());
+				}
+			}
+			one_hop_features.add(connected_features);
+		}
+		
+		// 4. Get 2-hop connections: features connected to 1-hop features
+		HashMap<String, Integer> two_hop_indices = new HashMap<>();
+		List<List<List<Feature>>> two_hop_features = new ArrayList<>();
+		
+		for (List<Feature> one_hop_list : one_hop_features) {
+			List<List<Feature>> two_hop_for_vocab_feature = new ArrayList<>();
+			
+			for (Feature one_hop_feature : one_hop_list) {
+				Set<FeatureWeight> two_hop_weights = obj_def_repo.getFeatureWeights(one_hop_feature.getValue());
+				List<Feature> two_hop_list = new ArrayList<>();
+				
+				for (FeatureWeight fw : two_hop_weights) {
+					if (fw != null && fw.getResultFeature() != null) {
+						String two_hop_value = fw.getResultFeature().getValue();
+						if (two_hop_value != null && !two_hop_indices.containsKey(two_hop_value)) {
+							two_hop_indices.put(two_hop_value, two_hop_indices.size());
+						}
+						two_hop_list.add(fw.getResultFeature());
+					}
+				}
+				two_hop_for_vocab_feature.add(two_hop_list);
+			}
+			two_hop_features.add(two_hop_for_vocab_feature);
+		}
+		
+		// 5. Create 3D array: [vocab_features][1-hop_features][2-hop_features]
+		int vocab_size = vocab_features.size();
+		int one_hop_size = one_hop_indices.size();
+		int two_hop_size = two_hop_indices.size();
+		
+		double[][][] weight_matrix = new double[vocab_size][one_hop_size][two_hop_size];
+		
+		// 6. Populate the 3D array with weights
+		for (int i = 0; i < vocab_size; i++) {
+			Feature vocab_feature = vocab_features.get(i);
+			List<Feature> one_hop_list = one_hop_features.get(i);
+			
+			for (int j = 0; j < one_hop_list.size(); j++) {
+				Feature one_hop_feature = one_hop_list.get(j);
+				Integer one_hop_idx = one_hop_indices.get(one_hop_feature.getValue());
+				
+				if (one_hop_idx == null) continue;
+				
+				// Get weight from vocab_feature to one_hop_feature
+				Set<FeatureWeight> weights_to_one_hop = obj_def_repo.getFeatureWeights(vocab_feature.getValue());
+				double weight_1hop = 0.0;
+				for (FeatureWeight fw : weights_to_one_hop) {
+					if (fw != null && fw.getResultFeature() != null && 
+						fw.getResultFeature().getValue().equals(one_hop_feature.getValue())) {
+						// Prefer vocabulary-specific weight, fall back to general weight
+						weight_1hop = fw.getVocabularyWeight(vocabulary_label);
+						if (weight_1hop == 0.0) {
+							weight_1hop = fw.getWeight();
+						}
+						break;
+					}
+				}
+				
+				List<Feature> two_hop_list = two_hop_features.get(i).get(j);
+				
+				for (int k = 0; k < two_hop_list.size(); k++) {
+					Feature two_hop_feature = two_hop_list.get(k);
+					Integer two_hop_idx = two_hop_indices.get(two_hop_feature.getValue());
+					
+					if (two_hop_idx == null) continue;
+					
+					// Get weight from one_hop_feature to two_hop_feature
+					Set<FeatureWeight> weights_to_two_hop = obj_def_repo.getFeatureWeights(one_hop_feature.getValue());
+					double weight_2hop = 0.0;
+					for (FeatureWeight fw : weights_to_two_hop) {
+						if (fw != null && fw.getResultFeature() != null && 
+							fw.getResultFeature().getValue().equals(two_hop_feature.getValue())) {
+							// Prefer vocabulary-specific weight, fall back to general weight
+							weight_2hop = fw.getVocabularyWeight(vocabulary_label);
+							if (weight_2hop == 0.0) {
+								weight_2hop = fw.getWeight();
+							}
+							break;
+						}
+					}
+					
+					// Store combined weight (product of 1-hop and 2-hop weights)
+					weight_matrix[i][one_hop_idx][two_hop_idx] = weight_1hop * weight_2hop;
+				}
+			}
+		}
+		
+		log.info("Loaded vocabulary features: {} vocab features, {} 1-hop features, {} 2-hop features", 
+			vocab_size, one_hop_size, two_hop_size);
+		
+		return weight_matrix;
 	}
 }
