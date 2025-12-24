@@ -159,10 +159,7 @@ public class Brain {
 		// 2a. load known action policies/probabilities for each object definition in the definition list
 		MemoryRecord memory = memory_record.get();
 		
-		
-
 		//set estimated reward using prediction from memory.
-
 		//replace with steps to estimate reward for an output feature independent of actual desired output feature
 		double estimated_reward = 1.0;
 		
