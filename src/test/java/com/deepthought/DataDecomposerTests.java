@@ -1,4 +1,4 @@
-package Qanairy.deepthought;
+package com.deepthought;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import com.deepthought.models.Feature;
-import com.qanairy.db.DataDecomposer;
+import com.deepthought.db.DataDecomposer;
 
 public class DataDecomposerTests {
 

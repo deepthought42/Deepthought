@@ -1,4 +1,4 @@
-package com.qanairy.api;
+package com.deepthought.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
 import com.deepthought.models.repository.PredictionRepository;
-import com.qanairy.brain.Brain;
-import com.qanairy.db.DataDecomposer;
+import com.deepthought.brain.Brain;
+import com.deepthought.db.DataDecomposer;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;

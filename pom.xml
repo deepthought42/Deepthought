@@ -41,7 +41,7 @@
 	          <version>${springboot.version}</version>
 	          <configuration>
 	              <fork>true</fork>
-	              <mainClass>com.qanairy.deepthought.App</mainClass>
+	              <mainClass>com.deepthought.App</mainClass>
 	          </configuration>
 	            <executions>
 	              <execution>
