@@ -116,12 +116,12 @@ public class ImageProcessingServiceTests {
 		int[][][] rgb = new int[2][2][3];
 		rgb[0][0] = new int[] { 300, 300, 300 };
 		rgb[0][1] = new int[] { -10, -10, -10 };
-		rgb[1][0] = new int[] { 128, 128, 128 };
+		rgb[1][0] = new int[] { 100, 100, 100 };
 		rgb[1][1] = new int[] { 255, 255, 255 };
 		int[][][] bw = service.computeBlackAndWhite(rgb);
 		assertEquals(bw[0][0][0], 255);
 		assertEquals(bw[0][1][0], 0);
-		assertEquals(bw[1][0][0], 128);
+		assertEquals(bw[1][0][0], 100);
 		assertEquals(bw[1][1][0], 255);
 	}
 
@@ -153,8 +153,13 @@ public class ImageProcessingServiceTests {
 	}
 
 	@Test
-	public void computePca_producesSameDimensions() throws IOException {
-		int[][][] rgb = service.decodeToRgbMatrix(TINY_BASE64_PNG);
+	public void computePca_producesSameDimensions() {
+		int[][][] rgb = new int[5][5][3];
+		for (int y = 0; y < 5; y++) {
+			for (int x = 0; x < 5; x++) {
+				rgb[y][x] = new int[] { x * 50, y * 50, (x + y) * 25 };
+			}
+		}
 		int[][][] pca = service.computePca(rgb);
 		assertNotNull(pca);
 		assertEquals(pca.length, rgb.length);

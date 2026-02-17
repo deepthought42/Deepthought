@@ -292,7 +292,7 @@ public class Vocabulary {
     }
     
     public List<String> getValueList() {
-        return valueList;
+        return new ArrayList<>(valueList);
     }
     
     public void setValueList(List<String> valueList) {
