@@ -104,10 +104,10 @@ public class ImageIngestionController {
 			log.warn("Invalid image request: {}", e.getMessage());
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (IOException e) {
-			log.error("Failed to decode image", e);
+			log.error("Failed to decode image: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decode image: " + e.getMessage());
 		} catch (Exception e) {
-			log.error("Image processing error", e);
+			log.error("Image processing error: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Processing error: " + e.getMessage());
 		}
 	}
