@@ -773,6 +773,29 @@ docker run -d \
   neo4j:4.4
 ```
 
+#### Running with Docker
+
+Build and run the full stack (app + Neo4j) with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost:8080` and Neo4j at `http://localhost:7474`. Neo4j credentials: `neo4j` / `password`.
+
+To build only the app image (connect to an existing Neo4j):
+
+```bash
+docker build -t deepthought .
+docker run -p 8080:8080 \
+  -e SPRING_DATA_NEO4J_URI=bolt://host.docker.internal:7687 \
+  -e SPRING_DATA_NEO4J_USERNAME=neo4j \
+  -e SPRING_DATA_NEO4J_PASSWORD=password \
+  deepthought
+```
+
+Use `host.docker.internal` when Neo4j runs on the host; with `docker compose`, the app uses hostname `neo4j` (see [Configuration](#configuration) for property equivalents).
+
 ### Configuration
 Edit `src/main/resources/application.properties`:
 ```properties
