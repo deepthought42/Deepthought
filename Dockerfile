@@ -16,7 +16,7 @@ FROM eclipse-temurin:8-jre
 WORKDIR /app
 
 # Run as non-root user
-RUN groupadd -g 1000 appgroup && useradd -u 1000 -g appgroup -m -s /bin/bash appuser
+RUN groupadd -g 9999 appgroup && useradd -u 9999 -g appgroup -m -s /bin/bash appuser
 USER appuser
 
 COPY --from=build --chown=appuser:appgroup /app/target/deepthought-0.1.0-SNAPSHOT.jar app.jar
