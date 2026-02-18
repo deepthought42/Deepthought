@@ -11,14 +11,15 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # Stage 2: Run
-FROM eclipse-temurin:8-jre-alpine
+# Use Debian-based image (not Alpine): OpenCV native libs require glibc and libstdc++.so.6
+FROM eclipse-temurin:8-jre
 WORKDIR /app
 
 # Run as non-root user
-RUN addgroup -g 1000 appgroup && adduser -u 1000 -G appgroup -D appuser
+RUN groupadd -g 1000 appgroup && useradd -u 1000 -g appgroup -m -s /bin/bash appuser
 USER appuser
 
-COPY --from=build /app/target/deepthought-0.1.0-SNAPSHOT.jar app.jar
+COPY --from=build --chown=appuser:appgroup /app/target/deepthought-0.1.0-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
