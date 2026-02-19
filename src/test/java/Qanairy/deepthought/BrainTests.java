@@ -1,7 +1,9 @@
 package Qanairy.deepthought;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
+@Tag("Regression")
 public class BrainTests {
 
 		@Test

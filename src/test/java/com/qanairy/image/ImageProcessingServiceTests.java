@@ -1,5 +1,7 @@
 package com.qanairy.image;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,16 +9,18 @@ import java.util.Base64;
 
 import javax.imageio.ImageIO;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for ImageProcessingService. Uses a minimal 1x1 pixel PNG for
  * decode tests; transformations are validated for shape and basic invariants.
  */
-@Test(groups = "Regression")
+@Tag("Regression")
+@TestInstance(Lifecycle.PER_CLASS)
 public class ImageProcessingServiceTests {
 
 	private ImageProcessingService service;
@@ -24,7 +28,7 @@ public class ImageProcessingServiceTests {
 	/** Base64-encoded 1x1 red pixel PNG */
 	private static final String TINY_BASE64_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
 
-	@BeforeClass
+	@BeforeAll
 	public void setUp() {
 		ImageProcessingService.loadOpenCV();
 		service = new ImageProcessingService();

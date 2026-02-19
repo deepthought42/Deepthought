@@ -1,16 +1,20 @@
 package Qanairy.deepthought;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.deepthought.models.Feature;
 import com.qanairy.db.DataDecomposer;
 
+@Tag("Regression")
 public class DataDecomposerTests {
 
 		@Test
@@ -39,7 +43,7 @@ public class DataDecomposerTests {
 					map.remove(keys[idx]);
 				}
 				
-				assert(map.isEmpty());
+				assertTrue(map.isEmpty());
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

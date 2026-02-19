@@ -1,21 +1,22 @@
 package com.qanairy.api;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.deepthought.models.ImageMatrixNode;
 import com.deepthought.models.edges.PartOf;
@@ -28,7 +29,7 @@ import com.qanairy.image.ImageProcessingService;
  * Unit tests for ImageIngestionController. Tests request validation,
  * error handling, and full flow including object crops.
  */
-@Test(groups = "Regression")
+@Tag("Regression")
 public class ImageIngestionControllerTests {
 
 	private ImageIngestionController controller;
@@ -38,7 +39,7 @@ public class ImageIngestionControllerTests {
 
 	private static final String TINY_BASE64_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
 
-	@BeforeMethod
+	@BeforeEach
 	public void setUp() throws Exception {
 		image_processing_service = mock(ImageProcessingService.class);
 		image_matrix_repo = mock(ImageMatrixNodeRepository.class);

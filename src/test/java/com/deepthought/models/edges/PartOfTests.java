@@ -1,15 +1,16 @@
 package com.deepthought.models.edges;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.deepthought.models.ImageMatrixNode;
-
-import static org.testng.Assert.*;
 
 /**
  * Unit tests for PartOf relationship entity.
  */
-@Test(groups = "Regression")
+@Tag("Regression")
 public class PartOfTests {
 
 	@Test

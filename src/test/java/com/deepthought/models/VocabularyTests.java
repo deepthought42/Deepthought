@@ -1,22 +1,24 @@
 package com.deepthought.models;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the Vocabulary class
  */
+@Tag("Regression")
 public class VocabularyTests {
     
     private Vocabulary vocabulary;
     
-    @Before
+    @BeforeEach
     public void setUp() {
         vocabulary = new Vocabulary("test_vocabulary");
     }
@@ -84,19 +86,19 @@ public class VocabularyTests {
         assertEquals("foo", vocabulary.getWord(2));
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddWordNullThrowsException() {
-        vocabulary.addWord(null);
+        assertThrows(IllegalArgumentException.class, () -> vocabulary.addWord(null));
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddWordEmptyThrowsException() {
-        vocabulary.addWord("");
+        assertThrows(IllegalArgumentException.class, () -> vocabulary.addWord(""));
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddWordWhitespaceOnlyThrowsException() {
-        vocabulary.addWord("   ");
+        assertThrows(IllegalArgumentException.class, () -> vocabulary.addWord("   "));
     }
     
     @Test
@@ -114,15 +116,15 @@ public class VocabularyTests {
         assertTrue(vocabulary.contains("another_word"));
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendToVocabularyNullFeatureThrowsException() {
-        vocabulary.appendToVocabulary(null);
+        assertThrows(IllegalArgumentException.class, () -> vocabulary.appendToVocabulary(null));
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendToVocabularyNullValueThrowsException() {
         Feature feature = new Feature(null);
-        vocabulary.appendToVocabulary(feature);
+        assertThrows(IllegalArgumentException.class, () -> vocabulary.appendToVocabulary(feature));
     }
     
     @Test
@@ -319,8 +321,8 @@ public class VocabularyTests {
         for (int i = 0; i < numThreads; i++) {
             for (int j = 0; j < wordsPerThread; j++) {
                 String word = "word_" + i + "_" + j;
-                assertTrue("Word should exist: " + word, vocabulary.contains(word));
-                assertTrue("Index should be valid", vocabulary.getIndex(word) >= 0);
+                assertTrue(vocabulary.contains(word), "Word should exist: " + word);
+                assertTrue(vocabulary.getIndex(word) >= 0, "Index should be valid");
             }
         }
     }

@@ -1,13 +1,14 @@
 package com.qanairy.api.dto;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.testng.Assert.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for ImageIngestRequest DTO.
  */
-@Test(groups = "Regression")
+@Tag("Regression")
 public class ImageIngestRequestTests {
 
 	@Test

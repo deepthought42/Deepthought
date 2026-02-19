@@ -1,13 +1,14 @@
 package com.deepthought.models;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.testng.Assert.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for ImageMatrixNode entity.
  */
-@Test(groups = "Regression")
+@Tag("Regression")
 public class ImageMatrixNodeTests {
 
 	@Test
