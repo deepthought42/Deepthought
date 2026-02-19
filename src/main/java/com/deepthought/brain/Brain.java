@@ -142,7 +142,7 @@ public class Brain {
 				//updated feature weight with q_learn_val
 				feature_weight.setWeight(q_learn_val);
 				features_weights.add(feature_weight);
-				log.debug("feature ::    " + feature_weight.getFeature().getValue() + "  :::   " + feature_weight.getWeight());
+				log.debug("feature ::    " + input_key + "  :::   " + feature_weight.getWeight());
 				feature_weight_repo.save(feature_weight);
 			}
 		}		

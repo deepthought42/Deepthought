@@ -3,12 +3,12 @@ package com.deepthought.models;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.deepthought.models.edges.FeatureWeight;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Defines objects that are available to the system for learning against
  */
-@NodeEntity
+@Node
 public class Feature {
 
 	@Schema(description = "Unique identifier of the Feature.", example = "1", required = true)

@@ -1,11 +1,11 @@
 package com.deepthought.models.edges;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.RelationshipId;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
+import org.springframework.data.neo4j.core.schema.TargetNode;
 
 import com.deepthought.models.Feature;
 
@@ -13,19 +13,19 @@ import com.deepthought.models.Feature;
  * Acts as a relationship between 2 {@link Feature} nodes within the graph and 
  * 	holds the most recent policy/model weight for the feature relationship
  */
-@RelationshipEntity(type = "HAS_RELATED_FEATURE")
+@RelationshipProperties
 public class FeatureWeight {
-	@Id 
+	@RelationshipId
 	@GeneratedValue   
 	private Long id;
     
 	@Property  
     private double weight;
     
-	@StartNode 
+	@Transient
 	private Feature feature;
     
-	@EndNode   
+	@TargetNode
 	private Feature end_feature;
 
 	public long getId(){

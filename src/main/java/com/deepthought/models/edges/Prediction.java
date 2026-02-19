@@ -1,11 +1,11 @@
 package com.deepthought.models.edges;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.RelationshipId;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
+import org.springframework.data.neo4j.core.schema.TargetNode;
 
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
@@ -13,19 +13,19 @@ import com.deepthought.models.MemoryRecord;
 /**
  * Encapsulates data for a predicted weight for a result feature in connection with a {@link MemoryRecord}
  */
-@RelationshipEntity(type = "PREDICTION")
+@RelationshipProperties
 public class Prediction {
-	@Id 
-	@GeneratedValue   
+	@RelationshipId
+	@GeneratedValue
 	private Long relationshipId;
     
 	@Property  
     private double weight;
     
-	@StartNode 
+	@Transient
 	private MemoryRecord memory;
     
-	@EndNode   
+	@TargetNode   
 	private Feature result_feature;
     
     public Prediction(MemoryRecord memory, Feature feature, double weight) {

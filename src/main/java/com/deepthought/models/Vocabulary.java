@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Property;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * - Thread-safe operations for concurrent access
  * - Integration with the graph-based learning system
  */
-@NodeEntity
+@Node
 public class Vocabulary {
 
     @Schema(description = "Unique identifier of the Vocabulary.", example = "1", required = true)

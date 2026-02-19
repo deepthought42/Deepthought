@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.deepthought.models.edges.Prediction;
 import com.google.gson.Gson;
@@ -19,7 +19,7 @@ import com.google.gson.GsonBuilder;
  *  also connects to {@link Feature}s through a {@link Prediction} relationship/edge
  *  that contains the predicted weight for the feature that this memory stores.
  */
-@NodeEntity
+@Node
 public class MemoryRecord {
 
 	@Id 
@@ -35,7 +35,7 @@ public class MemoryRecord {
 	@Relationship(type = "PREDICTED")
 	private Feature predicted_feature;
 	
-	@Relationship(type = "PREDICTION", direction = Relationship.OUTGOING)
+	@Relationship(type = "PREDICTION", direction = Relationship.Direction.OUTGOING)
 	private List<Prediction> predictions;
 	
 	private List<String> input_feature_values;

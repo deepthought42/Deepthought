@@ -1,9 +1,9 @@
 package com.deepthought.models;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Property;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.Gson;
@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * serialized as JSON (int[height][width][3]) for persistence. Types include
  * original image, outline, PCA-transformed, black-and-white, and cropped objects.
  */
-@NodeEntity
+@Node
 public class ImageMatrixNode {
 
 	public enum Type {

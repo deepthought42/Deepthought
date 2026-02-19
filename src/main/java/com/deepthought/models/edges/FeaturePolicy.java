@@ -3,12 +3,12 @@ package com.deepthought.models.edges;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.RelationshipId;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
+import org.springframework.data.neo4j.core.schema.TargetNode;
 
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
@@ -16,9 +16,9 @@ import com.deepthought.models.MemoryRecord;
 /**
  * 
  */
-@RelationshipEntity(type = "FEATURE_POLICY")
+@RelationshipProperties
 public class FeaturePolicy {
-	@Id 
+	@RelationshipId
 	@GeneratedValue   
 	private Long relationshipId;
     
@@ -31,10 +31,10 @@ public class FeaturePolicy {
 	@Property  
     private double reward;
 	
-	@StartNode 
+	@Transient
 	private MemoryRecord memory;
     
-	@EndNode   
+	@TargetNode
 	private Feature feature;
     
     public MemoryRecord getMemoryRecord(){

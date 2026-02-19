@@ -3,7 +3,7 @@ package com.deepthought.models.repository;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import com.deepthought.models.Feature;
@@ -24,7 +24,7 @@ public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 	 * 
 	 * @return {@link Set} of {@link FeatureWeights}
 	 */
-	@Query("MATCH (:Feature{value:{value}})-[fw:HAS_RELATED_FEATURE]->(:Feature) RETURN fw")
+	@Query("MATCH (:Feature{value:$value})-[fw:HAS_RELATED_FEATURE]->(:Feature) RETURN fw")
 	public Set<FeatureWeight> getFeatureWeights(@Param("value") String value);
 	
 	/**
@@ -35,7 +35,7 @@ public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 	 * 
 	 * @return {@link List} of {@link Feature}s
 	 */
-	@Query("MATCH p=(f1:Feature{value:{input_value}})-[fw:HAS_RELATED_FEATURE]->(f2:Feature{value:{output_value}}) RETURN f1,fw,f2")
+	@Query("MATCH p=(f1:Feature{value:$input_value})-[fw:HAS_RELATED_FEATURE]->(f2:Feature{value:$output_value}) RETURN f1,fw,f2")
 	public List<Feature> getConnectedFeatures(@Param("input_value") String input_value,
 										      @Param("output_value") String output_value);
 
@@ -47,8 +47,8 @@ public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 	 * @param weight
 	 */
 	@Query("MATCH (f_in:Feature),(f_out:Feature)" + 
-			"WHERE f_in.value = {input_value} AND f_out.value = {output_value}" + 
-			"CREATE (f_in)-[r:HAS_RELATED_FEATURE{ weight: {weight}}]->(f_out)" + 
+			"WHERE f_in.value = $input_value AND f_out.value = $output_value" + 
+			"CREATE (f_in)-[r:HAS_RELATED_FEATURE{ weight: $weight}]->(f_out)" + 
 			"RETURN r ")
 	public FeatureWeight createWeightedConnection(@Param("input_value") String input_value,
 											      @Param("output_value") String output_value, 

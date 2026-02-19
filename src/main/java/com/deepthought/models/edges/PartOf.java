@@ -1,10 +1,10 @@
 package com.deepthought.models.edges;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
+import org.springframework.data.neo4j.core.schema.TargetNode;
 
 import com.deepthought.models.ImageMatrixNode;
 
@@ -12,17 +12,17 @@ import com.deepthought.models.ImageMatrixNode;
  * Relationship from a derived image node (outline, PCA, black-and-white, or
  * cropped object) to the original image node. Direction: derived --[PART_OF]--> original.
  */
-@RelationshipEntity(type = "PART_OF")
+@RelationshipProperties
 public class PartOf {
 
 	@Id
 	@GeneratedValue
 	private Long id;
 
-	@StartNode
+	@Transient
 	private ImageMatrixNode part;
 
-	@EndNode
+	@TargetNode
 	private ImageMatrixNode whole;
 
 	public PartOf() {
