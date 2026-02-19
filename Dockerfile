@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM maven:3.8-eclipse-temurin-8 AS build
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy pom and download dependencies
@@ -12,7 +12,7 @@ RUN mvn clean package -DskipTests -B
 
 # Stage 2: Run
 # Use Debian-based image (not Alpine): OpenCV native libs require glibc and libstdc++.so.6
-FROM eclipse-temurin:8-jre
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Run as non-root user
