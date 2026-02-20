@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="Deepthought PMD Rules"
+	xmlns="http://pmd.sourceforge.io/ruleset/2.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://pmd.sourceforge.io/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+	<description>PMD rules for Deepthought project - best practices, code style, design, error prone patterns</description>
+
+	<!-- Best practices: avoid magic numbers, proper exception handling -->
+	<rule ref="category/java/bestpractices.xml">
+		<exclude name="AvoidReassigningParameters"/>
+		<exclude name="OneDeclarationPerLine"/>
+	</rule>
+
+	<!-- Code style: unnecessary code, empty blocks -->
+	<rule ref="category/java/codestyle.xml">
+		<exclude name="CommentDefaultAccessModifier"/>
+		<exclude name="AtLeastOneConstructor"/>
+	</rule>
+
+	<!-- Design: coupling, cohesion -->
+	<rule ref="category/java/design.xml">
+		<exclude name="TooManyFields"/>
+		<exclude name="LawOfDemeter"/>
+	</rule>
+
+	<!-- Error prone: null checks, unused variables -->
+	<rule ref="category/java/errorprone.xml">
+		<exclude name="AvoidLiteralsInIfCondition"/>
+		<exclude name="BeanMembersShouldSerialize"/>
+	</rule>
+
+	<!-- Performance -->
+	<rule ref="category/java/performance.xml"/>
+
+	<!-- Security -->
+	<rule ref="category/java/security.xml"/>
+
+	<!-- Exclude test sources from some rules if needed -->
+	<exclude-pattern>.*/target/.*</exclude-pattern>
+</ruleset>

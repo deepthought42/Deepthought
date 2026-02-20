@@ -20,6 +20,15 @@ The system introduces "elastic vectors" - dynamic embeddings constructed on-dema
 
 This architecture assumes that **global parameter updates are unnecessary** - a hypothesis counter to standard backpropagation but potentially more aligned with how knowledge naturally connects. By storing weights in the graph structure itself, the system achieves sparse, localized learning without dense parameter matrices.
 
+### Tech Stack
+
+- **Java 17**
+- **Spring Boot 3.5** (with Spring Data Neo4j — driver-based, not OGM)
+- **Neo4j 4.4+ or 5.x** (Bolt protocol)
+- **Maven** (build); **JUnit 5** (tests, `@Tag("Regression")` for default suite)
+- **SpringDoc OpenAPI 2.x** (Swagger UI at `/swagger-ui.html`)
+- **Jakarta** namespaces (validation, annotations) for Boot 3
+
 ## Architecture
 
 ### Knowledge Graph Foundation
@@ -35,48 +44,43 @@ Feature (Node) → FeatureWeight (Edge) → Vocabulary (Index) → Elastic Vecto
 - **Vectors**: Dynamically constructed from graph neighborhoods via vocabulary indexing
 - **Learning**: Q-learning algorithm updates `FeatureWeight` values based on outcomes
 
-### API v2: LLM-Competitive Interface
+### REST API
 
-The Enhanced Reasoning Controller (`EnhancedReasoningController.java`) provides:
+The application exposes two controller areas:
 
-#### Endpoints
+#### Reinforcement Learning (`/rl/*`)
 
-**`POST /api/v2/reason`** - Multi-step reasoning with explanations
-- Transparent reasoning paths
-- Confidence scoring
-- Source attribution
-- Alternative hypotheses
+`ReinforcementLearningController` provides prediction and learning endpoints:
 
-**`POST /api/v2/chat`** - Conversational interface
-- Multi-turn context awareness
-- Session management
-- Optional reasoning visibility
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/rl/predict` | Make a prediction from JSON input and output feature labels; returns a `MemoryRecord` with the predicted feature and policy snapshot. |
+| POST | `/rl/learn` | Apply learning feedback for a given memory ID and actual feature value; updates `FeatureWeight` edges via Q-learning. |
+| POST | `/rl/train` | Run a training iteration with labeled JSON and a vocabulary label. |
 
-**`POST /api/v2/reason/async`** - Complex query handling
-- Non-blocking processing
-- Polling-based result retrieval
-- Extended reasoning steps
+Parameters (e.g. for `/rl/predict`): `input` (stringified JSON), `output_features` (comma-separated output labels).
 
-**`POST /api/v2/explain`** - Detailed explanation generation
-- Reasoning decomposition
-- Configurable explanation depth
+#### Image Ingestion (`/images/*`)
 
-**`POST /api/v2/knowledge/update`** - Dynamic knowledge integration
-- Runtime graph updates without retraining
-- Conflict resolution
-- Source tracking
+`ImageIngestionController` provides image-to-graph ingestion:
 
-**`GET /api/v2/health`** - System capabilities
-- Version info
-- Feature enumeration
-- Graph statistics
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/images/ingest` | Accept a base64-encoded image; creates an original image node and derived nodes (outline, PCA, black-and-white, cropped objects) with `PART_OF` relationships to the original. |
+
+Request body: `{ "image": "<base64 string>" }`.
+
+#### API Documentation
+
+- **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) (when the app is running)
+- **OpenAPI spec**: Generated during `mvn verify` (integration-test phase).
 
 ### Key Components
 
-1. **GraphReasoningEngine**: Performs graph traversal and attention-based reasoning
-2. **ConversationManager**: Maintains multi-turn context
-3. **KnowledgeIntegrator**: Updates graph without full retraining
-4. **ExplanationGenerator**: Produces human-readable reasoning chains
+1. **Brain**: Orchestrates prediction and learning; builds policy matrices from the graph and applies Q-learning updates.
+2. **DataDecomposer**: Converts JSON input into `Feature` lists for prediction.
+3. **FeatureRepository / FeatureWeightRepository**: CRUD and custom Cypher for features and weighted edges.
+4. **Neo4j**: Spring Boot 3 auto-configuration; Neo4j Java Driver and Spring Data Neo4j (no OGM).
 
 ## Core Data Model
 
@@ -87,9 +91,9 @@ Deepthought's architecture is built on two fundamental objects that work togethe
 `Feature` objects (`Feature.java`) are the building blocks of the knowledge graph. Each feature represents an observable attribute, concept, or token (e.g., "button", "click", "form", "submit").
 
 **Key characteristics:**
-- Stored as Neo4j `@NodeEntity` nodes in the graph database
+- Stored as Neo4j nodes using Spring Data Neo4j `@Node` (driver-based, not OGM)
 - Identified by a string `value` (e.g., "login", "password")
-- Connected to other features via weighted `@Relationship` edges
+- Connected to other features via `@Relationship(type = "HAS_RELATED_FEATURE")` to `FeatureWeight` relationship properties
 - Form a neural network-like structure where edges represent learned associations
 
 **Graph structure:**
@@ -99,13 +103,13 @@ Feature button = new Feature("button");
 Feature click = new Feature("click");
 Feature submit = new Feature("submit");
 
-// FeatureWeight edges connect features with learned weights
-// These weights are continuously updated through Q-learning
-@RelationshipEntity(type = "HAS_RELATED_FEATURE")
+// FeatureWeight is a relationship property type (HAS_RELATED_FEATURE)
+// Weights are continuously updated through Q-learning
+@RelationshipProperties
 class FeatureWeight {
-    @StartNode Feature inputFeature;   // e.g., "button"
-    @EndNode Feature outputFeature;     // e.g., "click"
-    @Property double weight;            // learned association strength (0.0-1.0)
+    @RelationshipId @GeneratedValue private Long id;
+    @Property private double weight;           // learned association strength (0.0-1.0)
+    @TargetNode private Feature end_feature;   // e.g., "click"
 }
 ```
 
@@ -200,7 +204,7 @@ The relationship between Feature and Vocabulary objects implements the "elastic 
 `MemoryRecord` objects (`MemoryRecord.java`) serve as **snapshots of prediction attempts** that enable retrospective learning from feedback. They're the bridge between making predictions and updating the knowledge graph.
 
 **Key characteristics:**
-- Stored as Neo4j `@NodeEntity` nodes (like Features and Vocabularies)
+- Stored as Neo4j nodes using Spring Data Neo4j `@Node` (like Features and Vocabularies)
 - Capture complete prediction context: inputs, outputs, predicted feature, and actual outcome
 - Store the policy matrix (weight snapshot) at the time of prediction
 - Enable temporal learning: predict now, learn later when outcome is known
@@ -208,7 +212,7 @@ The relationship between Feature and Vocabulary objects implements the "elastic 
 
 **What they store:**
 ```java
-@NodeEntity
+@Node
 public class MemoryRecord {
     @Id @GeneratedValue 
     private Long id;
@@ -222,7 +226,7 @@ public class MemoryRecord {
     @Relationship(type = "PREDICTED")
     private Feature predicted_feature;          // What was predicted
     
-    @Relationship(type = "PREDICTION", direction = OUTGOING)
+    @Relationship(type = "PREDICTION", direction = Relationship.Direction.OUTGOING)
     private List<Prediction> predictions;       // Full probability distribution
     
     private List<String> input_feature_values; // Observed features (inputs)
@@ -356,51 +360,64 @@ for (MemoryRecord memory : oldMemories) {
 
 ```
 src/
-├── main/java/com/
-│   ├── deepthought/           # Core domain models
-│   │   ├── models/           # Data models and entities
-│   │   │   ├── edges/        # Edge types (FeaturePolicy, FeatureWeight, Prediction)
-│   │   │   ├── Feature.java  # Feature node model (atomic knowledge units)
-│   │   │   ├── Vocabulary.java # Vocabulary model (feature indexing)
-│   │   │   └── MemoryRecord.java # Memory storage model
-│   │   ├── repository/       # Data access layer
+├── main/java/
+│   ├── com/deepthought/        # Domain and API (deepthought namespace)
+│   │   ├── models/             # Neo4j entities (Spring Data Neo4j @Node / @RelationshipProperties)
+│   │   │   ├── edges/          # FeatureWeight, FeaturePolicy, Prediction, PartOf
+│   │   │   ├── Feature.java
+│   │   │   ├── Vocabulary.java
+│   │   │   ├── MemoryRecord.java
+│   │   │   └── ImageMatrixNode.java
+│   │   ├── repository/         # Spring Data Neo4j repositories
 │   │   │   ├── FeatureRepository.java
 │   │   │   ├── FeatureWeightRepository.java
 │   │   │   ├── VocabularyRepository.java
 │   │   │   ├── MemoryRecordRepository.java
-│   │   │   └── PredictionRepository.java
-│   │   └── services/         # Business logic
-│   │       └── FeatureService.java
-│   └── qanairy/              # Main application package
-│       ├── api/              # REST controllers
-│       │   └── ReinforcementLearningController.java
-│       ├── brain/            # Core reasoning engine
-│       │   ├── Brain.java    # Main reasoning orchestrator
-│       │   ├── QLearn.java   # Reinforcement learning implementation
-│       │   ├── FeatureVector.java # Elastic vector construction
-│       │   ├── Predict.java  # Prediction algorithms
-│       │   └── ActionFactory.java # Action creation utilities
-│       ├── config/           # Configuration classes
-│       │   ├── ConfigService.java
+│   │   │   ├── PredictionRepository.java
+│   │   │   ├── ImageMatrixNodeRepository.java
+│   │   │   └── PartOfRepository.java
+│   │   ├── services/
+│   │   │   └── FeatureService.java
+│   │   ├── api/
+│   │   │   └── ReinforcementLearningController.java   # /rl/*
+│   │   └── deepthought/
+│   │       └── App.java       # Spring Boot main (package com.qanairy.deepthought)
+│   └── com/qanairy/           # Application layer
+│       ├── api/
+│       │   └── ImageIngestionController.java          # /images/*
+│       ├── brain/
+│       │   ├── Brain.java
+│       │   ├── QLearn.java
+│       │   ├── FeatureVector.java
+│       │   ├── Predict.java
+│       │   └── ActionFactory.java
+│       ├── config/
 │       │   └── Neo4jConfiguration.java
-│       ├── db/               # Database utilities
-│       │   ├── DataDecomposer.java # JSON to graph conversion
-│       │   └── VocabularyWeights.java # Vocabulary management
-│       ├── deepthought/      # Application entry point
-│       │   └── App.java      # Spring Boot main class
-│       └── observableStructs/ # Observable data structures
-│           ├── ConcurrentNode.java
-│           ├── ObservableHash.java
-│           └── ObservableQueue.java
-├── test/java/                # Test classes
+│       ├── db/
+│       │   ├── DataDecomposer.java
+│       │   └── VocabularyWeights.java
+│       ├── image/
+│       │   └── ImageProcessingService.java
+│       └── observableStructs/
+├── test/java/
+│   ├── com/deepthought/models/
+│   │   └── VocabularyTests.java
+│   ├── com/deepthought/models/edges/
+│   │   └── PartOfTests.java
+│   ├── com/deepthought/models/
+│   │   └── ImageMatrixNodeTests.java
+│   ├── com/qanairy/api/
+│   │   ├── ReinforcementLearningControllerSmokeTests.java
+│   │   ├── ImageIngestionControllerTests.java
+│   │   └── dto/ImageIngestRequestTests.java
+│   ├── com/qanairy/image/
+│   │   └── ImageProcessingServiceTests.java
 │   └── Qanairy/deepthought/
 │       ├── BrainTests.java
 │       ├── DataDecomposerTests.java
-│       └── resourceClasses/
-│           └── SelfContainedTestObject.java
+│       └── resourceClasses/SelfContainedTestObject.java
 └── resources/
-    ├── application.properties # Configuration
-    └── logback.xml           # Logging configuration
+    └── application.properties
 ```
 
 ### Key Components Explained
@@ -620,48 +637,51 @@ for (String inputKey : memory.getInputFeatureValues()) {
 
 ### Developer Quick Reference
 
-**Core Types:**
+**Core types (Spring Data Neo4j — driver-based, not OGM):**
 ```java
-// Node entity (stored in Neo4j)
-@NodeEntity
+// Node (Neo4j)
+@Node
 public class Feature {
+    @Id @GeneratedValue private Long id;
     private String value;  // e.g., "button", "click"
+    @Relationship(type = "HAS_RELATED_FEATURE")
     private List<FeatureWeight> feature_weights;  // Outgoing edges
 }
 
-// Relationship entity (edges in Neo4j)
-@RelationshipEntity(type = "HAS_RELATED_FEATURE")
+// Relationship properties (HAS_RELATED_FEATURE edge)
+@RelationshipProperties
 public class FeatureWeight {
-    @StartNode private Feature feature;      // Input feature
-    @EndNode private Feature end_feature;    // Output feature
+    @RelationshipId @GeneratedValue private Long id;
     @Property private double weight;         // Learned association (0.0-1.0)
+    @TargetNode private Feature end_feature;  // Target feature
 }
 
 // Index structure (node in Neo4j)
-@NodeEntity
+@Node
 public class Vocabulary {
+    @Id @GeneratedValue private Long id;
     private String label;              // Domain name
     private List<String> valueList;    // Ordered feature strings
-    private Map<String, Integer> wordToIndexMap;  // Fast lookup
+    // wordToIndexMap is transient; rebuilt from valueList
     
-    // Thread-safe operations
     public synchronized int addWord(String word);
     public int getIndex(String word);
     public boolean[] createFeatureVector(List<String> words);
 }
 
 // Experience record (node in Neo4j)
-@NodeEntity
+@Node
 public class MemoryRecord {
-    private Date date;                          // Timestamp
-    private Feature desired_feature;            // Actual outcome
-    private Feature predicted_feature;          // What was predicted
-    private List<Prediction> predictions;       // Full distribution
-    private List<String> input_feature_values;  // Observed features
-    private String[] output_feature_values;     // Possible outcomes
-    private String policy_matrix_json;          // Weight snapshot
+    @Id @GeneratedValue private Long id;
+    private Date date;
+    private Feature desired_feature;
+    private Feature predicted_feature;
+    @Relationship(type = "PREDICTION", direction = Relationship.Direction.OUTGOING)
+    private List<Prediction> predictions;
+    private List<String> input_feature_values;
+    private String[] output_feature_values;
+    private String policy_matrix_json;
     
-    // Store/retrieve policy matrix
     public void setPolicyMatrix(double[][] matrix);
     public double[][] getPolicyMatrix();
 }
@@ -788,51 +808,65 @@ To build only the app image (connect to an existing Neo4j):
 ```bash
 docker build -t deepthought .
 docker run -p 8080:8080 \
-  -e SPRING_DATA_NEO4J_URI=bolt://host.docker.internal:7687 \
-  -e SPRING_DATA_NEO4J_USERNAME=neo4j \
-  -e SPRING_DATA_NEO4J_PASSWORD=password \
+  -e SPRING_NEO4J_URI=bolt://host.docker.internal:7687 \
+  -e SPRING_NEO4J_AUTHENTICATION_USERNAME=neo4j \
+  -e SPRING_NEO4J_AUTHENTICATION_PASSWORD=password \
   deepthought
 ```
 
-Use `host.docker.internal` when Neo4j runs on the host; with `docker compose`, the app uses hostname `neo4j` (see [Configuration](#configuration) for property equivalents).
+Use `host.docker.internal` when Neo4j runs on the host; with `docker compose`, the app typically uses hostname `neo4j` (see [Configuration](#configuration) for property names).
 
 ### Configuration
-Edit `src/main/resources/application.properties`:
-```properties
-# Neo4j Configuration
-spring.data.neo4j.uri=bolt://localhost:7687
-spring.data.neo4j.username=neo4j
-spring.data.neo4j.password=password
 
-# Server Configuration
+Edit `src/main/resources/application.properties`:
+
+```properties
+# Neo4j (Spring Boot 3 / Neo4j Java Driver)
+spring.neo4j.uri=bolt://localhost:7687
+spring.neo4j.authentication.username=neo4j
+spring.neo4j.authentication.password=password
+
+# Server
 server.port=8080
 
-# Logging Configuration
+# Logging
 logging.level.com.qanairy=DEBUG
 logging.level.org.neo4j=WARN
 ```
 
 ### Running Tests
+
+Tests use **JUnit 5 (Jupiter)**. Only tests tagged `@Tag("Regression")` run by default.
+
 ```bash
-# Run all tests
+# Run Regression-tagged tests (default)
+mvn test
+# or
 ./mvnw test
 
-# Run specific test class
-./mvnw test -Dtest=BrainTests
+# Run a specific test class
+mvn test -Dtest=BrainTests
 
-# Run with coverage (requires jacoco plugin)
-./mvnw test jacoco:report
+# Run all tests regardless of tag
+mvn test -Djunit.jupiter.tags=
 
-# Run integration tests
-./mvnw verify
+# Coverage report (JaCoCo)
+mvn test jacoco:report
+
+# Integration tests (includes OpenAPI generation)
+mvn verify
 ```
+
+**Test framework:** JUnit 5 (Jupiter). Tests that run with the default suite are tagged `@Tag("Regression")`. To run a different tag or all tests, use `-Djunit.jupiter.tags=YourTag` or `-Djunit.jupiter.tags=`.
+
+**Writing new tests:** Use `org.junit.jupiter.api.Test`, `@BeforeEach` / `@BeforeAll`, and `org.junit.jupiter.api.Assertions` (e.g. `assertThrows` for expected exceptions). Tag regression tests with `@Tag("Regression")`.
 
 ## Prerequisites
 
 ### Required Software
-- **Java**: JDK 8 or higher
-- **Maven**: 3.6+ (or use included `mvnw`)
-- **Neo4j**: 4.0+ (Community or Enterprise)
+- **Java**: JDK 17 or higher
+- **Maven**: 3.6+ (or use included `./mvnw` if present)
+- **Neo4j**: 4.4+ or 5.x (Bolt; compatible with Spring Data Neo4j driver)
 - **Git**: For version control
 
 ### System Requirements
@@ -862,10 +896,7 @@ logging.level.org.neo4j=WARN
    ```
 
 3. **Configure Database**
-   ```bash
-   cp src/main/resources/application.properties.example src/main/resources/application.properties
-   # Edit application.properties with your Neo4j credentials
-   ```
+   Edit `src/main/resources/application.properties`: uncomment and set `spring.neo4j.uri`, `spring.neo4j.authentication.username`, and `spring.neo4j.authentication.password` for your Neo4j instance.
 
 4. **Build and Run**
    ```bash
@@ -875,7 +906,11 @@ logging.level.org.neo4j=WARN
 
 5. **Test the API**
    ```bash
-   curl -X POST http://localhost:8080/api/v2/health
+   # Swagger UI
+   open http://localhost:8080/swagger-ui.html
+
+   # Or call predict (example)
+   curl -X POST "http://localhost:8080/rl/predict?input=%7B%22field%22%3A%22value%22%7D&output_features=LABEL_A,LABEL_B"
    ```
 
 ## Installation
@@ -885,59 +920,61 @@ logging.level.org.neo4j=WARN
 git clone https://github.com/deepthought42/Deepthought.git
 cd Deepthought
 
-# Setup graph database (Neo4j recommended)
-# Configure connection in application.properties
+# Configure Neo4j in src/main/resources/application.properties
+# (spring.neo4j.uri, spring.neo4j.authentication.username/password)
 
-# Build
-./mvnw clean install
+# Build (requires JDK 17+)
+mvn clean package
+# or
+./mvnw clean package
 
 # Run
+mvn spring-boot:run
+# or
 ./mvnw spring-boot:run
 ```
 
 ## Usage Example
 
-```bash
-# Perform reasoning
-curl -X POST http://localhost:8080/api/v2/reason \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "What causes economic recessions?",
-    "context": ["historical patterns", "policy factors"],
-    "maxSteps": 5,
-    "sessionId": "session-123"
-  }'
+**Prediction and learning:**
 
-# Response includes:
-# - conclusion: Synthesized answer
-# - confidence: 0.0-1.0 score
-# - explanation: Natural language reasoning
-# - reasoningSteps: Path through graph
-# - sources: Supporting nodes
-# - alternativeHypotheses: Other possibilities
+```bash
+# 1. Predict: send JSON input and output feature labels
+curl -X POST "http://localhost:8080/rl/predict?input=%7B%22button%22%3Atrue%2C%22form%22%3Atrue%7D&output_features=click,submit,validate"
+
+# Response: MemoryRecord (JSON) with id, predicted_feature, policy snapshot, etc.
+
+# 2. Learn: send memory ID and actual outcome
+curl -X POST "http://localhost:8080/rl/learn?memory_id=1&feature_value=submit"
+```
+
+**Image ingestion:**
+
+```bash
+curl -X POST http://localhost:8080/images/ingest \
+  -H "Content-Type: application/json" \
+  -d '{"image":"<base64-encoded-image-data>"}'
 ```
 
 ## Current Status & Roadmap
 
 ### Implemented
-- ✅ Graph-based weight storage
-- ✅ Elastic vector construction
-- ✅ API v2 with modern interfaces
-- ✅ Multi-turn conversation support
-- ✅ Async reasoning for complex queries
-- ✅ Dynamic knowledge updates
+- ✅ Graph-based weight storage (Neo4j, Spring Data Neo4j driver)
+- ✅ Elastic vector construction and Q-learning updates
+- ✅ REST API: `/rl/predict`, `/rl/learn`, `/rl/train` and `/images/ingest`
+- ✅ Image ingestion with derived nodes (outline, PCA, B&W, cropped objects) and `PART_OF` relationships
+- ✅ OpenAPI/Swagger UI
+- ✅ Java 17, Spring Boot 3.5, JUnit 5 test suite
 
 ### In Progress
 - 🔄 Graph attention optimization
-- 🔄 Benchmarking against GPT/Claude
-- 🔄 Multi-modal node support (images, audio)
+- 🔄 Multi-modal and image graph integration
 
 ### Planned
 - ⬜ Formal localized learning proof
-- ⬜ Distributed graph reasoning (multi-node databases)
-- ⬜ Auto-scaling edge pruning
-- ⬜ Reasoning cache optimization
-- ⬜ Fine-grained explanation controls
+- ⬜ LLM-competitive API (e.g. reason/chat/explain endpoints)
+- ⬜ Distributed graph reasoning
+- ⬜ Auto-scaling edge pruning and reasoning cache optimization
 
 ## Critical Questions & Challenges
 
@@ -1073,7 +1110,7 @@ Error: Failed to resolve dependencies
 - Check internet connection
 - Clear Maven cache: `./mvnw dependency:purge-local-repository`
 - Update Maven: `./mvnw -U clean install`
-- Check Java version: `java -version` (should be 8+)
+- Check Java version: `java -version` (should be 17+)
 
 #### Out of Memory Error
 ```
@@ -1142,19 +1179,20 @@ Enable debug logging for troubleshooting:
 logging.level.com.qanairy=DEBUG
 logging.level.org.neo4j=DEBUG
 logging.level.org.springframework.data.neo4j=DEBUG
+logging.level.com.deepthought=DEBUG
 ```
 
 ### Health Checks
 
 Monitor system health:
 ```bash
-# Check API health
-curl http://localhost:8080/api/v2/health
+# Swagger UI / API docs
+open http://localhost:8080/swagger-ui.html
 
-# Check Neo4j health
-curl http://localhost:7474/db/data/
+# Neo4j (if running)
+curl http://localhost:7474
 
-# Check system resources
+# Process
 top -p $(pgrep java)
 ```
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+	<!-- Exclude generated and third-party code -->
+	<Match>
+		<Class name="~.*\.package-info"/>
+	</Match>
+	<Match>
+		<Class name="~.*\$\$.*"/>
+	</Match>
+	<Match>
+		<Class name="~.*\$\$Lambda\$.*"/>
+	</Match>
+
+	<!-- Spring @Autowired field injection - SpotBugs flags uninitialized fields -->
+	<Match>
+		<Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+		<Class name="~com\.deepthought\.*"/>
+	</Match>
+	<Match>
+		<Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+		<Class name="~com\.qanairy\.*"/>
+	</Match>
+
+	<!-- Neo4j/Spring Data entities - mutable objects in getters/setters -->
+	<Match>
+		<Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+		<Class name="~com\.deepthought\.models\.*"/>
+	</Match>
+</FindBugsFilter>
