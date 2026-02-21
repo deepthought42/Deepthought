@@ -35,48 +35,37 @@ Feature (Node) → FeatureWeight (Edge) → Vocabulary (Index) → Elastic Vecto
 - **Vectors**: Dynamically constructed from graph neighborhoods via vocabulary indexing
 - **Learning**: Q-learning algorithm updates `FeatureWeight` values based on outcomes
 
-### API v2: LLM-Competitive Interface
+### API Interface
 
-The Enhanced Reasoning Controller (`EnhancedReasoningController.java`) provides:
+The current implementation exposes two controller surfaces:
 
-#### Endpoints
+#### Reinforcement Learning API (`/rl`)
 
-**`POST /api/v2/reason`** - Multi-step reasoning with explanations
-- Transparent reasoning paths
-- Confidence scoring
-- Source attribution
-- Alternative hypotheses
+**`POST /rl/predict`**
+- Decomposes input into `Feature` objects
+- Generates a policy matrix from graph weights
+- Returns a `MemoryRecord` with prediction edges
 
-**`POST /api/v2/chat`** - Conversational interface
-- Multi-turn context awareness
-- Session management
-- Optional reasoning visibility
+**`POST /rl/learn`**
+- Applies feedback to a previously created `MemoryRecord`
+- Updates feature connection weights via Q-learning
 
-**`POST /api/v2/reason/async`** - Complex query handling
-- Non-blocking processing
-- Polling-based result retrieval
-- Extended reasoning steps
+**`POST /rl/train`**
+- Performs training iteration using labeled JSON payloads
 
-**`POST /api/v2/explain`** - Detailed explanation generation
-- Reasoning decomposition
-- Configurable explanation depth
+#### Image Ingestion API (`/images`)
 
-**`POST /api/v2/knowledge/update`** - Dynamic knowledge integration
-- Runtime graph updates without retraining
-- Conflict resolution
-- Source tracking
-
-**`GET /api/v2/health`** - System capabilities
-- Version info
-- Feature enumeration
-- Graph statistics
+**`POST /images/ingest`**
+- Accepts base64-encoded image payloads
+- Creates original + derived image nodes (outline, PCA, black/white, object crops)
+- Persists `PART_OF` relationships to the original image node
 
 ### Key Components
 
-1. **GraphReasoningEngine**: Performs graph traversal and attention-based reasoning
-2. **ConversationManager**: Maintains multi-turn context
-3. **KnowledgeIntegrator**: Updates graph without full retraining
-4. **ExplanationGenerator**: Produces human-readable reasoning chains
+1. **ReinforcementLearningController**: Prediction, learning, and training endpoints
+2. **ImageIngestionController**: Image decoding + derived representation ingestion
+3. **Brain**: Policy generation, prediction scoring, and Q-learning updates
+4. **ImageProcessingService**: OpenCV/Math-based image transformations
 
 ## Core Data Model
 
@@ -875,7 +864,7 @@ logging.level.org.neo4j=WARN
 
 5. **Test the API**
    ```bash
-   curl -X POST http://localhost:8080/api/v2/health
+   curl -X POST "http://localhost:8080/rl/predict?input=%7B%22field%22%3A%22value%22%7D&output_features=label_1&output_features=label_2"
    ```
 
 ## Installation
@@ -898,23 +887,11 @@ cd Deepthought
 ## Usage Example
 
 ```bash
-# Perform reasoning
-curl -X POST http://localhost:8080/api/v2/reason \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "What causes economic recessions?",
-    "context": ["historical patterns", "policy factors"],
-    "maxSteps": 5,
-    "sessionId": "session-123"
-  }'
+# Make a prediction
+curl -X POST "http://localhost:8080/rl/predict?input=%7B%22field%22%3A%22value%22%7D&output_features=approve&output_features=reject"
 
-# Response includes:
-# - conclusion: Synthesized answer
-# - confidence: 0.0-1.0 score
-# - explanation: Natural language reasoning
-# - reasoningSteps: Path through graph
-# - sources: Supporting nodes
-# - alternativeHypotheses: Other possibilities
+# Provide feedback for learning
+curl -X POST "http://localhost:8080/rl/learn?memory_id=1&feature_value=approve"
 ```
 
 ## Current Status & Roadmap
@@ -922,10 +899,10 @@ curl -X POST http://localhost:8080/api/v2/reason \
 ### Implemented
 - ✅ Graph-based weight storage
 - ✅ Elastic vector construction
-- ✅ API v2 with modern interfaces
-- ✅ Multi-turn conversation support
-- ✅ Async reasoning for complex queries
-- ✅ Dynamic knowledge updates
+- ✅ Reinforcement learning API (`/rl`)
+- ✅ Image ingestion API (`/images`)
+- ✅ OpenAPI annotations for REST endpoints
+- ✅ Regression test coverage for image ingestion flow
 
 ### In Progress
 - 🔄 Graph attention optimization
@@ -1144,17 +1121,17 @@ logging.level.org.neo4j=DEBUG
 logging.level.org.springframework.data.neo4j=DEBUG
 ```
 
-### Health Checks
+### Operational Checks
 
-Monitor system health:
+Run quick runtime checks:
 ```bash
-# Check API health
-curl http://localhost:8080/api/v2/health
+# API smoke test (prediction endpoint responds)
+curl -X POST "http://localhost:8080/rl/predict?input=%7B%22field%22%3A%22value%22%7D&output_features=label"
 
-# Check Neo4j health
+# Neo4j availability
 curl http://localhost:7474/db/data/
 
-# Check system resources
+# JVM process resources
 top -p $(pgrep java)
 ```
 

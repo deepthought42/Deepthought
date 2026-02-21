@@ -122,9 +122,9 @@ public class ImageProcessingService {
 		RealMatrix components = eig.getV();
 		RealMatrix transformed = matrix.multiply(components);
 		int[][][] result = new int[h][w][3];
-		double min0 = Double.MAX_VALUE, max0 = Double.MIN_VALUE;
-		double min1 = Double.MAX_VALUE, max1 = Double.MIN_VALUE;
-		double min2 = Double.MAX_VALUE, max2 = Double.MIN_VALUE;
+		double min0 = Double.MAX_VALUE, max0 = Double.NEGATIVE_INFINITY;
+		double min1 = Double.MAX_VALUE, max1 = Double.NEGATIVE_INFINITY;
+		double min2 = Double.MAX_VALUE, max2 = Double.NEGATIVE_INFINITY;
 		for (int i = 0; i < n; i++) {
 			double v0 = transformed.getEntry(i, 0);
 			double v1 = transformed.getEntry(i, 1);

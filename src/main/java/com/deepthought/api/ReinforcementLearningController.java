@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.deepthought.models.Feature;
 import com.deepthought.models.MemoryRecord;
@@ -140,14 +141,7 @@ public class ReinforcementLearningController {
     		output_feature_keys[i] = output_features.get(i).getValue();
       	}
     	
-    	double max_pred = 0.0;
-    	int max_idx = 0;
-    	for(int idx = 0; idx<prediction.length; idx++){
-    		if(prediction[idx] > max_pred){
-    			max_idx = idx;
-    			max_pred = prediction[idx];
-    		}
-    	}
+		int max_idx = getMaxPredictionIndex(prediction);
     	
     	//create memory and save vocabularies, policy matrix and prediction vector
     	MemoryRecord memory = new MemoryRecord();
@@ -183,12 +177,15 @@ public class ReinforcementLearningController {
     @RequestMapping(value ="/learn", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.ACCEPTED, reason = "Successfully learned from feedback")
     public  @ResponseBody void learn(@Schema(description = "unique identifier for specific memory", example = "12345", required = true) @RequestParam(value="memory_id", required=true) long memory_id, 
-    								 @Schema(description = "value of feature that you want to label memory with and learn from", example = "VERB", required = true) @RequestParam(value="feature_value", required=true) String feature_value) 
+    							 @Schema(description = "value of feature that you want to label memory with and learn from", example = "VERB", required = true) @RequestParam(value="feature_value", required=true) String feature_value) 
 					 throws JSONException, IllegalArgumentException, IllegalAccessException, NullPointerException, IOException
     {
-    	Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
-    	
-    	//log.info("object definition list size :: "+feature_list.size());
+	    Optional<MemoryRecord> optional_memory = memory_repo.findById(memory_id);
+	    if(!optional_memory.isPresent()) {
+	    	throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Memory record not found for id " + memory_id);
+	    }
+	    
+	    //log.info("object definition list size :: "+feature_list.size());
     	Feature feature = new Feature(feature_value);
     	Feature feature_record = feature_repo.findByValue(feature.getValue());
     	if(feature_record != null){
@@ -197,6 +194,22 @@ public class ReinforcementLearningController {
     	//LOAD OBJECT DEFINITION LIST BY DECOMPOSING json_string
 	    brain.learn(memory_id, feature); //feature_list, predicted, feature, isRewarded);
     }
+
+	static int getMaxPredictionIndex(double[] prediction) {
+		if (prediction == null || prediction.length == 0) {
+			throw new IllegalArgumentException("Prediction array cannot be null or empty");
+		}
+
+		double max_pred = Double.NEGATIVE_INFINITY;
+		int max_idx = 0;
+		for (int idx = 0; idx < prediction.length; idx++) {
+			if (prediction[idx] > max_pred) {
+				max_idx = idx;
+				max_pred = prediction[idx];
+			}
+		}
+		return max_idx;
+	}
     
 	/**
 	 * 
