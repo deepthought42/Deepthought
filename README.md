@@ -1121,17 +1121,17 @@ logging.level.org.neo4j=DEBUG
 logging.level.org.springframework.data.neo4j=DEBUG
 ```
 
-### Health Checks
+### Operational Checks
 
-Monitor system health:
+Run quick runtime checks:
 ```bash
-# Check API health
+# API smoke test (prediction endpoint responds)
 curl -X POST "http://localhost:8080/rl/predict?input=%7B%22field%22%3A%22value%22%7D&output_features=label"
 
-# Check Neo4j health
+# Neo4j availability
 curl http://localhost:7474/db/data/
 
-# Check system resources
+# JVM process resources
 top -p $(pgrep java)
 ```
 
