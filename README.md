@@ -767,10 +767,28 @@ docker run -d \
 Build and run the full stack (app + Neo4j) with Docker Compose:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
-The app will be available at `http://localhost:8080` and Neo4j at `http://localhost:7474`. Neo4j credentials: `neo4j` / `password`.
+Services started by Compose:
+- `app` on `http://localhost:8080`
+- `neo4j` browser on `http://localhost:7474`
+- Neo4j Bolt on `localhost:7687`
+
+Default Neo4j credentials are `neo4j` / `password`.
+
+Useful lifecycle commands:
+
+```bash
+# Stream logs
+docker compose logs -f
+
+# Stop services while preserving database volumes
+docker compose down
+
+# Stop services and remove persisted data
+docker compose down -v
+```
 
 To build only the app image (connect to an existing Neo4j):
 
