@@ -25,6 +25,7 @@ import com.deepthought.models.edges.Prediction;
 import com.deepthought.models.repository.FeatureRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
 import com.deepthought.models.repository.PredictionRepository;
+import com.deepthought.models.services.VocabularyService;
 import com.qanairy.brain.Brain;
 import com.qanairy.db.DataDecomposer;
 
@@ -52,6 +53,9 @@ public class ReinforcementLearningController {
 	
 	@Autowired
 	private Brain brain;
+
+	@Autowired
+	private VocabularyService vocabularyService;
 	
     /**
      * Generates a prediction based on stringified JSON object, input and output {@link Vocabulary} 
@@ -230,6 +234,7 @@ public class ReinforcementLearningController {
     
     	JSONObject json_obj = new JSONObject(json_object);
     	List<Feature> feature_list = DataDecomposer.decompose(json_obj);
+    	vocabularyService.learnFromTrainingFeatures(feature_list, label);
     	brain.train(feature_list, label);
     }
 }

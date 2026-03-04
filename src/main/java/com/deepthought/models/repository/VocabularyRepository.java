@@ -123,4 +123,17 @@ public interface VocabularyRepository extends Neo4jRepository<Vocabulary, Long> 
      */
     @Query("MATCH (v:Vocabulary) SET v.size = size(v.valueList)")
     void updateAllSizes();
+
+    /**
+     * Creates a parent-child relationship between vocabulary nodes.
+     * Direction: child -[:PART_OF_VOCABULARY]-> parent
+     *
+     * @param parentId aggregate/parent vocabulary id
+     * @param childIds child vocabulary ids
+     */
+    @Query("MATCH (parent:Vocabulary) WHERE id(parent) = $parentId " +
+           "MATCH (child:Vocabulary) WHERE id(child) IN $childIds " +
+           "MERGE (child)-[:PART_OF_VOCABULARY]->(parent)")
+    void attachChildVocabularies(@Param("parentId") Long parentId,
+                                 @Param("childIds") List<Long> childIds);
 }
