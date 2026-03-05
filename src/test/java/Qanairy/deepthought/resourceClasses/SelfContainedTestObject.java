@@ -13,8 +13,16 @@ public class SelfContainedTestObject {
 	
 	public List<String> string_list;
 	public Map<String, String> string_map;
+
+	public SelfContainedTestObject() {
+	}
 	
 	public SelfContainedTestObject(String string_value, int primitive_int, Integer int_object, double double_primitive, List<String> string_list, Map<String, String> string_map){
-		
+		this.string_value = string_value;
+		this.int_primitive_value = primitive_int;
+		this.int_object_value = int_object;
+		this.double_value = double_primitive;
+		this.string_list = string_list;
+		this.string_map = string_map;
 	}
 }
