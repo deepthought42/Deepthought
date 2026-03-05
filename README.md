@@ -810,10 +810,13 @@ logging.level.org.neo4j=WARN
 ./mvnw test -Dtest=BrainTests
 
 # Run with coverage (requires jacoco plugin)
-./mvnw test jacoco:report
+./mvnw -Pcoverage test
 
 # Run integration tests
-./mvnw verify
+./mvnw -Papp-runtime verify
+
+# Note: app packaging/openapi generation plugins are disabled by default.
+# Enable them with -Papp-runtime when needed.
 ```
 
 ## Prerequisites
@@ -858,8 +861,8 @@ logging.level.org.neo4j=WARN
 
 4. **Build and Run**
    ```bash
-   ./mvnw clean install
-   ./mvnw spring-boot:run
+   ./mvnw -Papp-runtime clean install
+   ./mvnw -Papp-runtime spring-boot:run
    ```
 
 5. **Test the API**
@@ -878,10 +881,10 @@ cd Deepthought
 # Configure connection in application.properties
 
 # Build
-./mvnw clean install
+./mvnw -Papp-runtime clean install
 
 # Run
-./mvnw spring-boot:run
+./mvnw -Papp-runtime spring-boot:run
 ```
 
 ## Usage Example
@@ -974,7 +977,7 @@ curl -X POST "http://localhost:8080/rl/learn?memory_id=1&feature_value=approve"
 4. **Test Your Changes**
    ```bash
    ./mvnw clean test
-   ./mvnw spring-boot:run  # Manual testing
+   ./mvnw -Papp-runtime spring-boot:run  # Manual testing
    ```
 
 5. **Submit Pull Request**
