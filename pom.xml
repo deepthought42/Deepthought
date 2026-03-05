@@ -14,6 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
     <springboot.version>2.2.6.RELEASE</springboot.version>
+    <surefireArgLine></surefireArgLine>
   </properties>
 
 	<build>
@@ -37,72 +38,89 @@
 	                <target>1.8</target>
 	            </configuration>
 	        </plugin>
-		    <plugin>
-		       <groupId>org.springframework.boot</groupId>
-	          <artifactId>spring-boot-maven-plugin</artifactId>
-	          <version>${springboot.version}</version>
-	          <configuration>
-	              <fork>true</fork>
-	              <mainClass>com.qanairy.deepthought.App</mainClass>
-	          </configuration>
-	            <executions>
-	              <execution>
-	                <goals>
-	                  <goal>repackage</goal>
-	                </goals>
-	              </execution>
-	              <execution>
-			            <id>pre-integration-test</id>
-			            <goals>
-			                <goal>start</goal>
-			            </goals>
-			        </execution>
-			        <execution>
-			            <id>post-integration-test</id>
-			            <goals>
-			                <goal>stop</goal>
-			            </goals>
-			        </execution>
-	          </executions>
-		    </plugin>
-			<plugin>
-			    <groupId>org.springdoc</groupId>
-			    <artifactId>springdoc-openapi-maven-plugin</artifactId>
-			    <version>0.2</version>
-			    <executions>
-			        <execution>
-			            <phase>integration-test</phase>
-			            <goals>
-			                <goal>generate</goal>
-			            </goals>
-			        </execution>
-			    </executions>
-			</plugin>
-			<plugin>
-			    <groupId>org.jacoco</groupId>
-			    <artifactId>jacoco-maven-plugin</artifactId>
-			    <version>0.8.10</version>
-			    <executions>
-			        <execution>
-			            <id>prepare-agent</id>
-			            <goals>
-			                <goal>prepare-agent</goal>
-			            </goals>
-			            <configuration>
-			                <propertyName>surefireArgLine</propertyName>
-			            </configuration>
-			        </execution>
-			        <execution>
-			            <id>report</id>
-			            <phase>test</phase>
-			            <goals>
-			                <goal>report</goal>
-			            </goals>
-			        </execution>
-			    </executions>
-			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>app-runtime</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<version>${springboot.version}</version>
+						<configuration>
+							<fork>true</fork>
+							<mainClass>com.qanairy.deepthought.App</mainClass>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>repackage</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>pre-integration-test</id>
+								<goals>
+									<goal>start</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>post-integration-test</id>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.springdoc</groupId>
+						<artifactId>springdoc-openapi-maven-plugin</artifactId>
+						<version>0.2</version>
+						<executions>
+							<execution>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>generate</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.10</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<configuration>
+									<propertyName>surefireArgLine</propertyName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
   <dependencies>
     <dependency>
 	   	<groupId>org.testng</groupId>
