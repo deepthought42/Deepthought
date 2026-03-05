@@ -1,9 +1,17 @@
 package Qanairy.deepthought;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import Qanairy.deepthought.resourceClasses.SelfContainedTestObject;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
@@ -11,62 +19,79 @@ import org.testng.annotations.Test;
 import com.deepthought.models.Feature;
 import com.qanairy.db.DataDecomposer;
 
+@Test(groups = "Regression")
 public class DataDecomposerTests {
 
-		@Test
-		public void decomposeGenericObject(){
-			String[] keys = {"String", "value", "object", "key", "here"};
-			JSONObject json_obj = new JSONObject();
-			try {
-				json_obj.put("string_val", "String value");
-				JSONObject obj = new JSONObject();
-				obj.put("object_key", "object key here");
-				json_obj.put("obj", obj);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				List<Feature> object_definition_list = DataDecomposer.decompose(json_obj);
-				
-				Map<String, Feature> map = new HashMap<String, Feature>();
-				for(Feature obj : object_definition_list){
-					map.put(obj.getValue(), obj);
-				}
-				
-				for(int idx=0; idx<keys.length; idx++){
-					map.remove(keys[idx]);
-				}
-				
-				assert(map.isEmpty());
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NullPointerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	@Test
+	public void decomposeGenericObject() throws IllegalArgumentException, IllegalAccessException, JSONException {
+		String[] keys = { "String", "value", "object", "key", "here" };
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("string_val", "String value");
+		JSONObject obj = new JSONObject();
+		obj.put("object_key", "object key here");
+		jsonObj.put("obj", obj);
+
+		List<Feature> objectDefinitionList = DataDecomposer.decompose(jsonObj);
+		Map<String, Feature> map = new HashMap<String, Feature>();
+		for (Feature feature : objectDefinitionList) {
+			map.put(feature.getValue(), feature);
 		}
-		
-		@Test
-		public void decomposeMap(){
-			
+
+		for (String key : keys) {
+			map.remove(key);
 		}
-		
-		@Test
-		public void decomposeObjectList(){
-			
-		}
-		
-		@Test
-		public void decomposeObjectArray(){
-			
-		}
+
+		assertTrue(map.isEmpty());
+	}
+
+	@Test
+	public void decomposeMap() throws IllegalArgumentException, IllegalAccessException {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("title", "hello world");
+		map.put("labels", Arrays.asList("alpha beta", null));
+		map.put("tokens", new String[] { "foo", "bar" });
+		map.put("unused", null);
+
+		List<Feature> output = DataDecomposer.decompose(map);
+		List<String> values = output.stream().map(Feature::getValue).collect(Collectors.toList());
+
+		assertTrue(values.contains("hello"));
+		assertTrue(values.contains("world"));
+		assertTrue(values.contains("alpha"));
+		assertTrue(values.contains("beta"));
+		assertTrue(values.contains("foo"));
+		assertTrue(values.contains("bar"));
+	}
+
+	@Test
+	public void decomposeObjectList() throws IllegalArgumentException, IllegalAccessException {
+		SelfContainedTestObject input = new SelfContainedTestObject(null, 0, null, 0.0, null, null);
+		input.string_value = "quick brown fox";
+		input.int_primitive_value = 7;
+		input.string_list = Arrays.asList("jumps high", "over");
+
+		List<Feature> output = DataDecomposer.decompose((Object) input);
+		List<String> values = output.stream().map(Feature::getValue).collect(Collectors.toList());
+
+		assertTrue(values.contains("quick"));
+		assertTrue(values.contains("brown"));
+		assertTrue(values.contains("fox"));
+		assertTrue(values.contains("jumps"));
+		assertTrue(values.contains("high"));
+	}
+
+	@Test
+	public void decomposeObjectArray() throws IllegalArgumentException, IllegalAccessException, JSONException {
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("items", new Object[] { "alpha beta", "gamma" });
+		jsonObj.put("nested", new JSONArray(Arrays.asList(new JSONObject().put("k", "delta"))));
+
+		List<Feature> output = DataDecomposer.decompose(jsonObj);
+		List<String> values = output.stream().map(Feature::getValue).collect(Collectors.toList());
+
+		assertEquals(values.stream().filter("alpha"::equals).count(), 1L);
+		assertTrue(values.contains("beta"));
+		assertTrue(values.contains("gamma"));
+		assertTrue(values.contains("delta"));
+	}
 }
