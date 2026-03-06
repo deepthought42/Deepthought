@@ -1,0 +1,276 @@
+openapi: 3.0.3
+info:
+  title: Deepthought API
+  version: 1.0.0
+  description: |
+    OpenAPI specification for all currently implemented HTTP endpoints in the Deepthought
+    repository.
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Reinforcement Learning
+    description: Prediction, feedback learning, and supervised training endpoints.
+  - name: Image Ingestion
+    description: Image ingestion and derived image-node creation endpoints.
+
+paths:
+  /rl/predict:
+    post:
+      tags: [Reinforcement Learning]
+      summary: Make a prediction and return a MemoryRecord
+      description: |
+        Decomposes the input payload into features, generates a policy matrix,
+        predicts the most likely output feature, and persists a MemoryRecord with
+        prediction edge weights.
+      parameters:
+        - name: input
+          in: query
+          required: true
+          description: |
+            JSON string to decompose into input features. If the value is not valid JSON,
+            it is treated as unstructured text.
+          schema:
+            type: string
+          example: '{"field_1":{"field_2":"hello"}}'
+        - name: output_features
+          in: query
+          required: true
+          description: List of output feature labels to score.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            repeatedParameters:
+              summary: Repeated query parameter form
+              value: [label_1, label_2, label_n]
+      responses:
+        '200':
+          description: Prediction generated and persisted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryRecord'
+        '500':
+          description: Unexpected processing error.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /rl/learn:
+    post:
+      tags: [Reinforcement Learning]
+      summary: Applies learning feedback to a memory
+      description: |
+        Applies reinforcement-learning updates to graph weights using the supplied
+        feature value as the desired outcome for a previously persisted memory.
+      parameters:
+        - name: memory_id
+          in: query
+          required: true
+          description: Unique identifier of a MemoryRecord.
+          schema:
+            type: integer
+            format: int64
+          example: 12345
+        - name: feature_value
+          in: query
+          required: true
+          description: Feature value used as learning feedback.
+          schema:
+            type: string
+          example: VERB
+      responses:
+        '202':
+          description: Successfully learned from feedback.
+        '404':
+          description: Memory record was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected processing error.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /rl/train:
+    post:
+      tags: [Reinforcement Learning]
+      summary: Performs one training iteration
+      description: |
+        Trains the model by decomposing a JSON object into features and associating
+        it with a provided label.
+      parameters:
+        - name: json_object
+          in: query
+          required: true
+          description: Stringified JSON object to train on.
+          schema:
+            type: string
+          example: '{"text":"hello world"}'
+        - name: label
+          in: query
+          required: true
+          description: Label to learn for the provided JSON object.
+          schema:
+            type: string
+          example: greeting
+      responses:
+        '200':
+          description: Training iteration completed.
+        '500':
+          description: Unexpected processing error.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /images/ingest:
+    post:
+      tags: [Image Ingestion]
+      summary: Ingest image and create graph nodes
+      description: |
+        Accepts a base64-encoded image and creates an original image node plus
+        derived image nodes (outline, PCA, black-and-white, and detected cropped
+        objects), linked via PART_OF relationships.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageIngestRequest'
+      responses:
+        '200':
+          description: Successfully ingested image and created graph nodes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageMatrixNode'
+        '400':
+          description: Invalid request (missing image or invalid base64 data).
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Image decoding or processing error.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    Feature:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        value:
+          type: string
+          example: form
+      required: [value]
+
+    Prediction:
+      type: object
+      properties:
+        feature:
+          $ref: '#/components/schemas/Feature'
+        weight:
+          type: number
+          format: double
+          example: 0.85
+
+    MemoryRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: MemoryRecord identifier.
+          readOnly: true
+        date:
+          type: string
+          format: date-time
+          description: Timestamp the memory was created.
+        desiredFeature:
+          $ref: '#/components/schemas/Feature'
+        predictedFeature:
+          $ref: '#/components/schemas/Feature'
+        predictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prediction'
+        inputFeatureValues:
+          type: array
+          items:
+            type: string
+        outputFeatureKeys:
+          type: array
+          items:
+            type: string
+        policyMatrix:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+              format: double
+
+    ImageIngestRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          description: Base64-encoded image data.
+          example: /9j/4AAQSkZJRg...
+      required: [image]
+
+    ImageMatrixNode:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        type:
+          type: string
+          enum: [ORIGINAL, OUTLINE, PCA, BLACK_WHITE, CROPPED_OBJECT]
+        width:
+          type: integer
+          minimum: 1
+          example: 1920
+        height:
+          type: integer
+          minimum: 1
+          example: 1080
+      required: [type, width, height]
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Memory record not found for id 12345
+        path:
+          type: string
+          example: /rl/learn
