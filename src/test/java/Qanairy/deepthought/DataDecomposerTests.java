@@ -16,7 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Token;
 import com.qanairy.db.DataDecomposer;
 
 @Test(groups = "Regression")
@@ -31,10 +31,10 @@ public class DataDecomposerTests {
 		obj.put("object_key", "object key here");
 		jsonObj.put("obj", obj);
 
-		List<Feature> objectDefinitionList = DataDecomposer.decompose(jsonObj);
-		Map<String, Feature> map = new HashMap<String, Feature>();
-		for (Feature feature : objectDefinitionList) {
-			map.put(feature.getValue(), feature);
+		List<Token> objectDefinitionList = DataDecomposer.decompose(jsonObj);
+		Map<String, Token> map = new HashMap<String, Token>();
+		for (Token token : objectDefinitionList) {
+			map.put(token.getValue(), token);
 		}
 
 		for (String key : keys) {
@@ -52,8 +52,8 @@ public class DataDecomposerTests {
 		map.put("tokens", new String[] { "foo", "bar" });
 		map.put("unused", null);
 
-		List<Feature> output = DataDecomposer.decompose(map);
-		List<String> values = output.stream().map(Feature::getValue).collect(Collectors.toList());
+		List<Token> output = DataDecomposer.decompose(map);
+		List<String> values = output.stream().map(Token::getValue).collect(Collectors.toList());
 
 		assertTrue(values.contains("hello"));
 		assertTrue(values.contains("world"));
@@ -70,8 +70,8 @@ public class DataDecomposerTests {
 		input.int_primitive_value = 7;
 		input.string_list = Arrays.asList("jumps high", "over");
 
-		List<Feature> output = DataDecomposer.decompose((Object) input);
-		List<String> values = output.stream().map(Feature::getValue).collect(Collectors.toList());
+		List<Token> output = DataDecomposer.decompose((Object) input);
+		List<String> values = output.stream().map(Token::getValue).collect(Collectors.toList());
 
 		assertTrue(values.contains("quick"));
 		assertTrue(values.contains("brown"));
@@ -86,8 +86,8 @@ public class DataDecomposerTests {
 		jsonObj.put("items", new Object[] { "alpha beta", "gamma" });
 		jsonObj.put("nested", new JSONArray(Arrays.asList(new JSONObject().put("k", "delta"))));
 
-		List<Feature> output = DataDecomposer.decompose(jsonObj);
-		List<String> values = output.stream().map(Feature::getValue).collect(Collectors.toList());
+		List<Token> output = DataDecomposer.decompose(jsonObj);
+		List<String> values = output.stream().map(Token::getValue).collect(Collectors.toList());
 
 		assertEquals(values.stream().filter("alpha"::equals).count(), 1L);
 		assertTrue(values.contains("beta"));

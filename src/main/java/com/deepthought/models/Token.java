@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import com.deepthought.models.edges.FeatureWeight;
+import com.deepthought.models.edges.TokenWeight;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,54 +19,54 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Defines objects that are available to the system for learning against
  */
 @NodeEntity
-public class Feature {
+public class Token {
 
-	@Schema(description = "Unique identifier of the Feature.", example = "1", required = true)
-	@Id 
-	@GeneratedValue 
+	@Schema(description = "Unique identifier of the Token.", example = "1", required = true)
+	@Id
+	@GeneratedValue
 	private Long id;
-    
-	@Schema(description = "Feature label", example = "form", required = true)
+
+	@Schema(description = "Token label", example = "form", required = true)
     @NotBlank
 	private String value;
-	
-	@Relationship(type = "HAS_RELATED_FEATURE")
-	private List<FeatureWeight> feature_weights = new ArrayList<FeatureWeight>();
-	
-	public Feature(){}
-	
+
+	@Relationship(type = "HAS_RELATED_TOKEN")
+	private List<TokenWeight> token_weights = new ArrayList<TokenWeight>();
+
+	public Token(){}
+
 	/**
 	 * Instantiates a new object definition
-	 * 
+	 *
 	 * @param uid
 	 * @param value
 	 * @param type
-	 * @param features
-	 * 
-	 * @pre features != null
+	 * @param tokens
+	 *
+	 * @pre tokens != null
 	 */
-	public Feature(String value, List<FeatureWeight> features) {
-		assert features != null;
-		
+	public Token(String value, List<TokenWeight> tokens) {
+		assert tokens != null;
+
 		this.value = value;
-		this.feature_weights = features;
+		this.token_weights = tokens;
 	}
-	
+
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param value
 	 * @param type
 	 */
-	public Feature(String value) {
+	public Token(String value) {
 		this.value = value;
-		this.feature_weights = new ArrayList<FeatureWeight>();
+		this.token_weights = new ArrayList<TokenWeight>();
 	}
 
 	public String getValue(){
 		return this.value;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -74,22 +74,22 @@ public class Feature {
 	public String toString(){
 		return this.value;
 	}
-	
+
 	/**
-	 * Gets list of probabilities associated with features for this object definition
+	 * Gets list of probabilities associated with tokens for this object definition
 	 * @return
 	 */
 	@JsonIgnore
-	public List<FeatureWeight> getFeatureWeights(){
-		return this.feature_weights;
+	public List<TokenWeight> getTokenWeights(){
+		return this.token_weights;
 	}
-	
+
 	@Override
 	public boolean equals(Object o){
 		if (this == o) return true;
-        if (!(o instanceof Feature)) return false;
-        
-        Feature that = (Feature)o;
+        if (!(o instanceof Token)) return false;
+
+        Token that = (Token)o;
         if(this.getValue().equals(that.getValue())){
         	return true;
         }
