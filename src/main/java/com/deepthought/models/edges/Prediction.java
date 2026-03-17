@@ -7,45 +7,45 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Token;
 import com.deepthought.models.MemoryRecord;
 
 /**
- * Encapsulates data for a predicted weight for a result feature in connection with a {@link MemoryRecord}
+ * Encapsulates data for a predicted weight for a result token in connection with a {@link MemoryRecord}
  */
 @RelationshipEntity(type = "PREDICTION")
 public class Prediction {
-	@Id 
-	@GeneratedValue   
+	@Id
+	@GeneratedValue
 	private Long relationshipId;
-    
-	@Property  
+
+	@Property
     private double weight;
-    
-	@StartNode 
+
+	@StartNode
 	private MemoryRecord memory;
-    
-	@EndNode   
-	private Feature result_feature;
-    
-    public Prediction(MemoryRecord memory, Feature feature, double weight) {
+
+	@EndNode
+	private Token result_token;
+
+    public Prediction(MemoryRecord memory, Token token, double weight) {
 		setMemoryRecord(memory);
-		setFeature(feature);
+		setToken(token);
 		setWeight(weight);
 	}
 
-	public Feature getFeature(){
-    	return this.result_feature;
+	public Token getToken(){
+    	return this.result_token;
     }
-    
-    public void setFeature(Feature result_feature){
-    	this.result_feature = result_feature;
+
+    public void setToken(Token result_token){
+    	this.result_token = result_token;
     }
-    
+
     public double getWeight(){
     	return this.weight;
     }
-    
+
     public void setWeight(double weight){
     	this.weight = weight;
     }

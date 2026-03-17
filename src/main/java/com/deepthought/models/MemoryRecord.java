@@ -16,51 +16,51 @@ import com.google.gson.GsonBuilder;
 
 /**
  * Stores all data for making predictions and learning from feedback. This node
- *  also connects to {@link Feature}s through a {@link Prediction} relationship/edge
- *  that contains the predicted weight for the feature that this memory stores.
+ *  also connects to {@link Token}s through a {@link Prediction} relationship/edge
+ *  that contains the predicted weight for the token that this memory stores.
  */
 @NodeEntity
 public class MemoryRecord {
 
-	@Id 
-	@GeneratedValue 
+	@Id
+	@GeneratedValue
 	private Long id;
-	
+
 	@Property
 	private Date date;
 
-	@Relationship(type = "DESIRED_FEATURE")
-	private Feature desired_feature;
-	
+	@Relationship(type = "DESIRED_TOKEN")
+	private Token desired_token;
+
 	@Relationship(type = "PREDICTED")
-	private Feature predicted_feature;
-	
+	private Token predicted_token;
+
 	@Relationship(type = "PREDICTION", direction = Relationship.OUTGOING)
 	private List<Prediction> predictions;
-	
-	private List<String> input_feature_values;
-	private String[] output_feature_values;
-	
+
+	private List<String> input_token_values;
+	private String[] output_token_values;
+
 	private String policy_matrix_json;
-	
+
 	public MemoryRecord(){
 		setDate(new Date());
 		policy_matrix_json = "";
 		setPredictions( new ArrayList<>() );
 	}
-	
+
 	public void setPredictions(List<Prediction> prediction_edges) {
 		this.predictions = prediction_edges;
 	}
-	
+
 	public List<Prediction> getPredictions(){
 		return this.predictions;
 	}
-	
+
 	public Long getID() {
 		return id;
 	}
-	
+
 	public Date getDate() {
 		return date;
 	}
@@ -68,29 +68,29 @@ public class MemoryRecord {
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	
-	public Feature getPredictedFeature() {
-		return this.predicted_feature;
-	}
-	
-	public void setPredictedFeature(Feature predicted_feature){
-		this.predicted_feature = predicted_feature;
+
+	public Token getPredictedToken() {
+		return this.predicted_token;
 	}
 
-	public List<String> getInputFeatureValues() {
-		return input_feature_values;
+	public void setPredictedToken(Token predicted_token){
+		this.predicted_token = predicted_token;
 	}
 
-	public void setInputFeatureValues(List<String> input_feature_values) {
-		this.input_feature_values = input_feature_values;
+	public List<String> getInputTokenValues() {
+		return input_token_values;
 	}
 
-	public String[] getOutputFeatureKeys() {
-		return output_feature_values;
+	public void setInputTokenValues(List<String> input_token_values) {
+		this.input_token_values = input_token_values;
 	}
 
-	public void setOutputFeatureKeys(String[] output_feature_values) {
-		this.output_feature_values = output_feature_values;
+	public String[] getOutputTokenKeys() {
+		return output_token_values;
+	}
+
+	public void setOutputTokenKeys(String[] output_token_values) {
+		this.output_token_values = output_token_values;
 	}
 
 	public double[][] getPolicyMatrix() {
@@ -105,11 +105,11 @@ public class MemoryRecord {
 		this.policy_matrix_json = gson.toJson(policy_matrix);
 	}
 
-	public Feature getDesiredFeature() {
-		return desired_feature;
+	public Token getDesiredToken() {
+		return desired_token;
 	}
 
-	public void setDesiredFeature(Feature feature) {
-		desired_feature = feature;
+	public void setDesiredToken(Token token) {
+		desired_token = token;
 	}
 }

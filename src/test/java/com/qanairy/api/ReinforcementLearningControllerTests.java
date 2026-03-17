@@ -20,9 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Token;
 import com.deepthought.models.MemoryRecord;
-import com.deepthought.models.repository.FeatureRepository;
+import com.deepthought.models.repository.TokenRepository;
 import com.deepthought.models.repository.MemoryRecordRepository;
 import com.deepthought.models.repository.PredictionRepository;
 import com.qanairy.brain.Brain;
@@ -31,7 +31,7 @@ import com.qanairy.brain.Brain;
 public class ReinforcementLearningControllerTests {
 
 	private ReinforcementLearningController controller;
-	private FeatureRepository feature_repo;
+	private TokenRepository token_repo;
 	private MemoryRecordRepository memory_repo;
 	private PredictionRepository prediction_repo;
 	private Brain brain;
@@ -39,12 +39,12 @@ public class ReinforcementLearningControllerTests {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		controller = new ReinforcementLearningController();
-		feature_repo = mock(FeatureRepository.class);
+		token_repo = mock(TokenRepository.class);
 		memory_repo = mock(MemoryRecordRepository.class);
 		prediction_repo = mock(PredictionRepository.class);
 		brain = mock(Brain.class);
 
-		setField("feature_repo", feature_repo);
+		setField("token_repo", token_repo);
 		setField("memory_repo", memory_repo);
 		setField("prediction_repo", prediction_repo);
 		setField("brain", brain);
@@ -90,24 +90,24 @@ public class ReinforcementLearningControllerTests {
 	}
 
 	@Test
-	public void learn_usesExistingFeatureWhenPresent() throws Exception {
+	public void learn_usesExistingTokenWhenPresent() throws Exception {
 		when(memory_repo.findById(123L)).thenReturn(Optional.of(new MemoryRecord()));
-		Feature existingFeature = new Feature("existing");
-		when(feature_repo.findByValue("existing")).thenReturn(existingFeature);
+		Token existingToken = new Token("existing");
+		when(token_repo.findByValue("existing")).thenReturn(existingToken);
 
 		controller.learn(123L, "existing");
 
-		verify(brain).learn(123L, existingFeature);
+		verify(brain).learn(123L, existingToken);
 	}
 
 	@Test
-	public void learn_createsFeatureWhenMissing() throws Exception {
+	public void learn_createsTokenWhenMissing() throws Exception {
 		when(memory_repo.findById(321L)).thenReturn(Optional.of(new MemoryRecord()));
-		when(feature_repo.findByValue("new-feature")).thenReturn(null);
+		when(token_repo.findByValue("new-token")).thenReturn(null);
 
-		controller.learn(321L, "new-feature");
+		controller.learn(321L, "new-token");
 
-		verify(brain).learn(eq(321L), any(Feature.class));
+		verify(brain).learn(eq(321L), any(Token.class));
 	}
 
 	@Test
@@ -119,24 +119,24 @@ public class ReinforcementLearningControllerTests {
 
 	@Test
 	public void predict_acceptsJsonInputAndBuildsMemoryRecord() throws Exception {
-		Feature existingOutput = new Feature("known_output");
-		when(feature_repo.findByValue("known_output")).thenReturn(existingOutput);
-		when(feature_repo.findByValue("new_output")).thenReturn(null);
+		Token existingOutput = new Token("known_output");
+		when(token_repo.findByValue("known_output")).thenReturn(existingOutput);
+		when(token_repo.findByValue("new_output")).thenReturn(null);
 		when(brain.generatePolicy(any(), any())).thenReturn(new double[][] { { 0.1, 0.9 } });
 		when(brain.predict(any())).thenReturn(new double[] { 0.2, 0.8 });
 
 		MemoryRecord memory = controller.predict("{\"text\":\"alpha beta\"}", new String[] { "known_output", "new_output" });
 
 		assertNotNull(memory);
-		assertNotNull(memory.getPredictedFeature());
-		assertEquals(memory.getPredictedFeature().getValue(), "new_output");
+		assertNotNull(memory.getPredictedToken());
+		assertEquals(memory.getPredictedToken().getValue(), "new_output");
 		assertEquals(memory.getPredictions().size(), 2);
-		assertEquals(memory.getOutputFeatureKeys(), new String[] { "known_output", "new_output" });
+		assertEquals(memory.getOutputTokenKeys(), new String[] { "known_output", "new_output" });
 	}
 
 	@Test
 	public void predict_acceptsPlainTextFallbackWhenInputIsNotJson() throws Exception {
-		when(feature_repo.findByValue("label")).thenReturn(new Feature("label"));
+		when(token_repo.findByValue("label")).thenReturn(new Token("label"));
 		when(brain.generatePolicy(any(), any())).thenReturn(new double[][] { { 1.0 } });
 		when(brain.predict(any())).thenReturn(new double[] { 1.0 });
 
@@ -147,22 +147,22 @@ public class ReinforcementLearningControllerTests {
 	}
 
 	@Test
-	public void predict_scrubsDuplicateAndInvalidInputFeatures() throws Exception {
-		when(feature_repo.findByValue("hello")).thenReturn(new Feature("hello"));
+	public void predict_scrubsDuplicateAndInvalidInputTokens() throws Exception {
+		when(token_repo.findByValue("hello")).thenReturn(new Token("hello"));
 		when(brain.generatePolicy(any(), any())).thenReturn(new double[][] { { 1.0 } });
 		when(brain.predict(any())).thenReturn(new double[] { 1.0 });
 
 		MemoryRecord memory = controller.predict("{\"a\":\"hello\",\"b\":\"hello\",\"c\":\"null\",\"d\":\"\"}", new String[] { "hello" });
 
 		assertNotNull(memory);
-		assertTrue(memory.getInputFeatureValues().isEmpty());
+		assertTrue(memory.getInputTokenValues().isEmpty());
 		verify(brain).generatePolicy(any(), any());
-		verify(brain, never()).learn(any(Long.class), any(Feature.class));
+		verify(brain, never()).learn(any(Long.class), any(Token.class));
 	}
 
 	@Test
 	public void predict_stripsBracketCharactersFromUnknownOutputLabels() throws Exception {
-		when(feature_repo.findByValue("[fresh]"))
+		when(token_repo.findByValue("[fresh]"))
 				.thenReturn(null);
 		when(brain.generatePolicy(any(), any())).thenReturn(new double[][] { { 1.0 } });
 		when(brain.predict(any())).thenReturn(new double[] { 1.0 });
@@ -170,6 +170,6 @@ public class ReinforcementLearningControllerTests {
 		MemoryRecord memory = controller.predict("{\"a\":\"value\"}", new String[] { "[fresh]" });
 
 		assertNotNull(memory);
-		assertEquals(Arrays.asList(memory.getOutputFeatureKeys()), Arrays.asList("fresh"));
+		assertEquals(Arrays.asList(memory.getOutputTokenKeys()), Arrays.asList("fresh"));
 	}
 }

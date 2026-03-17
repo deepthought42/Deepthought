@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Token;
 
 /**
  * Defines static methods to handle the decomposition of it's data into their constituent pieces.
@@ -22,37 +22,37 @@ public class DataDecomposer {
 
     /**
 	 * Decomposes object into data fragments
-	 * 
+	 *
 	 * @return
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-     * @throws JSONException 
+     * @throws JSONException
 	 */
-	public static List<Feature> decompose(JSONObject jsonObject) 
+	public static List<Token> decompose(JSONObject jsonObject)
 			throws IllegalArgumentException, IllegalAccessException, NullPointerException, JSONException{
-		List<Feature> objDefList = new ArrayList<Feature>();
+		List<Token> objDefList = new ArrayList<Token>();
 		Iterator<String> iter = jsonObject.keys();
-		
+
 		while(iter.hasNext()){
 			String key = iter.next();
 			log.info("Object Field Name :: "+key);
 			Object value = jsonObject.get(key);
 			if(value!=null){
-	        	Feature objDef = null;
+	        	Token objDef = null;
 	        	log.info("System class :: "+value.getClass());
 	        	log.info("VALUE BEING READ :::  "+value.toString());
 	        	if(value.toString().length()>=3 && value.toString().substring(0, 1).equals("{")){
 	        		log.info("converting to json string");
 	        		//String json_string = value.toString().substring(1, value.toString().length()-1);
 		        	JSONObject obj = new JSONObject(value.toString());
-		        	List<Feature> definition_list = decompose(obj);
+		        	List<Token> definition_list = decompose(obj);
 		        	objDefList.addAll(definition_list);
 	        	}
 	        	else if(value.getClass().equals(ArrayList.class)){
 		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<Feature> decomposedList = decomposeArrayList(list);
+		        	List<Token> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(JSONObject.class)){
@@ -64,7 +64,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new Feature(stringVal.toString());
+		        		objDef = new Token(stringVal.toString());
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -72,7 +72,7 @@ public class DataDecomposer {
 		        	log.info("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
-		        	List<Feature> decomposedList = decomposeObjectArray(array);
+		        	List<Token> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(JSONArray.class)){
@@ -86,51 +86,51 @@ public class DataDecomposer {
 		        	String[] words = value.toString().split("\\s+");
 		        	log.info("parsing string .....");
 		        	for(String word : words){
-		        		objDef = new Feature(word);
+		        		objDef = new Token(word);
 		        		objDefList.add(objDef);
-		        	}		        	
+		        	}
 		        }
 	        	log.info("Ending list size :: "+objDefList.size());
 
 			}
         }
-		
+
 		//log.info("Object definition List size :: "+objDefList.size());
 		return objDefList;
-		
+
 	}
 
 	/**
 	 * Decomposes object into data fragments
-	 * 
+	 *
 	 * @return
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static List<Feature> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
-		List<Feature> objDefList = new ArrayList<Feature>();
+	public static List<Token> decompose(String value) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Token> objDefList = new ArrayList<Token>();
     	String[] words = value.toString().split("\\s+");
     	for(String word : words){
     		log.info("word :: "+word);
-    		Feature objDef = new Feature(word);
+    		Token objDef = new Token(word);
     		objDefList.add(objDef);
     	}
-	        	
+
 		return objDefList;
 	}
 
 	/**
 	 * Decomposes object into data fragments
-	 * 
+	 *
 	 * @return
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static List<Feature> decompose(Object obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
-		List<Feature> objDefList = new ArrayList<Feature>();
+	public static List<Token> decompose(Object obj) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Token> objDefList = new ArrayList<Token>();
 		JSONObject jsonObject = new JSONObject();
 		Iterator<String> iter = jsonObject.keys();
-		
+
 		while(iter.hasNext()){
 			iter.next();
 		}
@@ -141,20 +141,20 @@ public class DataDecomposer {
 	    for(Field field : fields) {
 	        Object value = field.get(obj);
 	        if(value!=null){
-	        	Feature objDef = null;
-	        		
+	        	Token objDef = null;
+
 	        	if(value.getClass().equals(ArrayList.class)){
 		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<Feature> decomposedList = decomposeArrayList(list);
+		        	List<Token> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(ArrayList.class)){
 		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<Feature> decomposedList = decomposeArrayList(list);
+		        	List<Token> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(String[].class)){
@@ -162,7 +162,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new Feature(stringVal.toString());
+		        		objDef = new Token(stringVal.toString());
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -170,7 +170,7 @@ public class DataDecomposer {
 		        	log.info("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
-		        	List<Feature> decomposedList = decomposeObjectArray(array);
+		        	List<Token> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else{
@@ -180,48 +180,48 @@ public class DataDecomposer {
 		        	log.info("words :: "+words.length);
 		        	for(String word : words){
 		        		log.info("word :: "+word);
-		        		objDef = new Feature(word);
+		        		objDef = new Token(word);
 		        		objDefList.add(objDef);
 		        	}
-		        	
-	        		//objDef = new Feature(value.toString(), field.getType().getSimpleName().replace(".", "").replace("[","").replace("]",""));
+
+	        		//objDef = new Token(value.toString(), field.getType().getSimpleName().replace(".", "").replace("[","").replace("]",""));
 		        	//objDefList.add(objDef);
 		        }
 	        }
 	    }
 		return objDefList;
 	}
-	
+
 	/**
 	 * Decomposes object into data fragments
-	 * 
+	 *
 	 * @return
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static List<Feature> decompose(HashMap<?,?> map) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
-		List<Feature> objDefList = new ArrayList<Feature>();
-		
+	public static List<Token> decompose(HashMap<?,?> map) throws IllegalArgumentException, IllegalAccessException, NullPointerException{
+		List<Token> objDefList = new ArrayList<Token>();
+
 		Class<?> objClass = map.getClass();
         log.info("LIST CLASS:: "+ objClass);
 
 		for(Object key : map.keySet()){
 			Object value = map.get(key);
 			if(value!=null){
-	        	Feature objDef = null;
-	        		
+	        	Token objDef = null;
+
 	        	if(value.getClass().equals(ArrayList.class)){
 		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<Feature> decomposedList = decomposeArrayList(list);
+		        	List<Token> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 	        	else if(value.getClass().equals(ArrayList.class)){
 		        	log.info("Deconstructing Array list");
 		        	ArrayList<?> list = ((ArrayList<?>)value);
 		        	//return all elements of array
-		        	List<Feature> decomposedList = decomposeArrayList(list);
+		        	List<Token> decomposedList = decomposeArrayList(list);
 	        		objDefList.addAll(decomposedList);
 		        }
 		        else if(value.getClass().equals(String[].class)){
@@ -229,7 +229,7 @@ public class DataDecomposer {
 
 		        	String[] array = (String[]) value;
 		        	for(String stringVal : array){
-		        		objDef = new Feature(stringVal.toString());
+		        		objDef = new Token(stringVal.toString());
 		        		objDefList.add(objDef);
 		            }
 		        }
@@ -237,7 +237,7 @@ public class DataDecomposer {
 		        	log.info("Deconstructing Object list");
 
 		        	Object[] array = (Object[]) value;
-		        	List<Feature> decomposedList = decomposeObjectArray(array);
+		        	List<Token> decomposedList = decomposeObjectArray(array);
 		        	objDefList.addAll(decomposedList);
 		        }
 		        else{
@@ -245,7 +245,7 @@ public class DataDecomposer {
 		        	String[] words = value.toString().split("\\s+");
 
 		        	for(String word : words){
-		        		objDef = new Feature(word);
+		        		objDef = new Token(word);
 		        		objDefList.add(objDef);
 		        	}
 		        }
@@ -253,7 +253,7 @@ public class DataDecomposer {
 		}
 		return objDefList;
 	}
-	
+
 	/**
 	 * Decomposes an array of Objects into memory blocks
 	 * @param array
@@ -261,12 +261,12 @@ public class DataDecomposer {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static List<Feature> decomposeObjectArray(Object[] array) throws IllegalArgumentException, IllegalAccessException{
-    	List<Feature> objDefList = new ArrayList<Feature>();
+	private static List<Token> decomposeObjectArray(Object[] array) throws IllegalArgumentException, IllegalAccessException{
+    	List<Token> objDefList = new ArrayList<Token>();
 		if(array == null || array.length == 0){
 			return objDefList;
 		}
-    	
+
         for(Object object : array){
         	objDefList.addAll(DataDecomposer.decompose(object));
         }
@@ -275,18 +275,18 @@ public class DataDecomposer {
 
 	/**
 	 * Iterates over ArrayList of objects, and decomposes each object
-	 * 
+	 *
 	 * @param list
 	 * @return
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static List<Feature> decomposeArrayList(ArrayList<?> list) throws IllegalArgumentException, IllegalAccessException, NullPointerException {
-    	List<Feature> objDefList = new ArrayList<Feature>();
+	private static List<Token> decomposeArrayList(ArrayList<?> list) throws IllegalArgumentException, IllegalAccessException, NullPointerException {
+    	List<Token> objDefList = new ArrayList<Token>();
 		if(list == null || list.isEmpty()){
 			return objDefList;
 		}
-		
+
         for(Object object : list){
         	if(object != null){
         		objDefList.addAll(DataDecomposer.decompose(object));

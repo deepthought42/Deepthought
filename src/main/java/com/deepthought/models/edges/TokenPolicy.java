@@ -10,66 +10,66 @@ import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.deepthought.models.Feature;
+import com.deepthought.models.Token;
 import com.deepthought.models.MemoryRecord;
 
 /**
- * 
+ *
  */
-@RelationshipEntity(type = "FEATURE_POLICY")
-public class FeaturePolicy {
-	@Id 
-	@GeneratedValue   
+@RelationshipEntity(type = "TOKEN_POLICY")
+public class TokenPolicy {
+	@Id
+	@GeneratedValue
 	private Long relationshipId;
-    
+
 	@Property
-	private List<String> policy_features = new ArrayList<String>();
-	
+	private List<String> policy_tokens = new ArrayList<String>();
+
 	@Property
 	private List<Double> policy_weights = new ArrayList<Double>();
-    
-	@Property  
+
+	@Property
     private double reward;
-	
-	@StartNode 
+
+	@StartNode
 	private MemoryRecord memory;
-    
-	@EndNode   
-	private Feature feature;
-    
+
+	@EndNode
+	private Token token;
+
     public MemoryRecord getMemoryRecord(){
     	return this.memory;
     }
-    
+
     public void setMemoryRecord(MemoryRecord memory){
     	this.memory = memory;
     }
-  
-    
-    public List<String> getPolicyFeatures(){
-    	return this.policy_features;
+
+
+    public List<String> getPolicyTokens(){
+    	return this.policy_tokens;
     }
-    
-    public void setPolicyFeatures(List<String> policy_features){
-    	this.policy_features = policy_features;
+
+    public void setPolicyTokens(List<String> policy_tokens){
+    	this.policy_tokens = policy_tokens;
     }
-	
+
     public List<Double> getPolicyWeights(){
     	return this.policy_weights;
     }
-    
+
     public void setPolicyWeights(List<Double> policy_weights){
     	this.policy_weights = policy_weights;
     }
 
-	public void setFeature(Feature feature) {
-		this.feature = feature;
+	public void setToken(Token token) {
+		this.token = token;
 	}
-	
+
 	public double getReward(){
     	return this.reward;
     }
-    
+
     public void setReward(double reward){
     	this.reward = reward;
     }

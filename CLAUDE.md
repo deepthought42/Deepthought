@@ -42,21 +42,21 @@ mvn verify
 ```
 src/main/java/
 ├── com/deepthought/models/           # Domain models (Neo4j entities)
-│   ├── Feature.java                  # Node entity — atomic knowledge unit
-│   ├── Vocabulary.java               # Feature indexing and vector construction
+│   ├── Token.java                    # Node entity — atomic knowledge unit
+│   ├── Vocabulary.java               # Token indexing and vector construction
 │   ├── MemoryRecord.java             # Prediction history for experience replay
 │   ├── edges/
-│   │   ├── FeatureWeight.java        # Weighted edge (HAS_RELATED_FEATURE)
-│   │   ├── FeaturePolicy.java        # Policy edge type
+│   │   ├── TokenWeight.java          # Weighted edge (HAS_RELATED_TOKEN)
+│   │   ├── TokenPolicy.java          # Policy edge type
 │   │   └── Prediction.java           # Prediction probability edge (PREDICTION)
 │   ├── repository/                   # Spring Data Neo4j repositories
-│   │   ├── FeatureRepository.java    # Feature CRUD + custom Cypher queries
-│   │   ├── FeatureWeightRepository.java
+│   │   ├── TokenRepository.java      # Token CRUD + custom Cypher queries
+│   │   ├── TokenWeightRepository.java
 │   │   ├── VocabularyRepository.java
 │   │   ├── MemoryRecordRepository.java
 │   │   └── PredictionRepository.java
 │   └── services/
-│       └── FeatureService.java       # Feature business logic
+│       └── TokenService.java         # Token business logic
 ├── com/qanairy/
 │   ├── deepthought/App.java          # Spring Boot entry point
 │   ├── api/
@@ -64,14 +64,14 @@ src/main/java/
 │   ├── brain/
 │   │   ├── Brain.java                # Core prediction/learning orchestrator
 │   │   ├── QLearn.java               # Q-learning algorithm implementation
-│   │   ├── FeatureVector.java        # Elastic vector construction from graph
+│   │   ├── TokenVector.java          # Elastic vector construction from graph
 │   │   ├── Predict.java              # Prediction interface
 │   │   └── ActionFactory.java        # Action/outcome creation utilities
 │   ├── config/
 │   │   ├── Neo4jConfiguration.java   # Neo4j session/transaction setup
 │   │   └── ConfigService.java        # Configuration management
 │   ├── db/
-│   │   ├── DataDecomposer.java       # JSON-to-Feature decomposition
+│   │   ├── DataDecomposer.java       # JSON-to-Token decomposition
 │   │   └── VocabularyWeights.java    # Vocabulary weight management
 │   └── observableStructs/            # Concurrent data structures
 │       ├── ConcurrentNode.java
@@ -100,23 +100,23 @@ This is configured in `App.java` via `@ComponentScan(basePackages = {"com.deepth
 ### Neo4j Graph Schema
 
 ```
-(Feature) -[HAS_RELATED_FEATURE {weight}]-> (Feature)
-(MemoryRecord) -[PREDICTION {weight}]-> (Feature)
+(Token) -[HAS_RELATED_TOKEN {weight}]-> (Token)
+(MemoryRecord) -[PREDICTION {weight}]-> (Token)
 ```
 
-- **Feature** nodes hold a `value` string (e.g., "button", "click")
-- **FeatureWeight** edges store learned weights (0.0–1.0) between features
+- **Token** nodes hold a `value` string (e.g., "button", "click")
+- **TokenWeight** edges store learned weights (0.0–1.0) between tokens
 - **MemoryRecord** nodes store prediction context (inputs, outputs, policy matrix)
-- **Prediction** edges link memory records to predicted features with confidence weights
+- **Prediction** edges link memory records to predicted tokens with confidence weights
 
 ### Request Flow
 
-1. Client sends JSON to `POST /rl/predict` with input data and output feature labels
-2. `DataDecomposer` breaks JSON into a list of `Feature` objects
+1. Client sends JSON to `POST /rl/predict` with input data and output token labels
+2. `DataDecomposer` breaks JSON into a list of `Token` objects
 3. `Brain.generatePolicy()` builds a weight matrix from graph edges (or initializes random weights)
 4. `Brain.predict()` sums columns and normalizes to produce a probability distribution
 5. A `MemoryRecord` is persisted with the policy matrix and prediction
-6. Client provides feedback via `POST /rl/learn` with the memory ID and actual feature
+6. Client provides feedback via `POST /rl/learn` with the memory ID and actual token
 7. `Brain.learn()` applies Q-learning updates to edge weights in the graph
 
 ### Q-Learning Parameters
@@ -147,7 +147,7 @@ The properties file is templated with commented-out placeholders. Neo4j must be 
 
 ## Code Conventions
 
-- **Naming:** snake_case for variables and parameters (`feature_repo`, `input_features`, `memory_id`), PascalCase for classes, camelCase for methods
+- **Naming:** snake_case for variables and parameters (`token_repo`, `input_tokens`, `memory_id`), PascalCase for classes, camelCase for methods
 - **Dependency injection:** Field-level `@Autowired` injection throughout
 - **Logging:** SLF4J with Logback — `private static Logger log = LoggerFactory.getLogger(ClassName.class)`
 - **Neo4j queries:** Custom Cypher via `@Query` annotations on repository interfaces
