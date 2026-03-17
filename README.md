@@ -646,7 +646,7 @@ public class MemoryRecord {
     private Token desired_token;              // Actual outcome
     private Token predicted_token;            // What was predicted
     private List<Prediction> predictions;       // Full distribution
-    private List<String> input_token_values;  // Observed features
+    private List<String> input_token_values;  // Observed tokens
     private String[] output_token_values;     // Possible outcomes
     private String policy_matrix_json;          // Weight snapshot
     
